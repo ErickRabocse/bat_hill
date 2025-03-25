@@ -4,6 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import Word from './Word'
 import Glossary from './Glossary'
+import scenes from './scenes'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -11,6 +12,36 @@ function App() {
   const [nameInput, setNameInput] = useState('') // nombre que el usuario escribe
   const [nameLoaded, setNameLoaded] = useState(false)
   const [view, setView] = useState('story')
+  const [sceneIndex, setSceneIndex] = useState(0)
+
+  const [voiceReady, setVoiceReady] = useState(false)
+
+  useEffect(() => {
+    if (!window.responsiveVoice) {
+      const script = document.createElement('script')
+      script.src =
+        'https://code.responsivevoice.org/responsivevoice.js?key=free'
+      script.async = true
+      script.onload = () => {
+        console.log('✅ ResponsiveVoice is ready')
+        setVoiceReady(true)
+      }
+      document.body.appendChild(script)
+    } else {
+      setVoiceReady(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://code.responsivevoice.org/responsivevoice.js?key=free'
+    script.async = true
+    document.body.appendChild(script)
+
+    return () => {
+      document.body.removeChild(script)
+    }
+  }, [])
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -45,6 +76,18 @@ function App() {
     await setDoc(userDoc, { name: nameInput }, { merge: true })
     setUserName(nameInput)
     alert('✅ Name saved!')
+  }
+
+  const speakScene = () => {
+    if (!voiceReady || !window.responsiveVoice) {
+      console.warn('⏳ ResponsiveVoice not ready yet')
+      return
+    }
+
+    const scene = scenes[sceneIndex]
+    const fullText = scene.text.map(({ word }) => word).join(' ')
+
+    window.responsiveVoice.speak(fullText, 'Spanish Latin American Female')
   }
 
   return (
@@ -84,15 +127,37 @@ function App() {
       {view === 'story' && (
         <>
           <h1>The Guardian of the Bat Hill</h1>
+
           <p>
-            <Word text="Adi" translation="(nombre propio)" />
-            <Word text="walks" translation="camina" />
-            <Word text="to" translation="a" />
-            <Word text="the" translation="el/la" />
-            <Word text="hill" translation="cerro" />
-            <Word text="every" translation="cada" />
-            <Word text="morning" translation="mañana" />.
+            {scenes[sceneIndex].text.map(({ word, translation }, index) => (
+              <Word key={index} text={word} translation={translation} />
+            ))}
           </p>
+          <button
+            onClick={speakScene}
+            disabled={!voiceReady}
+            style={{ marginBottom: '1rem' }}
+          >
+            🔊 Play Scene
+          </button>
+
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              onClick={() => setSceneIndex((prev) => Math.max(prev - 1, 0))}
+              disabled={sceneIndex === 0}
+              style={{ marginRight: '1rem' }}
+            >
+              ⬅️ Previous
+            </button>
+            <button
+              onClick={() =>
+                setSceneIndex((prev) => Math.min(prev + 1, scenes.length - 1))
+              }
+              disabled={sceneIndex === scenes.length - 1}
+            >
+              Next ➡️
+            </button>
+          </div>
         </>
       )}
 
