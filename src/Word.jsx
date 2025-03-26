@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react'
-import { db, auth } from './firebase'
+import { db } from './firebase'
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore'
 
-function Word({ text, translation }) {
+function Word({ text, translation, userId }) {
   const [saved, setSaved] = useState(false)
   const [showPrompt, setShowPrompt] = useState(false)
 
   useEffect(() => {
     const checkIfSaved = async () => {
-      const user = auth.currentUser
-      if (!user) return
+      if (!userId) return
 
-      const userWordsRef = collection(db, 'glossaries', user.uid, 'words')
+      const userWordsRef = collection(db, 'glossaries', userId, 'words')
       const q = query(userWordsRef, where('word', '==', text))
       const snapshot = await getDocs(q)
 
@@ -21,7 +20,7 @@ function Word({ text, translation }) {
     }
 
     checkIfSaved()
-  }, [text])
+  }, [text, userId])
 
   const handleClick = () => {
     const utter = new SpeechSynthesisUtterance(text)
@@ -34,16 +33,13 @@ function Word({ text, translation }) {
   }
 
   const handleSave = async () => {
-    const user = auth.currentUser
-    if (!user) {
-      console.warn('No authenticated user')
+    if (!userId) {
+      console.warn('No user ID')
       return
     }
 
-    const userGlossaryRef = collection(db, 'glossaries', user.uid, 'words')
-
-    // Verificar duplicado otra vez por seguridad
-    const q = query(userGlossaryRef, where('word', '==', text))
+    const userWordsRef = collection(db, 'glossaries', userId, 'words')
+    const q = query(userWordsRef, where('word', '==', text))
     const snapshot = await getDocs(q)
 
     if (!snapshot.empty) {
@@ -53,7 +49,7 @@ function Word({ text, translation }) {
     }
 
     try {
-      await addDoc(userGlossaryRef, {
+      await addDoc(userWordsRef, {
         word: text,
         meaning: translation,
         date: new Date().toISOString(),
@@ -70,9 +66,8 @@ function Word({ text, translation }) {
   return (
     <span
       onClick={(e) => {
-        // Solo permitir clic si NO se está mostrando el modal
         if (!showPrompt) {
-          handleClick(e)
+          handleClick()
         }
       }}
       style={{
@@ -116,7 +111,6 @@ function Word({ text, translation }) {
           >
             Yes
           </button>
-
           <button
             onClick={(e) => {
               e.stopPropagation()

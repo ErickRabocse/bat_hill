@@ -1,21 +1,15 @@
 import { useEffect, useState } from 'react'
-import { auth, db } from './firebase'
-import { onAuthStateChanged } from 'firebase/auth'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
 import Word from './Word'
 import Glossary from './Glossary'
 import scenes from './scenes'
 
 function App() {
-  const [user, setUser] = useState(null)
-  const [userName, setUserName] = useState('') // nombre guardado en Firestore
-  const [nameInput, setNameInput] = useState('') // nombre que el usuario escribe
-  const [nameLoaded, setNameLoaded] = useState(false)
-  const [view, setView] = useState('story')
+  const [userId, setUserId] = useState('')
+  const [view, setView] = useState('login') // login | story | glossary
   const [sceneIndex, setSceneIndex] = useState(0)
-
   const [voiceReady, setVoiceReady] = useState(false)
 
+  // Cargar voz de ResponsiveVoice
   useEffect(() => {
     if (!window.responsiveVoice) {
       const script = document.createElement('script')
@@ -32,51 +26,14 @@ function App() {
     }
   }, [])
 
+  // Recuperar ID guardado
   useEffect(() => {
-    const script = document.createElement('script')
-    script.src = 'https://code.responsivevoice.org/responsivevoice.js?key=free'
-    script.async = true
-    document.body.appendChild(script)
-
-    return () => {
-      document.body.removeChild(script)
+    const savedId = localStorage.getItem('studentId')
+    if (savedId) {
+      setUserId(savedId)
+      setView('story')
     }
   }, [])
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        console.log('✅ User signed in:', firebaseUser.uid)
-        setUser(firebaseUser)
-
-        const fetchName = async () => {
-          const userDoc = doc(db, 'glossaries', firebaseUser.uid)
-          const userSnap = await getDoc(userDoc)
-
-          if (userSnap.exists()) {
-            const name = userSnap.data().name || ''
-            setUserName(name)
-            setNameInput(name)
-          }
-
-          setNameLoaded(true)
-        }
-
-        fetchName()
-      }
-    })
-
-    return () => unsubscribe()
-  }, [])
-
-  const saveUserName = async () => {
-    if (!user) return
-
-    const userDoc = doc(db, 'glossaries', user.uid)
-    await setDoc(userDoc, { name: nameInput }, { merge: true })
-    setUserName(nameInput)
-    alert('✅ Name saved!')
-  }
 
   const speakScene = () => {
     if (!voiceReady || !window.responsiveVoice) {
@@ -86,10 +43,38 @@ function App() {
 
     const scene = scenes[sceneIndex]
     const fullText = scene.text.map(({ word }) => word).join(' ')
-
     window.responsiveVoice.speak(fullText, 'Spanish Latin American Female')
   }
 
+  // Pantalla de inicio
+  if (view === 'login') {
+    return (
+      <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
+        <h2>Welcome!</h2>
+        <p>Enter your student ID to begin:</p>
+        <input
+          type="text"
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+          placeholder="e.g. 20231234"
+        />
+        <button
+          onClick={() => {
+            if (userId.trim()) {
+              localStorage.setItem('studentId', userId.trim())
+              setUserId(userId.trim())
+              setView('story')
+            }
+          }}
+          style={{ marginLeft: '1rem' }}
+        >
+          Start
+        </button>
+      </div>
+    )
+  }
+
+  // Interfaz principal
   return (
     <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
       <nav style={{ marginBottom: '1.5rem' }}>
@@ -102,37 +87,42 @@ function App() {
         <button onClick={() => setView('glossary')}>📘 My Glossary</button>
       </nav>
 
-      {user &&
-        nameLoaded &&
-        (userName ? (
-          <p style={{ fontSize: '0.9rem', color: '#555' }}>
-            🔑 Logged in as: <strong>{userName}</strong>
-          </p>
-        ) : (
-          <div style={{ marginBottom: '1rem' }}>
-            <label>
-              Enter your name:{' '}
-              <input
-                type="text"
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-              />
-            </label>
-            <button onClick={saveUserName} style={{ marginLeft: '1rem' }}>
-              Save
-            </button>
-          </div>
-        ))}
+      <p style={{ fontSize: '0.9rem', color: '#555' }}>
+        🔑 Student ID: <strong>{userId}</strong>{' '}
+        <button
+          onClick={() => {
+            localStorage.removeItem('studentId')
+            setUserId('')
+            setView('login')
+          }}
+          style={{
+            marginLeft: '1rem',
+            fontSize: '0.8rem',
+            background: 'transparent',
+            border: '1px solid #ccc',
+            borderRadius: '4px',
+            padding: '2px 6px',
+            cursor: 'pointer',
+          }}
+        >
+          🔒 Log out
+        </button>
+      </p>
 
       {view === 'story' && (
         <>
           <h1>The Guardian of the Bat Hill</h1>
-
           <p>
             {scenes[sceneIndex].text.map(({ word, translation }, index) => (
-              <Word key={index} text={word} translation={translation} />
+              <Word
+                key={index}
+                text={word}
+                translation={translation}
+                userId={userId}
+              />
             ))}
           </p>
+
           <button
             onClick={speakScene}
             disabled={!voiceReady}
@@ -161,7 +151,7 @@ function App() {
         </>
       )}
 
-      {view === 'glossary' && <Glossary />}
+      {view === 'glossary' && <Glossary userId={userId} />}
     </div>
   )
 }
