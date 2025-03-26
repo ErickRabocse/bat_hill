@@ -1,3 +1,4 @@
+// ✅ App.jsx
 import { useEffect, useState } from 'react'
 import Word from './Word'
 import Glossary from './Glossary'
@@ -9,7 +10,6 @@ function App() {
   const [sceneIndex, setSceneIndex] = useState(0)
   const [voiceReady, setVoiceReady] = useState(false)
 
-  // Cargar voz de ResponsiveVoice
   useEffect(() => {
     if (!window.responsiveVoice) {
       const script = document.createElement('script')
@@ -26,7 +26,6 @@ function App() {
     }
   }, [])
 
-  // Recuperar ID guardado
   useEffect(() => {
     const savedId = localStorage.getItem('studentId')
     if (savedId) {
@@ -46,7 +45,6 @@ function App() {
     window.responsiveVoice.speak(fullText, 'Spanish Latin American Female')
   }
 
-  // Pantalla de inicio
   if (view === 'login') {
     return (
       <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
@@ -74,7 +72,6 @@ function App() {
     )
   }
 
-  // Interfaz principal
   return (
     <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
       <nav style={{ marginBottom: '1.5rem' }}>
