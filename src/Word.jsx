@@ -1,42 +1,80 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { db, auth } from './firebase'
-import { collection, addDoc } from 'firebase/firestore'
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore'
 
 function Word({ text, translation }) {
   const [saved, setSaved] = useState(false)
+  const [showPrompt, setShowPrompt] = useState(false)
 
-  const handleClick = async () => {
-    // 🔊 Speak the word
+  useEffect(() => {
+    const checkIfSaved = async () => {
+      const user = auth.currentUser
+      if (!user) return
+
+      const userWordsRef = collection(db, 'glossaries', user.uid, 'words')
+      const q = query(userWordsRef, where('word', '==', text))
+      const snapshot = await getDocs(q)
+
+      if (!snapshot.empty) {
+        setSaved(true)
+      }
+    }
+
+    checkIfSaved()
+  }, [text])
+
+  const handleClick = () => {
     const utter = new SpeechSynthesisUtterance(text)
     utter.lang = 'en-US'
     speechSynthesis.speak(utter)
 
-    // 🔐 Get current user
+    if (!saved) {
+      setShowPrompt(true)
+    }
+  }
+
+  const handleSave = async () => {
     const user = auth.currentUser
     if (!user) {
       console.warn('No authenticated user')
       return
     }
 
-    try {
-      const userGlossaryRef = collection(db, 'glossaries', user.uid, 'words')
+    const userGlossaryRef = collection(db, 'glossaries', user.uid, 'words')
 
+    // Verificar duplicado otra vez por seguridad
+    const q = query(userGlossaryRef, where('word', '==', text))
+    const snapshot = await getDocs(q)
+
+    if (!snapshot.empty) {
+      setSaved(true)
+      setShowPrompt(false)
+      return
+    }
+
+    try {
       await addDoc(userGlossaryRef, {
         word: text,
         meaning: translation,
         date: new Date().toISOString(),
       })
-
-      console.log(`✅ Word "${text}" saved for user ${user.uid}`)
       setSaved(true)
-    } catch (error) {
-      console.error('❌ Error saving word:', error)
+      console.log(`✅ Word "${text}" saved`)
+    } catch (err) {
+      console.error('❌ Error saving word:', err)
     }
+
+    setShowPrompt(false)
   }
 
   return (
     <span
-      onClick={handleClick}
+      onClick={(e) => {
+        // Solo permitir clic si NO se está mostrando el modal
+        if (!showPrompt) {
+          handleClick(e)
+        }
+      }}
       style={{
         cursor: 'pointer',
         backgroundColor: saved ? '#d1fae5' : 'transparent',
@@ -45,10 +83,50 @@ function Word({ text, translation }) {
         transition: 'background 0.3s',
         marginRight: '5px',
         display: 'inline-block',
+        position: 'relative',
       }}
       title={`"${text}" → ${translation}`}
     >
       {text}
+
+      {showPrompt && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '120%',
+            left: 0,
+            background: '#fff',
+            border: '1px solid #ccc',
+            borderRadius: '8px',
+            padding: '8px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            zIndex: 10,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <p style={{ margin: '0 0 6px' }}>
+            Save "<strong>{text}</strong>" to glossary?
+          </p>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              handleSave()
+            }}
+            style={{ marginRight: '0.5rem' }}
+          >
+            Yes
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowPrompt(false)
+            }}
+          >
+            No
+          </button>
+        </div>
+      )}
     </span>
   )
 }
