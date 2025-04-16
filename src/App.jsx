@@ -9,6 +9,7 @@ function App() {
   const [view, setView] = useState('login') // login | story | glossary
   const [sceneIndex, setSceneIndex] = useState(0)
   const [voiceReady, setVoiceReady] = useState(false)
+  const [activeWord, setActiveWord] = useState(null)
 
   useEffect(() => {
     if (!window.responsiveVoice) {
@@ -32,6 +33,16 @@ function App() {
       setUserId(savedId)
       setView('story')
     }
+  }, [])
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.word-span')) {
+        setActiveWord(null)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
   const speakScene = () => {
@@ -73,7 +84,10 @@ function App() {
   }
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
+    <div
+      onClick={() => setActiveWord(null)} // 💡 closes any open bubble
+      style={{ padding: '2rem', fontFamily: 'Arial' }}
+    >
       <nav style={{ marginBottom: '1.5rem' }}>
         <button
           onClick={() => setView('story')}
@@ -116,6 +130,8 @@ function App() {
                 text={word}
                 translation={translation}
                 userId={userId}
+                activeWord={activeWord}
+                setActiveWord={setActiveWord}
               />
             ))}
           </p>

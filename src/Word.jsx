@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { db } from './firebase'
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore'
 
-function Word({ text, translation, userId }) {
+function Word({ text, translation, userId, activeWord, setActiveWord }) {
   const [saved, setSaved] = useState(false)
-  const [showPrompt, setShowPrompt] = useState(false)
+  const isActive = activeWord === text
 
   useEffect(() => {
     const checkIfSaved = async () => {
@@ -28,7 +28,7 @@ function Word({ text, translation, userId }) {
     speechSynthesis.speak(utter)
 
     if (!saved) {
-      setShowPrompt(true)
+      setActiveWord(text)
     }
   }
 
@@ -44,7 +44,7 @@ function Word({ text, translation, userId }) {
 
     if (!snapshot.empty) {
       setSaved(true)
-      setShowPrompt(false)
+      setActiveWord(null)
       return
     }
 
@@ -60,15 +60,15 @@ function Word({ text, translation, userId }) {
       console.error('❌ Error saving word:', err)
     }
 
-    setShowPrompt(false)
+    setActiveWord(null)
   }
 
   return (
     <span
+      className="word-span"
       onClick={(e) => {
-        if (!showPrompt) {
-          handleClick()
-        }
+        e.stopPropagation()
+        handleClick()
       }}
       style={{
         cursor: 'pointer',
@@ -84,7 +84,7 @@ function Word({ text, translation, userId }) {
     >
       {text}
 
-      {showPrompt && (
+      {isActive && !saved && (
         <div
           style={{
             position: 'absolute',
@@ -102,6 +102,15 @@ function Word({ text, translation, userId }) {
           <p style={{ margin: '0 0 6px' }}>
             Save "<strong>{text}</strong>" to glossary?
           </p>
+          <p
+            style={{
+              margin: '0 0 6px',
+              fontStyle: 'italic',
+              fontSize: '0.9rem',
+            }}
+          >
+            {text} → {translation}
+          </p>
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -114,7 +123,7 @@ function Word({ text, translation, userId }) {
           <button
             onClick={(e) => {
               e.stopPropagation()
-              setShowPrompt(false)
+              setActiveWord(null)
             }}
           >
             No
