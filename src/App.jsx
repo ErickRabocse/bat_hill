@@ -9,8 +9,9 @@ function App() {
   const [view, setView] = useState('login') // login | story | glossary
   const [sceneIndex, setSceneIndex] = useState(0)
   const [activeWord, setActiveWord] = useState(null)
-  const [voiceLang, setVoiceLang] = useState('en-US')
   const [voiceRate, setVoiceRate] = useState(1)
+  const [isPaused, setIsPaused] = useState(false)
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const utteranceRef = useRef(null)
 
   useEffect(() => {
@@ -34,29 +35,65 @@ function App() {
 
   const speakScene = () => {
     const scene = scenes[sceneIndex]
-    const fullText = scene.text.map(({ word }) => word).join(' ')
+    const fullText = scene.text.reduce((acc, { word }, i) => {
+      if (['.', ',', '!', '?', '...'].includes(word)) {
+        return acc + word
+      } else {
+        return acc + (i === 0 ? word : ' ' + word)
+      }
+    }, '')
 
     const utterance = new SpeechSynthesisUtterance(fullText)
-    utterance.lang = voiceLang
+    utterance.lang = 'en-US'
     utterance.rate = voiceRate
 
     const voices = speechSynthesis.getVoices()
     const preferred = voices.find(
-      (v) => v.lang === voiceLang && v.name.toLowerCase().includes('female')
+      (v) =>
+        v.lang === 'en-US' &&
+        (v.name.includes('Google US English') ||
+          v.name.includes('Microsoft David'))
     )
     if (preferred) utterance.voice = preferred
+
+    utterance.onboundary = (event) => {
+      const charIndex = event.charIndex
+      const upToChar = fullText.slice(0, charIndex)
+      const words = upToChar.trim().split(/\s+/)
+      setHighlightedIndex(words.length - 1)
+    }
+
+    utterance.onend = () => setHighlightedIndex(-1)
 
     utteranceRef.current = utterance
     speechSynthesis.cancel()
     speechSynthesis.speak(utterance)
+    setIsPaused(false)
   }
 
-  const pauseSpeech = () => {
-    speechSynthesis.pause()
+  const togglePause = () => {
+    if (speechSynthesis.speaking) {
+      if (isPaused) {
+        speechSynthesis.resume()
+        setIsPaused(false)
+      } else {
+        speechSynthesis.pause()
+        setIsPaused(true)
+      }
+    }
   }
 
-  const resumeSpeech = () => {
-    speechSynthesis.resume()
+  const speakWord = (word) => {
+    const utter = new SpeechSynthesisUtterance(word)
+    utter.lang = 'en-US'
+    utter.rate = voiceRate
+    const voices = speechSynthesis.getVoices()
+    const preferred = voices.find(
+      (v) => v.lang === 'en-US' && v.name.toLowerCase().includes('female')
+    )
+    if (preferred) utter.voice = preferred
+    speechSynthesis.cancel()
+    speechSynthesis.speak(utter)
   }
 
   if (view === 'login') {
@@ -129,32 +166,24 @@ function App() {
           <p>
             {scenes[sceneIndex].text.map(({ word, translation }, index) => (
               <Word
-                key={index}
+                key={`${word}-${index}`}
                 text={word}
                 translation={translation}
                 userId={userId}
                 activeWord={activeWord}
                 setActiveWord={setActiveWord}
+                onSpeak={speakWord}
+                isHighlighted={index === highlightedIndex}
               />
             ))}
           </p>
 
           <div style={{ marginBottom: '1rem' }}>
             <button onClick={speakScene}>🗣️ Play Scene</button>
-            <button onClick={pauseSpeech} style={{ marginLeft: '1rem' }}>
-              ⏸️ Pause
+            <button onClick={togglePause} style={{ marginLeft: '1rem' }}>
+              {isPaused ? '▶️ Resume' : '⏸️ Pause'}
             </button>
-            <button onClick={resumeSpeech} style={{ marginLeft: '1rem' }}>
-              ▶️ Resume
-            </button>
-            <button
-              onClick={() =>
-                setVoiceLang((prev) => (prev === 'en-US' ? 'en-GB' : 'en-US'))
-              }
-              style={{ marginLeft: '1rem' }}
-            >
-              {voiceLang === 'en-US' ? '👨 Male (UK)' : '👩 Female (US)'}
-            </button>
+
             <button
               onClick={() =>
                 setVoiceRate((prev) => {

@@ -2,7 +2,15 @@ import { useEffect, useState } from 'react'
 import { db } from './firebase'
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore'
 
-function Word({ text, translation, userId, activeWord, setActiveWord }) {
+function Word({
+  text,
+  translation,
+  userId,
+  activeWord,
+  setActiveWord,
+  onSpeak,
+  isHighlighted,
+}) {
   const [saved, setSaved] = useState(false)
   const isActive = activeWord === text
 
@@ -23,17 +31,10 @@ function Word({ text, translation, userId, activeWord, setActiveWord }) {
   }, [text, userId])
 
   const handleClick = () => {
-    const utter = new SpeechSynthesisUtterance(text)
-    utter.lang = 'en-US'
-    speechSynthesis.speak(utter)
-
     setActiveWord(text)
-  }
-
-  const speakAgain = () => {
-    const utter = new SpeechSynthesisUtterance(text)
-    utter.lang = 'en-US'
-    speechSynthesis.speak(utter)
+    if (onSpeak) {
+      onSpeak(text)
+    }
   }
 
   const handleSave = async () => {
@@ -76,7 +77,11 @@ function Word({ text, translation, userId, activeWord, setActiveWord }) {
       }}
       style={{
         cursor: 'pointer',
-        backgroundColor: saved ? '#d1fae5' : 'transparent',
+        backgroundColor: isHighlighted
+          ? '#bfdbfe' // 🔵 azul cuando se está leyendo
+          : saved
+          ? '#d1fae5' // 🟢 verde si está guardado
+          : 'transparent',
         padding: '3px 6px',
         borderRadius: '6px',
         transition: 'background 0.3s',
@@ -113,7 +118,7 @@ function Word({ text, translation, userId, activeWord, setActiveWord }) {
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  speakAgain()
+                  onSpeak && onSpeak(text)
                 }}
                 style={{ marginTop: '6px' }}
               >
@@ -154,7 +159,7 @@ function Word({ text, translation, userId, activeWord, setActiveWord }) {
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  speakAgain()
+                  onSpeak && onSpeak(text)
                 }}
                 style={{ marginTop: '6px' }}
               >
