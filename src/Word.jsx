@@ -27,9 +27,13 @@ function Word({ text, translation, userId, activeWord, setActiveWord }) {
     utter.lang = 'en-US'
     speechSynthesis.speak(utter)
 
-    if (!saved) {
-      setActiveWord(text)
-    }
+    setActiveWord(text)
+  }
+
+  const speakAgain = () => {
+    const utter = new SpeechSynthesisUtterance(text)
+    utter.lang = 'en-US'
+    speechSynthesis.speak(utter)
   }
 
   const handleSave = async () => {
@@ -84,7 +88,7 @@ function Word({ text, translation, userId, activeWord, setActiveWord }) {
     >
       {text}
 
-      {isActive && !saved && (
+      {isActive && (
         <div
           style={{
             position: 'absolute',
@@ -99,35 +103,65 @@ function Word({ text, translation, userId, activeWord, setActiveWord }) {
             whiteSpace: 'nowrap',
           }}
         >
-          <p style={{ margin: '0 0 6px' }}>
-            Save "<strong>{text}</strong>" to glossary?
-          </p>
-          <p
-            style={{
-              margin: '0 0 6px',
-              fontStyle: 'italic',
-              fontSize: '0.9rem',
-            }}
-          >
-            {text} → {translation}
-          </p>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              handleSave()
-            }}
-            style={{ marginRight: '0.5rem' }}
-          >
-            Yes
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              setActiveWord(null)
-            }}
-          >
-            No
-          </button>
+          {saved ? (
+            <>
+              <p
+                style={{ margin: '0', fontStyle: 'italic', fontSize: '0.9rem' }}
+              >
+                {text} → {translation}
+              </p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  speakAgain()
+                }}
+                style={{ marginTop: '6px' }}
+              >
+                🔊 Hear again
+              </button>
+            </>
+          ) : (
+            <>
+              <p style={{ margin: '0 0 6px' }}>
+                Save "<strong>{text}</strong>" to glossary?
+              </p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleSave()
+                }}
+                style={{ marginRight: '0.5rem' }}
+              >
+                Yes
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setActiveWord(null)
+                }}
+              >
+                No
+              </button>
+              <p
+                style={{
+                  margin: '6px 0 0',
+                  fontStyle: 'italic',
+                  fontSize: '0.9rem',
+                }}
+              >
+                {text} → {translation}
+              </p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  speakAgain()
+                }}
+                style={{ marginTop: '6px' }}
+              >
+                🔊 Hear again
+              </button>
+            </>
+          )}
         </div>
       )}
     </span>

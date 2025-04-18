@@ -1,5 +1,5 @@
 // ✅ App.jsx
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Word from './Word'
 import Glossary from './Glossary'
 import scenes from './scenes'
@@ -8,24 +8,10 @@ function App() {
   const [userId, setUserId] = useState('')
   const [view, setView] = useState('login') // login | story | glossary
   const [sceneIndex, setSceneIndex] = useState(0)
-  const [voiceReady, setVoiceReady] = useState(false)
   const [activeWord, setActiveWord] = useState(null)
-
-  useEffect(() => {
-    if (!window.responsiveVoice) {
-      const script = document.createElement('script')
-      script.src =
-        'https://code.responsivevoice.org/responsivevoice.js?key=free'
-      script.async = true
-      script.onload = () => {
-        console.log('✅ ResponsiveVoice is ready')
-        setVoiceReady(true)
-      }
-      document.body.appendChild(script)
-    } else {
-      setVoiceReady(true)
-    }
-  }, [])
+  const [voiceLang, setVoiceLang] = useState('en-US')
+  const [voiceRate, setVoiceRate] = useState(1)
+  const utteranceRef = useRef(null)
 
   useEffect(() => {
     const savedId = localStorage.getItem('studentId')
@@ -34,6 +20,7 @@ function App() {
       setView('story')
     }
   }, [])
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (!e.target.closest('.word-span')) {
@@ -46,14 +33,30 @@ function App() {
   }, [])
 
   const speakScene = () => {
-    if (!voiceReady || !window.responsiveVoice) {
-      console.warn('⏳ ResponsiveVoice not ready yet')
-      return
-    }
-
     const scene = scenes[sceneIndex]
     const fullText = scene.text.map(({ word }) => word).join(' ')
-    window.responsiveVoice.speak(fullText, 'Spanish Latin American Female')
+
+    const utterance = new SpeechSynthesisUtterance(fullText)
+    utterance.lang = voiceLang
+    utterance.rate = voiceRate
+
+    const voices = speechSynthesis.getVoices()
+    const preferred = voices.find(
+      (v) => v.lang === voiceLang && v.name.toLowerCase().includes('female')
+    )
+    if (preferred) utterance.voice = preferred
+
+    utteranceRef.current = utterance
+    speechSynthesis.cancel()
+    speechSynthesis.speak(utterance)
+  }
+
+  const pauseSpeech = () => {
+    speechSynthesis.pause()
+  }
+
+  const resumeSpeech = () => {
+    speechSynthesis.resume()
   }
 
   if (view === 'login') {
@@ -85,7 +88,7 @@ function App() {
 
   return (
     <div
-      onClick={() => setActiveWord(null)} // 💡 closes any open bubble
+      onClick={() => setActiveWord(null)}
       style={{ padding: '2rem', fontFamily: 'Arial' }}
     >
       <nav style={{ marginBottom: '1.5rem' }}>
@@ -136,13 +139,34 @@ function App() {
             ))}
           </p>
 
-          <button
-            onClick={speakScene}
-            disabled={!voiceReady}
-            style={{ marginBottom: '1rem' }}
-          >
-            🔊 Play Scene
-          </button>
+          <div style={{ marginBottom: '1rem' }}>
+            <button onClick={speakScene}>🗣️ Play Scene</button>
+            <button onClick={pauseSpeech} style={{ marginLeft: '1rem' }}>
+              ⏸️ Pause
+            </button>
+            <button onClick={resumeSpeech} style={{ marginLeft: '1rem' }}>
+              ▶️ Resume
+            </button>
+            <button
+              onClick={() =>
+                setVoiceLang((prev) => (prev === 'en-US' ? 'en-GB' : 'en-US'))
+              }
+              style={{ marginLeft: '1rem' }}
+            >
+              {voiceLang === 'en-US' ? '👨 Male (UK)' : '👩 Female (US)'}
+            </button>
+            <button
+              onClick={() =>
+                setVoiceRate((prev) => {
+                  const next = parseFloat((prev + 0.2).toFixed(1))
+                  return next > 1.5 ? 0.5 : next
+                })
+              }
+              style={{ marginLeft: '1rem' }}
+            >
+              🎚️ Speed: {voiceRate.toFixed(1)}x
+            </button>
+          </div>
 
           <div style={{ marginTop: '1rem' }}>
             <button
