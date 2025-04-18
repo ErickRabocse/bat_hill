@@ -6,13 +6,14 @@ import scenes from './scenes'
 
 function App() {
   const [userId, setUserId] = useState('')
-  const [view, setView] = useState('login') // login | story | glossary
+  const [view, setView] = useState('login')
   const [sceneIndex, setSceneIndex] = useState(0)
   const [activeWord, setActiveWord] = useState(null)
   const [voiceRate, setVoiceRate] = useState(1)
   const [isPaused, setIsPaused] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const utteranceRef = useRef(null)
+  const [isSpeaking, setIsSpeaking] = useState(false)
 
   useEffect(() => {
     const savedId = localStorage.getItem('studentId')
@@ -28,19 +29,54 @@ function App() {
         setActiveWord(null)
       }
     }
-
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
+  const getWordTimings = (textArray, rate) => {
+    const baseWPM = 180
+    let multiplier
+
+    if (rate <= 0.5) {
+      multiplier = 1.7
+    } else if (rate <= 0.7) {
+      multiplier = 1.55
+    } else {
+      multiplier = 1.33
+    }
+
+    const wps = (baseWPM / 60) * rate * multiplier
+    const baseWordDuration = 1000 / wps
+
+    let timings = []
+    let time = 0
+
+    for (let i = 0; i < textArray.length; i++) {
+      timings.push(time)
+
+      const word = textArray[i]
+      time += baseWordDuration
+
+      if (['.', ',', '...', '!', '?'].includes(word)) {
+        time += 300 // ⏸️ Add 300ms pause for punctuation
+      }
+    }
+
+    return timings
+  }
+
   const speakScene = () => {
     const scene = scenes[sceneIndex]
-    const fullText = scene.text.reduce((acc, { word }, i) => {
-      if (['.', ',', '!', '?', '...'].includes(word)) {
-        return acc + word
-      } else {
-        return acc + (i === 0 ? word : ' ' + word)
-      }
+    const textArray = scene.text.map(({ word }) => word)
+    const fullText = textArray.reduce((acc, word, i) => {
+      return (
+        acc +
+        (['.', ',', '!', '?'].includes(word)
+          ? word
+          : i === 0
+          ? word
+          : ' ' + word)
+      )
     }, '')
 
     const utterance = new SpeechSynthesisUtterance(fullText)
@@ -56,19 +92,34 @@ function App() {
     )
     if (preferred) utterance.voice = preferred
 
-    utterance.onboundary = (event) => {
-      const charIndex = event.charIndex
-      const upToChar = fullText.slice(0, charIndex)
-      const words = upToChar.trim().split(/\s+/)
-      setHighlightedIndex(words.length - 1)
-    }
+    const timings = getWordTimings(textArray, voiceRate)
+    let timerIds = []
+    timings.forEach((time, index) => {
+      const id = setTimeout(() => {
+        setHighlightedIndex(index)
+      }, time)
+      timerIds.push(id)
+    })
 
-    utterance.onend = () => setHighlightedIndex(-1)
+    utterance.onend = () => {
+      setHighlightedIndex(-1)
+      setIsSpeaking(false)
+      timerIds.forEach(clearTimeout)
+    }
 
     utteranceRef.current = utterance
     speechSynthesis.cancel()
     speechSynthesis.speak(utterance)
     setIsPaused(false)
+    setIsSpeaking(true)
+  }
+
+  const toggleSpeakScene = () => {
+    if (isSpeaking) {
+      togglePause()
+    } else {
+      speakScene()
+    }
   }
 
   const togglePause = () => {
@@ -89,7 +140,10 @@ function App() {
     utter.rate = voiceRate
     const voices = speechSynthesis.getVoices()
     const preferred = voices.find(
-      (v) => v.lang === 'en-US' && v.name.toLowerCase().includes('female')
+      (v) =>
+        v.lang === 'en-US' &&
+        (v.name.includes('Google US English') ||
+          v.name.includes('Microsoft David'))
     )
     if (preferred) utter.voice = preferred
     speechSynthesis.cancel()
@@ -179,16 +233,18 @@ function App() {
           </p>
 
           <div style={{ marginBottom: '1rem' }}>
-            <button onClick={speakScene}>🗣️ Play Scene</button>
-            <button onClick={togglePause} style={{ marginLeft: '1rem' }}>
-              {isPaused ? '▶️ Resume' : '⏸️ Pause'}
+            <button onClick={toggleSpeakScene}>
+              {isSpeaking
+                ? isPaused
+                  ? '▶️ Resume'
+                  : '⏸️ Pause'
+                : '🗣️ Play Scene'}
             </button>
-
             <button
               onClick={() =>
                 setVoiceRate((prev) => {
                   const next = parseFloat((prev + 0.2).toFixed(1))
-                  return next > 1.5 ? 0.5 : next
+                  return next > 1.0 ? 0.5 : next
                 })
               }
               style={{ marginLeft: '1rem' }}
