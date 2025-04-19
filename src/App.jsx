@@ -38,11 +38,13 @@ function App() {
     let multiplier
 
     if (rate <= 0.5) {
-      multiplier = 1.7
+      multiplier = 1.75
     } else if (rate <= 0.7) {
       multiplier = 1.55
-    } else {
+    } else if (rate <= 0.9) {
       multiplier = 1.33
+    } else {
+      multiplier = 1.22
     }
 
     const wps = (baseWPM / 60) * rate * multiplier
@@ -216,7 +218,14 @@ function App() {
 
       {view === 'story' && (
         <>
-          <h1>The Guardian of the Bat Hill</h1>
+          <h1>Luna's journey</h1>
+          {/* Display the scene image */}
+          <img
+            src={scenes[sceneIndex].image}
+            alt={`Scene ${sceneIndex + 1}`}
+            height={'600px'}
+          />
+
           <p>
             {scenes[sceneIndex].text.map(({ word, translation }, index) => (
               <Word
