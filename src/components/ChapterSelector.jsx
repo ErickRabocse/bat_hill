@@ -12,7 +12,7 @@ function ChapterSelector({ chapters, chapterIndex, setChapterIndex }) {
       <select value={chapterIndex} onChange={handleChange}>
         {chapters.map((chapter, index) => (
           <option key={chapter.id} value={index}>
-            Chapter {index + 1}
+            {index === 0 ? 'Introduction' : `Chapter ${index}`}
           </option>
         ))}
       </select>
