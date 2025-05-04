@@ -11,6 +11,10 @@ function App() {
     const saved = localStorage.getItem('fontSizeIndex')
     return saved !== null ? parseInt(saved, 10) : 2
   })
+  useEffect(() => {
+    document.body.style.backgroundColor = darkMode ? '#1e1e1e' : '#fffbe6'
+    document.body.style.margin = '0'
+  }, [darkMode])
 
   useEffect(() => {
     localStorage.setItem('fontSizeIndex', fontSizeIndex.toString())
@@ -96,6 +100,7 @@ function App() {
         color: textColor,
         minHeight: '100vh',
         transition: 'background-color 0.3s, color 0.3s',
+        boxSizing: 'border-box',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -137,7 +142,7 @@ function App() {
 
         <div style={{ flex: 1 }}>
           <div style={{ marginBottom: '1rem' }}>
-            <h1 style={{ margin: 0, textAlign: "center" }}>Luna's journey</h1>
+            <h1 style={{ margin: 0, textAlign: 'center' }}>Luna's journey</h1>
             {/* <h2 style={{ marginTop: '0.5rem' }}>
               {chapters[chapterIndex].title}
             </h2> */}
@@ -254,20 +259,22 @@ function App() {
                         { word, translation, index: globalIndex },
                         localIndex
                       ) => (
-                        <Word
-                          key={`${word}-${globalIndex}`}
-                          text={word}
-                          translation={translation}
-                          activeWord={activeWord}
-                          setActiveWord={setActiveWord}
-                          onSpeak={speakWord}
-                          isHighlighted={
-                            sIndex === highlightedSentenceIndex &&
-                            localIndex === highlightedIndex
-                          }
-                          fontSize={fontSize}
-                          highlightColor={darkMode ? '#00ffff' : '#007acc'}
-                        />
+                        <span style={{ marginRight: '0.5rem' }}>
+                          <Word
+                            key={`${word}-${globalIndex}`}
+                            text={word}
+                            translation={translation}
+                            activeWord={activeWord}
+                            setActiveWord={setActiveWord}
+                            onSpeak={speakWord}
+                            isHighlighted={
+                              sIndex === highlightedSentenceIndex &&
+                              localIndex === highlightedIndex
+                            }
+                            fontSize={fontSize}
+                            highlightColor={darkMode ? '#00ffff' : '#007acc'}
+                          />
+                        </span>
                       )
                     )}
                   </span>

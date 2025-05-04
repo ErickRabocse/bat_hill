@@ -12,13 +12,12 @@ function ChapterSelector({ chapters, chapterIndex, setChapterIndex }) {
       <select value={chapterIndex} onChange={handleChange}>
         {chapters.map((chapter, index) => (
           <option key={chapter.id} value={index}>
-            {chapter.title}
+            Chapter {index + 1}
           </option>
         ))}
       </select>
       <div>
         <h2>{chapters[chapterIndex].title}</h2>
-        <p>{chapters[chapterIndex].content}</p>
       </div>
     </div>
   )

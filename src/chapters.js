@@ -1,7 +1,7 @@
 const chapters = [
   {
     id: 1,
-    title: 'Chapter 1 – A Cold Night',
+    title: 'A Cold Night',
     scenes: [
       {
         id: 1,
@@ -340,7 +340,7 @@ const chapters = [
   },
   {
     id: 2,
-    title: 'Chapter 2 – Where is Mama?',
+    title: 'Where is Mama?',
     scenes: [
       {
         id: 1,
@@ -684,7 +684,7 @@ const chapters = [
   },
   {
     id: 3,
-    title: 'Chapter 3 – Mia',
+    title: 'Mia',
     scenes: [
       {
         id: 1,
@@ -1025,7 +1025,7 @@ const chapters = [
   },
   {
     id: 4,
-    title: 'Chapter 4 – A new home',
+    title: 'A new home',
     scenes: [
       {
         id: 1,
@@ -1400,7 +1400,7 @@ const chapters = [
   },
   {
     id: 5,
-    title: 'Chapter 5 – Learning together',
+    title: 'Learning together',
     scenes: [
       {
         id: 1,
@@ -1584,8 +1584,7 @@ const chapters = [
           { word: 'flag', translation: 'bandera' },
           { word: '.', translation: '' },
           { word: 'She', translation: 'Ella' },
-          { word: 'does', translation: 'ya' },
-          { word: "n't", translation: 'no' },
+          { word: "doesn't", translation: 'no' },
           { word: 'chew', translation: 'muerde' },
           { word: 'shoes', translation: 'zapatos' },
           { word: 'anymore', translation: 'más' },
@@ -1658,7 +1657,7 @@ const chapters = [
   },
   {
     id: 6,
-    title: 'Chapter 6 – A Visit to the Vet',
+    title: 'A Visit to the Vet',
     scenes: [
       {
         id: 1,
@@ -1982,7 +1981,7 @@ const chapters = [
   },
   {
     id: 7,
-    title: 'Chapter 7 – Spreading the Word',
+    title: 'Spreading the Word',
     scenes: [
       {
         id: 1,
@@ -2248,7 +2247,7 @@ const chapters = [
   },
   {
     id: 8,
-    title: 'Chapter 8 – Reunited',
+    title: 'Reunited',
     scenes: [
       {
         id: 1,
