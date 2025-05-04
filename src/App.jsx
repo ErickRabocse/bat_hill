@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import Word from './Word'
 import chapters from './chapters'
 import ChapterSelector from './components/ChapterSelector'
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion'
+import './app.css'
 
 function App() {
   const [chapterIndex, setChapterIndex] = useState(0)
@@ -11,6 +14,7 @@ function App() {
     const saved = localStorage.getItem('fontSizeIndex')
     return saved !== null ? parseInt(saved, 10) : 2
   })
+
   useEffect(() => {
     document.body.style.backgroundColor = darkMode ? '#1e1e1e' : '#fffbe6'
     document.body.style.margin = '0'
@@ -128,206 +132,235 @@ function App() {
         </button>
       </div>
 
-      <div
-        style={{ display: 'flex', alignItems: 'flex-start', marginTop: '2rem' }}
-      >
-        <img
-          src={currentScene.image}
-          alt={`Scene ${sceneIndex + 1}`}
-          style={{
-            width: '33%',
-            height: 'auto',
-            objectFit: 'cover',
-            borderRadius: '8px',
-            marginRight: '2rem',
-          }}
-        />
-
-        <div style={{ flex: 1 }}>
-          <div style={{ marginBottom: '1rem' }}>
-            <h1 style={{ margin: 0, textAlign: 'center' }}>Luna's journey</h1>
-            <div style={{ marginTop: '0.5rem' }}>
-              <ChapterSelector
-                chapters={chapters}
-                chapterIndex={chapterIndex}
-                setChapterIndex={handleChapterChange}
-              />
-            </div>
-          </div>
-
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${chapterIndex}-${sceneIndex}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+        >
           <div
             style={{
               display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              gap: '0.3rem',
+              alignItems: 'flex-start',
+              marginTop: '2rem',
             }}
           >
-            {(() => {
-              const sentences = []
-              let currentSentence = []
-              currentScene.text.forEach((item, index) => {
-                currentSentence.push({ ...item, index })
-                if (['.', '!', '?'].includes(item.word)) {
-                  sentences.push(currentSentence)
-                  currentSentence = []
-                }
-              })
-              if (currentSentence.length) {
-                sentences.push(currentSentence)
-              }
+            <img
+              src={currentScene.image}
+              alt={`Scene ${sceneIndex + 1}`}
+              style={{
+                width: '33%',
+                height: '90vh',
+                objectFit: 'cover',
+                borderRadius: '8px',
+                marginRight: '2rem',
+              }}
+            />
 
-              return sentences.map((sentence, sIndex) => {
-                const sentenceText = sentence
-                  .map((item) => item.word)
-                  .join(' ')
-                  .replace(/\s+([.,!?])/g, '$1')
+            <div style={{ flex: 1, padding: '25px' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <h1 style={{ margin: 0, textAlign: 'center' }}>
+                  Luna's journey
+                </h1>
+                <div style={{ marginTop: '0.5rem' }}>
+                  <ChapterSelector
+                    chapters={chapters}
+                    chapterIndex={chapterIndex}
+                    setChapterIndex={handleChapterChange}
+                  />
+                </div>
+              </div>
 
-                const playSentence = () => {
-                  const utter = new SpeechSynthesisUtterance(sentenceText)
-                  utter.lang = 'en-US'
-                  utter.rate = voiceRate
-                  const preferred = getPreferredVoice()
-                  if (preferred) utter.voice = preferred
-
-                  const textArray = sentence.map(({ word }) => word)
-                  const delayBeforeStart = 1000
-                  const timings = getWordTimings(textArray, delayBeforeStart)
-                  let timerIds = []
-
-                  setHighlightedSentenceIndex(sIndex)
-                  setHighlightedIndex(-1)
-
-                  timings.forEach((time, index) => {
-                    const id = setTimeout(() => {
-                      setHighlightedIndex(index)
-                    }, time)
-                    timerIds.push(id)
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  textAlign: 'justify',
+                }}
+                className="scrollable-text"
+              >
+                {(() => {
+                  const sentences = []
+                  let currentSentence = []
+                  currentScene.text.forEach((item, index) => {
+                    currentSentence.push({ ...item, index })
+                    if (['.', '!', '?'].includes(item.word)) {
+                      sentences.push(currentSentence)
+                      currentSentence = []
+                    }
                   })
-
-                  utter.onend = () => {
-                    setTimeout(() => {
-                      setHighlightedIndex(-1)
-                      setHighlightedSentenceIndex(null)
-                      timerIds.forEach(clearTimeout)
-                    }, 400)
+                  if (currentSentence.length) {
+                    sentences.push(currentSentence)
                   }
 
-                  speechSynthesis.cancel()
-                  setTimeout(() => {
-                    speechSynthesis.speak(utter)
-                  }, delayBeforeStart)
-                }
+                  return sentences.map((sentence, sIndex) => {
+                    const sentenceText = sentence
+                      .map((item) => item.word)
+                      .join(' ')
+                      .replace(/\s+([.,!?])/g, '$1')
 
-                return (
-                  <span
-                    key={sIndex}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      marginRight: '0.5rem',
-                    }}
-                  >
+                    const playSentence = () => {
+                      const utter = new SpeechSynthesisUtterance(sentenceText)
+                      utter.lang = 'en-US'
+                      utter.rate = voiceRate
+                      const preferred = getPreferredVoice()
+                      if (preferred) utter.voice = preferred
+
+                      const textArray = sentence.map(({ word }) => word)
+                      const delayBeforeStart = 1000
+                      const timings = getWordTimings(
+                        textArray,
+                        delayBeforeStart
+                      )
+                      let timerIds = []
+
+                      setHighlightedSentenceIndex(sIndex)
+                      setHighlightedIndex(-1)
+
+                      timings.forEach((time, index) => {
+                        const id = setTimeout(() => {
+                          setHighlightedIndex(index)
+                        }, time)
+                        timerIds.push(id)
+                      })
+
+                      utter.onend = () => {
+                        setTimeout(() => {
+                          setHighlightedIndex(-1)
+                          setHighlightedSentenceIndex(null)
+                          timerIds.forEach(clearTimeout)
+                        }, 400)
+                      }
+
+                      speechSynthesis.cancel()
+                      setTimeout(() => {
+                        speechSynthesis.speak(utter)
+                      }, delayBeforeStart)
+                    }
+
+                    return (
+                      <span
+                        key={sIndex}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                          marginRight: '0.5rem',
+                        }}
+                      >
+                        <button
+                          onClick={playSentence}
+                          style={{
+                            fontSize: '0.75rem',
+                            padding: '0.2rem 0.35rem',
+                            cursor: 'pointer',
+                            border: '1px solid #ccc',
+                            borderRadius: '6px',
+                            backgroundColor: '#f8f8f8',
+                            transition:
+                              'background-color 0.2s, box-shadow 0.2s',
+                            marginRight: '0.3rem',
+                            lineHeight: '1',
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = '#e6f0ff'
+                            e.currentTarget.style.boxShadow =
+                              '0 0 3px rgba(0,0,0,0.2)'
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f8f8f8'
+                            e.currentTarget.style.boxShadow = 'none'
+                          }}
+                        >
+                          🔊
+                        </button>
+                        {sentence.map(
+                          (
+                            { word, translation, index: globalIndex },
+                            localIndex
+                          ) => {
+                            const isPunctuation = [
+                              '.',
+                              ',',
+                              '!',
+                              '?',
+                              '...',
+                            ].includes(word)
+                            return isPunctuation ? (
+                              <span key={`${word}-${globalIndex}`}>{word}</span>
+                            ) : (
+                              <span
+                                key={`${word}-${globalIndex}`}
+                                style={{ marginRight: '0.5rem' }}
+                              >
+                                <Word
+                                  text={word}
+                                  translation={translation}
+                                  activeWord={activeWord}
+                                  setActiveWord={setActiveWord}
+                                  onSpeak={speakWord}
+                                  isHighlighted={
+                                    sIndex === highlightedSentenceIndex &&
+                                    localIndex === highlightedIndex
+                                  }
+                                  isSameAsActive={activeWord === word}
+                                  fontSize={fontSize}
+                                  highlightColor={
+                                    darkMode ? '#00ffff' : '#007acc'
+                                  }
+                                />
+                              </span>
+                            )
+                          }
+                        )}
+                      </span>
+                    )
+                  })
+                })()}
+              </div>
+
+              <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+                <button
+                  onClick={() => setSceneIndex((prev) => Math.max(prev - 1, 0))}
+                  disabled={sceneIndex === 0}
+                >
+                  ⬅️ Previous
+                </button>
+                <button
+                  onClick={() =>
+                    setSceneIndex((prev) =>
+                      Math.min(
+                        prev + 1,
+                        chapters[chapterIndex].scenes.length - 1
+                      )
+                    )
+                  }
+                  disabled={
+                    sceneIndex === chapters[chapterIndex].scenes.length - 1
+                  }
+                >
+                  Next ➡️
+                </button>
+                {sceneIndex === chapters[chapterIndex].scenes.length - 1 &&
+                  chapterIndex < chapters.length - 1 && (
                     <button
-                      onClick={playSentence}
-                      style={{
-                        fontSize: '0.75rem',
-                        padding: '0.2rem 0.35rem',
-                        cursor: 'pointer',
-                        border: '1px solid #ccc',
-                        borderRadius: '6px',
-                        backgroundColor: '#f8f8f8',
-                        transition: 'background-color 0.2s, box-shadow 0.2s',
-                        marginRight: '0.3rem',
-                        lineHeight: '1',
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = '#e6f0ff'
-                        e.currentTarget.style.boxShadow =
-                          '0 0 3px rgba(0,0,0,0.2)'
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = '#f8f8f8'
-                        e.currentTarget.style.boxShadow = 'none'
+                      onClick={() => {
+                        setChapterIndex(chapterIndex + 1)
+                        setSceneIndex(0)
                       }}
                     >
-                      🔊
+                      👉 Next Chapter
                     </button>
-                    {sentence.map(
-                      (
-                        { word, translation, index: globalIndex },
-                        localIndex
-                      ) => {
-                        const isPunctuation = [
-                          '.',
-                          ',',
-                          '!',
-                          '?',
-                          '...',
-                        ].includes(word)
-                        return isPunctuation ? (
-                          <span key={`${word}-${globalIndex}`}>{word}</span>
-                        ) : (
-                          <span
-                            key={`${word}-${globalIndex}`}
-                            style={{ marginRight: '0.5rem' }}
-                          >
-                            <Word
-                              text={word}
-                              translation={translation}
-                              activeWord={activeWord}
-                              setActiveWord={setActiveWord}
-                              onSpeak={speakWord}
-                              isHighlighted={
-                                sIndex === highlightedSentenceIndex &&
-                                localIndex === highlightedIndex
-                              }
-                              isSameAsActive={activeWord === word}
-                              fontSize={fontSize}
-                              highlightColor={darkMode ? '#00ffff' : '#007acc'}
-                            />
-                          </span>
-                        )
-                      }
-                    )}
-                  </span>
-                )
-              })
-            })()}
+                  )}
+              </div>
+            </div>
           </div>
-
-          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
-            <button
-              onClick={() => setSceneIndex((prev) => Math.max(prev - 1, 0))}
-              disabled={sceneIndex === 0}
-            >
-              ⬅️ Previous
-            </button>
-            <button
-              onClick={() =>
-                setSceneIndex((prev) =>
-                  Math.min(prev + 1, chapters[chapterIndex].scenes.length - 1)
-                )
-              }
-              disabled={sceneIndex === chapters[chapterIndex].scenes.length - 1}
-            >
-              Next ➡️
-            </button>
-            {sceneIndex === chapters[chapterIndex].scenes.length - 1 &&
-              chapterIndex < chapters.length - 1 && (
-                <button
-                  onClick={() => {
-                    setChapterIndex(chapterIndex + 1)
-                    setSceneIndex(0)
-                  }}
-                >
-                  👉 Next Chapter
-                </button>
-              )}
-          </div>
-        </div>
-      </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   )
 }

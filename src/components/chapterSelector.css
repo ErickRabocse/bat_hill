@@ -1,0 +1,7 @@
+.glow {
+  color: black;
+  animation: glow 20s ease-in-out infinite alternate;
+  text-shadow: 0 0 10px #fff, 0 0 5px #eff1ea, 0 0 3px #ffc800;
+}
+
+

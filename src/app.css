@@ -1,0 +1,5 @@
+.scrollable-text {
+  max-height: 60vh; /* Adjust the height as needed */
+  overflow-y: auto;
+  padding-right: 1rem; /* Optional: adds space for scrollbar */
+}
