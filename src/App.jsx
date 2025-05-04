@@ -60,13 +60,13 @@ function App() {
     if (preferred) utter.voice = preferred
     speechSynthesis.cancel()
     speechSynthesis.speak(utter)
+    setActiveWord(word)
   }
 
   const getWordTimings = (textArray, delayBeforeStart = 1000) => {
     const baseWPM = 390
     const wps = (baseWPM / 60) * voiceRate
     const baseWordDuration = 950 / wps
-
     const punctuationMarks = ['.', ',', '...', '!', '?']
     const isPunctuation = (token) => punctuationMarks.includes(token)
 
@@ -76,10 +76,8 @@ function App() {
     for (let i = 0; i < textArray.length; i++) {
       const word = textArray[i]
       timings.push(time)
-
       const charDelay = isPunctuation(word) ? 0 : word.length * 10
       const punctuationPause = isPunctuation(word) ? 600 : 0
-
       time += baseWordDuration + charDelay + punctuationPause
     }
 
@@ -88,6 +86,11 @@ function App() {
 
   const backgroundColor = darkMode ? '#1e1e1e' : '#fffbe6'
   const textColor = darkMode ? '#f0f0f0' : '#333'
+
+  const handleChapterChange = (newIndex) => {
+    setChapterIndex(newIndex)
+    setSceneIndex(0)
+  }
 
   return (
     <div
@@ -143,14 +146,11 @@ function App() {
         <div style={{ flex: 1 }}>
           <div style={{ marginBottom: '1rem' }}>
             <h1 style={{ margin: 0, textAlign: 'center' }}>Luna's journey</h1>
-            {/* <h2 style={{ marginTop: '0.5rem' }}>
-              {chapters[chapterIndex].title}
-            </h2> */}
             <div style={{ marginTop: '0.5rem' }}>
               <ChapterSelector
                 chapters={chapters}
                 chapterIndex={chapterIndex}
-                setChapterIndex={setChapterIndex}
+                setChapterIndex={handleChapterChange}
               />
             </div>
           </div>
@@ -258,24 +258,38 @@ function App() {
                       (
                         { word, translation, index: globalIndex },
                         localIndex
-                      ) => (
-                        <span style={{ marginRight: '0.5rem' }}>
-                          <Word
+                      ) => {
+                        const isPunctuation = [
+                          '.',
+                          ',',
+                          '!',
+                          '?',
+                          '...',
+                        ].includes(word)
+                        return isPunctuation ? (
+                          <span key={`${word}-${globalIndex}`}>{word}</span>
+                        ) : (
+                          <span
                             key={`${word}-${globalIndex}`}
-                            text={word}
-                            translation={translation}
-                            activeWord={activeWord}
-                            setActiveWord={setActiveWord}
-                            onSpeak={speakWord}
-                            isHighlighted={
-                              sIndex === highlightedSentenceIndex &&
-                              localIndex === highlightedIndex
-                            }
-                            fontSize={fontSize}
-                            highlightColor={darkMode ? '#00ffff' : '#007acc'}
-                          />
-                        </span>
-                      )
+                            style={{ marginRight: '0.5rem' }}
+                          >
+                            <Word
+                              text={word}
+                              translation={translation}
+                              activeWord={activeWord}
+                              setActiveWord={setActiveWord}
+                              onSpeak={speakWord}
+                              isHighlighted={
+                                sIndex === highlightedSentenceIndex &&
+                                localIndex === highlightedIndex
+                              }
+                              isSameAsActive={activeWord === word}
+                              fontSize={fontSize}
+                              highlightColor={darkMode ? '#00ffff' : '#007acc'}
+                            />
+                          </span>
+                        )
+                      }
                     )}
                   </span>
                 )
@@ -283,11 +297,10 @@ function App() {
             })()}
           </div>
 
-          <div style={{ marginTop: '2rem' }}>
+          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
             <button
               onClick={() => setSceneIndex((prev) => Math.max(prev - 1, 0))}
               disabled={sceneIndex === 0}
-              style={{ marginRight: '1rem' }}
             >
               ⬅️ Previous
             </button>
@@ -301,6 +314,17 @@ function App() {
             >
               Next ➡️
             </button>
+            {sceneIndex === chapters[chapterIndex].scenes.length - 1 &&
+              chapterIndex < chapters.length - 1 && (
+                <button
+                  onClick={() => {
+                    setChapterIndex(chapterIndex + 1)
+                    setSceneIndex(0)
+                  }}
+                >
+                  👉 Next Chapter
+                </button>
+              )}
           </div>
         </div>
       </div>

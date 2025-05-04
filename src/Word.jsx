@@ -31,7 +31,7 @@ function Word({
     padding: '5px 8px',
     fontSize: '0.85rem',
     bottom: '100%',
-    marginBottom: '-90px',
+    marginBottom: '-60px',
     zIndex: 10,
     whiteSpace: 'nowrap',
     lineHeight: '1.2',
@@ -53,7 +53,11 @@ function Word({
         cursor: 'pointer',
         fontSize: fontSize || '1.2rem',
         lineHeight: '2.5',
-        ...(isHighlighted ? highlightStyle : {}),
+        ...(isHighlighted
+          ? highlightStyle
+          : isActive
+          ? { color: 'darkred', fontWeight: 'bold' }
+          : {}),
       }}
       onClick={handleClick}
     >
