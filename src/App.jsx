@@ -1,27 +1,30 @@
-// ✅ App.jsx
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import Word from './Word'
-import Glossary from './Glossary'
-import scenes from './scenes'
+import chapters from './chapters'
+import ChapterSelector from './components/ChapterSelector'
 
 function App() {
-  const [userId, setUserId] = useState('')
-  const [view, setView] = useState('login')
+  const [chapterIndex, setChapterIndex] = useState(0)
   const [sceneIndex, setSceneIndex] = useState(0)
-  const [activeWord, setActiveWord] = useState(null)
-  const [voiceRate, setVoiceRate] = useState(1)
-  const [isPaused, setIsPaused] = useState(false)
-  const [highlightedIndex, setHighlightedIndex] = useState(-1)
-  const utteranceRef = useRef(null)
-  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [darkMode, setDarkMode] = useState(false)
+  const [fontSizeIndex, setFontSizeIndex] = useState(() => {
+    const saved = localStorage.getItem('fontSizeIndex')
+    return saved !== null ? parseInt(saved, 10) : 2
+  })
 
   useEffect(() => {
-    const savedId = localStorage.getItem('studentId')
-    if (savedId) {
-      setUserId(savedId)
-      setView('story')
-    }
-  }, [])
+    localStorage.setItem('fontSizeIndex', fontSizeIndex.toString())
+  }, [fontSizeIndex])
+
+  const fontSizes = ['1rem', '1.25rem', '1.5rem', '1.75rem', '2rem']
+  const fontSize = fontSizes[fontSizeIndex] || '1.2rem'
+
+  const currentScene = chapters[chapterIndex].scenes[sceneIndex]
+
+  const [activeWord, setActiveWord] = useState(null)
+  const voiceRate = 0.6
+  const [highlightedSentenceIndex, setHighlightedSentenceIndex] = useState(null)
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -33,236 +36,247 @@ function App() {
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
-  const getWordTimings = (textArray, rate) => {
-    const baseWPM = 180
-    let multiplier
-
-    if (rate <= 0.5) {
-      multiplier = 1.75
-    } else if (rate <= 0.7) {
-      multiplier = 1.55
-    } else if (rate <= 0.9) {
-      multiplier = 1.33
-    } else {
-      multiplier = 1.22
-    }
-
-    const wps = (baseWPM / 60) * rate * multiplier
-    const baseWordDuration = 1000 / wps
-
-    let timings = []
-    let time = 0
-
-    for (let i = 0; i < textArray.length; i++) {
-      timings.push(time)
-
-      const word = textArray[i]
-      time += baseWordDuration
-
-      if (['.', ',', '...', '!', '?'].includes(word)) {
-        time += 300 // ⏸️ Add 300ms pause for punctuation
-      }
-    }
-
-    return timings
-  }
-
-  const speakScene = () => {
-    const scene = scenes[sceneIndex]
-    const textArray = scene.text.map(({ word }) => word)
-    const fullText = textArray.reduce((acc, word, i) => {
-      return (
-        acc +
-        (['.', ',', '!', '?'].includes(word)
-          ? word
-          : i === 0
-          ? word
-          : ' ' + word)
-      )
-    }, '')
-
-    const utterance = new SpeechSynthesisUtterance(fullText)
-    utterance.lang = 'en-US'
-    utterance.rate = voiceRate
-
+  const getPreferredVoice = () => {
     const voices = speechSynthesis.getVoices()
-    const preferred = voices.find(
-      (v) =>
-        v.lang === 'en-US' &&
-        (v.name.includes('Google US English') ||
-          v.name.includes('Microsoft David'))
+    return (
+      voices.find(
+        (v) =>
+          v.lang === 'en-US' &&
+          (v.name.includes('Google US English') ||
+            v.name.includes('Microsoft David'))
+      ) || null
     )
-    if (preferred) utterance.voice = preferred
-
-    const timings = getWordTimings(textArray, voiceRate)
-    let timerIds = []
-    timings.forEach((time, index) => {
-      const id = setTimeout(() => {
-        setHighlightedIndex(index)
-      }, time)
-      timerIds.push(id)
-    })
-
-    utterance.onend = () => {
-      setHighlightedIndex(-1)
-      setIsSpeaking(false)
-      timerIds.forEach(clearTimeout)
-    }
-
-    utteranceRef.current = utterance
-    speechSynthesis.cancel()
-    speechSynthesis.speak(utterance)
-    setIsPaused(false)
-    setIsSpeaking(true)
-  }
-
-  const toggleSpeakScene = () => {
-    if (isSpeaking) {
-      togglePause()
-    } else {
-      speakScene()
-    }
-  }
-
-  const togglePause = () => {
-    if (speechSynthesis.speaking) {
-      if (isPaused) {
-        speechSynthesis.resume()
-        setIsPaused(false)
-      } else {
-        speechSynthesis.pause()
-        setIsPaused(true)
-      }
-    }
   }
 
   const speakWord = (word) => {
     const utter = new SpeechSynthesisUtterance(word)
     utter.lang = 'en-US'
     utter.rate = voiceRate
-    const voices = speechSynthesis.getVoices()
-    const preferred = voices.find(
-      (v) =>
-        v.lang === 'en-US' &&
-        (v.name.includes('Google US English') ||
-          v.name.includes('Microsoft David'))
-    )
+    const preferred = getPreferredVoice()
     if (preferred) utter.voice = preferred
     speechSynthesis.cancel()
     speechSynthesis.speak(utter)
   }
 
-  if (view === 'login') {
-    return (
-      <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
-        <h2>Welcome!</h2>
-        <p>Enter your student ID to begin:</p>
-        <input
-          type="text"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          placeholder="e.g. 20231234"
-        />
-        <button
-          onClick={() => {
-            if (userId.trim()) {
-              localStorage.setItem('studentId', userId.trim())
-              setUserId(userId.trim())
-              setView('story')
-            }
-          }}
-          style={{ marginLeft: '1rem' }}
-        >
-          Start
-        </button>
-      </div>
-    )
+  const getWordTimings = (textArray, delayBeforeStart = 1000) => {
+    const baseWPM = 390
+    const wps = (baseWPM / 60) * voiceRate
+    const baseWordDuration = 950 / wps
+
+    const punctuationMarks = ['.', ',', '...', '!', '?']
+    const isPunctuation = (token) => punctuationMarks.includes(token)
+
+    let timings = []
+    let time = delayBeforeStart
+
+    for (let i = 0; i < textArray.length; i++) {
+      const word = textArray[i]
+      timings.push(time)
+
+      const charDelay = isPunctuation(word) ? 0 : word.length * 10
+      const punctuationPause = isPunctuation(word) ? 600 : 0
+
+      time += baseWordDuration + charDelay + punctuationPause
+    }
+
+    return timings
   }
+
+  const backgroundColor = darkMode ? '#1e1e1e' : '#fffbe6'
+  const textColor = darkMode ? '#f0f0f0' : '#333'
 
   return (
     <div
       onClick={() => setActiveWord(null)}
-      style={{ padding: '2rem', fontFamily: 'Arial' }}
+      style={{
+        padding: '2rem',
+        fontFamily: 'Georgia, serif',
+        fontSize,
+        backgroundColor,
+        color: textColor,
+        minHeight: '100vh',
+        transition: 'background-color 0.3s, color 0.3s',
+      }}
     >
-      <nav style={{ marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button
-          onClick={() => setView('story')}
-          style={{ marginRight: '1rem' }}
+          onClick={() => setDarkMode(!darkMode)}
+          style={{ fontSize: '0.9rem', marginRight: '1rem' }}
         >
-          📖 Story
+          {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
         </button>
-        <button onClick={() => setView('glossary')}>📘 My Glossary</button>
-      </nav>
-
-      <p style={{ fontSize: '0.9rem', color: '#555' }}>
-        🔑 Student ID: <strong>{userId}</strong>{' '}
         <button
-          onClick={() => {
-            localStorage.removeItem('studentId')
-            setUserId('')
-            setView('login')
-          }}
+          onClick={() => setFontSizeIndex((prev) => Math.max(0, prev - 1))}
+          style={{ marginRight: '0.5rem' }}
+        >
+          A-
+        </button>
+        <button
+          onClick={() =>
+            setFontSizeIndex((prev) => Math.min(fontSizes.length - 1, prev + 1))
+          }
+        >
+          A+
+        </button>
+      </div>
+
+      <div
+        style={{ display: 'flex', alignItems: 'flex-start', marginTop: '2rem' }}
+      >
+        <img
+          src={currentScene.image}
+          alt={`Scene ${sceneIndex + 1}`}
           style={{
-            marginLeft: '1rem',
-            fontSize: '0.8rem',
-            background: 'transparent',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            padding: '2px 6px',
-            cursor: 'pointer',
+            width: '33%',
+            height: 'auto',
+            objectFit: 'cover',
+            borderRadius: '8px',
+            marginRight: '2rem',
           }}
-        >
-          🔒 Log out
-        </button>
-      </p>
+        />
 
-      {view === 'story' && (
-        <>
-          <h1>Luna's journey</h1>
-          {/* Display the scene image */}
-          <img
-            src={scenes[sceneIndex].image}
-            alt={`Scene ${sceneIndex + 1}`}
-            height={'600px'}
-          />
-
-          <p>
-            {scenes[sceneIndex].text.map(({ word, translation }, index) => (
-              <Word
-                key={`${word}-${index}`}
-                text={word}
-                translation={translation}
-                userId={userId}
-                activeWord={activeWord}
-                setActiveWord={setActiveWord}
-                onSpeak={speakWord}
-                isHighlighted={index === highlightedIndex}
-              />
-            ))}
-          </p>
-
+        <div style={{ flex: 1 }}>
           <div style={{ marginBottom: '1rem' }}>
-            <button onClick={toggleSpeakScene}>
-              {isSpeaking
-                ? isPaused
-                  ? '▶️ Resume'
-                  : '⏸️ Pause'
-                : '🗣️ Play Scene'}
-            </button>
-            <button
-              onClick={() =>
-                setVoiceRate((prev) => {
-                  const next = parseFloat((prev + 0.2).toFixed(1))
-                  return next > 1.0 ? 0.5 : next
-                })
-              }
-              style={{ marginLeft: '1rem' }}
-            >
-              🎚️ Speed: {voiceRate.toFixed(1)}x
-            </button>
+            <h1 style={{ margin: 0, textAlign: "center" }}>Luna's journey</h1>
+            {/* <h2 style={{ marginTop: '0.5rem' }}>
+              {chapters[chapterIndex].title}
+            </h2> */}
+            <div style={{ marginTop: '0.5rem' }}>
+              <ChapterSelector
+                chapters={chapters}
+                chapterIndex={chapterIndex}
+                setChapterIndex={setChapterIndex}
+              />
+            </div>
           </div>
 
-          <div style={{ marginTop: '1rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: '0.3rem',
+            }}
+          >
+            {(() => {
+              const sentences = []
+              let currentSentence = []
+              currentScene.text.forEach((item, index) => {
+                currentSentence.push({ ...item, index })
+                if (['.', '!', '?'].includes(item.word)) {
+                  sentences.push(currentSentence)
+                  currentSentence = []
+                }
+              })
+              if (currentSentence.length) {
+                sentences.push(currentSentence)
+              }
+
+              return sentences.map((sentence, sIndex) => {
+                const sentenceText = sentence
+                  .map((item) => item.word)
+                  .join(' ')
+                  .replace(/\s+([.,!?])/g, '$1')
+
+                const playSentence = () => {
+                  const utter = new SpeechSynthesisUtterance(sentenceText)
+                  utter.lang = 'en-US'
+                  utter.rate = voiceRate
+                  const preferred = getPreferredVoice()
+                  if (preferred) utter.voice = preferred
+
+                  const textArray = sentence.map(({ word }) => word)
+                  const delayBeforeStart = 1000
+                  const timings = getWordTimings(textArray, delayBeforeStart)
+                  let timerIds = []
+
+                  setHighlightedSentenceIndex(sIndex)
+                  setHighlightedIndex(-1)
+
+                  timings.forEach((time, index) => {
+                    const id = setTimeout(() => {
+                      setHighlightedIndex(index)
+                    }, time)
+                    timerIds.push(id)
+                  })
+
+                  utter.onend = () => {
+                    setTimeout(() => {
+                      setHighlightedIndex(-1)
+                      setHighlightedSentenceIndex(null)
+                      timerIds.forEach(clearTimeout)
+                    }, 400)
+                  }
+
+                  speechSynthesis.cancel()
+                  setTimeout(() => {
+                    speechSynthesis.speak(utter)
+                  }, delayBeforeStart)
+                }
+
+                return (
+                  <span
+                    key={sIndex}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      marginRight: '0.5rem',
+                    }}
+                  >
+                    <button
+                      onClick={playSentence}
+                      style={{
+                        fontSize: '0.75rem',
+                        padding: '0.2rem 0.35rem',
+                        cursor: 'pointer',
+                        border: '1px solid #ccc',
+                        borderRadius: '6px',
+                        backgroundColor: '#f8f8f8',
+                        transition: 'background-color 0.2s, box-shadow 0.2s',
+                        marginRight: '0.3rem',
+                        lineHeight: '1',
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = '#e6f0ff'
+                        e.currentTarget.style.boxShadow =
+                          '0 0 3px rgba(0,0,0,0.2)'
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f8f8f8'
+                        e.currentTarget.style.boxShadow = 'none'
+                      }}
+                    >
+                      🔊
+                    </button>
+                    {sentence.map(
+                      (
+                        { word, translation, index: globalIndex },
+                        localIndex
+                      ) => (
+                        <Word
+                          key={`${word}-${globalIndex}`}
+                          text={word}
+                          translation={translation}
+                          activeWord={activeWord}
+                          setActiveWord={setActiveWord}
+                          onSpeak={speakWord}
+                          isHighlighted={
+                            sIndex === highlightedSentenceIndex &&
+                            localIndex === highlightedIndex
+                          }
+                          fontSize={fontSize}
+                          highlightColor={darkMode ? '#00ffff' : '#007acc'}
+                        />
+                      )
+                    )}
+                  </span>
+                )
+              })
+            })()}
+          </div>
+
+          <div style={{ marginTop: '2rem' }}>
             <button
               onClick={() => setSceneIndex((prev) => Math.max(prev - 1, 0))}
               disabled={sceneIndex === 0}
@@ -272,17 +286,17 @@ function App() {
             </button>
             <button
               onClick={() =>
-                setSceneIndex((prev) => Math.min(prev + 1, scenes.length - 1))
+                setSceneIndex((prev) =>
+                  Math.min(prev + 1, chapters[chapterIndex].scenes.length - 1)
+                )
               }
-              disabled={sceneIndex === scenes.length - 1}
+              disabled={sceneIndex === chapters[chapterIndex].scenes.length - 1}
             >
               Next ➡️
             </button>
           </div>
-        </>
-      )}
-
-      {view === 'glossary' && <Glossary userId={userId} />}
+        </div>
+      </div>
     </div>
   )
 }
