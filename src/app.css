@@ -3,3 +3,77 @@
   overflow-y: auto;
   padding-right: 1rem; /* Optional: adds space for scrollbar */
 }
+
+.app-container {
+  padding: 2rem;
+  font-family: Georgia, serif;
+  min-height: 100vh;
+  transition: background-color 0.3s, color 0.3s;
+  box-sizing: border-box;
+}
+
+.top-button-bar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.scene-layout {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 2rem;
+}
+
+.scene-image {
+  width: 33%;
+  height: 90vh;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 2rem;
+}
+
+.text-container {
+  flex: 1;
+  padding: 25px;
+}
+
+.chapter-title {
+  margin: 0;
+  text-align: center;
+}
+
+.sentence-wrapper {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-right: 0.5rem;
+}
+
+.play-button {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.35rem;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f8f8f8;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  margin-right: 0.3rem;
+  line-height: 1;
+}
+
+.play-button:hover {
+  background-color: #e6f0ff;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+}
+
+.page-number {
+  position: absolute;
+  bottom: 3rem;
+  right: 8rem;
+  font-weight: bold;
+}
+
+.nav-buttons {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+}

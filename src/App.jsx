@@ -26,9 +26,7 @@ function App() {
 
   const fontSizes = ['1rem', '1.25rem', '1.5rem', '1.75rem', '2rem']
   const fontSize = fontSizes[fontSizeIndex] || '1.2rem'
-
   const currentScene = chapters[chapterIndex].scenes[sceneIndex]
-
   const [activeWord, setActiveWord] = useState(null)
   const voiceRate = 0.6
   const [highlightedSentenceIndex, setHighlightedSentenceIndex] = useState(null)
@@ -51,7 +49,11 @@ function App() {
         (v) =>
           v.lang === 'en-US' &&
           (v.name.includes('Google US English') ||
-            v.name.includes('Microsoft David'))
+            v.name.includes('Microsoft Zira') ||
+            v.name.includes('Microsoft Jenny') ||
+            v.name.includes('Microsoft Aria') ||
+            v.name.includes('Samantha') ||
+            v.name.includes('Google UK English Female'))
       ) || null
     )
   }
@@ -88,29 +90,32 @@ function App() {
     return timings
   }
 
-  const backgroundColor = darkMode ? '#1e1e1e' : '#fffbe6'
-  const textColor = darkMode ? '#f0f0f0' : '#333'
-
   const handleChapterChange = (newIndex) => {
     setChapterIndex(newIndex)
     setSceneIndex(0)
   }
 
+  const getGlobalSceneNumber = () => {
+    if (chapterIndex === 0) return null
+    let page = 0
+    for (let i = 1; i < chapters.length; i++) {
+      if (i < chapterIndex) {
+        page += chapters[i].scenes.length
+      }
+    }
+    return page + sceneIndex + 1
+  }
+
+  const backgroundColor = darkMode ? '#1e1e1e' : '#fffbe6'
+  const textColor = darkMode ? '#f0f0f0' : '#333'
+
   return (
     <div
+      className="app-container"
+      style={{ fontSize, backgroundColor, color: textColor }}
       onClick={() => setActiveWord(null)}
-      style={{
-        padding: '2rem',
-        fontFamily: 'Georgia, serif',
-        fontSize,
-        backgroundColor,
-        color: textColor,
-        minHeight: '100vh',
-        transition: 'background-color 0.3s, color 0.3s',
-        boxSizing: 'border-box',
-      }}
     >
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div className="top-button-bar">
         <button
           onClick={() => setDarkMode(!darkMode)}
           style={{ fontSize: '0.9rem', marginRight: '1rem' }}
@@ -140,30 +145,15 @@ function App() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              marginTop: '2rem',
-            }}
-          >
+          <div className="scene-layout">
             <img
               src={currentScene.image}
               alt={`Scene ${sceneIndex + 1}`}
-              style={{
-                width: '33%',
-                height: '90vh',
-                objectFit: 'cover',
-                borderRadius: '8px',
-                marginRight: '2rem',
-              }}
+              className="scene-image"
             />
-
-            <div style={{ flex: 1, padding: '25px' }}>
+            <div className="text-container">
               <div style={{ marginBottom: '1rem' }}>
-                <h1 style={{ margin: 0, textAlign: 'center' }}>
-                  Luna's journey
-                </h1>
+                <h1 className="chapter-title">Luna's journey</h1>
                 <div style={{ marginTop: '0.5rem' }}>
                   <ChapterSelector
                     chapters={chapters}
@@ -173,16 +163,7 @@ function App() {
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  gap: '0.3rem',
-                  textAlign: 'justify',
-                }}
-                className="scrollable-text"
-              >
+              <div className="scrollable-text">
                 {(() => {
                   const sentences = []
                   let currentSentence = []
@@ -243,39 +224,8 @@ function App() {
                     }
 
                     return (
-                      <span
-                        key={sIndex}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          flexWrap: 'wrap',
-                          marginRight: '0.5rem',
-                        }}
-                      >
-                        <button
-                          onClick={playSentence}
-                          style={{
-                            fontSize: '0.75rem',
-                            padding: '0.2rem 0.35rem',
-                            cursor: 'pointer',
-                            border: '1px solid #ccc',
-                            borderRadius: '6px',
-                            backgroundColor: '#f8f8f8',
-                            transition:
-                              'background-color 0.2s, box-shadow 0.2s',
-                            marginRight: '0.3rem',
-                            lineHeight: '1',
-                          }}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.backgroundColor = '#e6f0ff'
-                            e.currentTarget.style.boxShadow =
-                              '0 0 3px rgba(0,0,0,0.2)'
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.backgroundColor = '#f8f8f8'
-                            e.currentTarget.style.boxShadow = 'none'
-                          }}
-                        >
+                      <span key={sIndex} className="sentence-wrapper">
+                        <button onClick={playSentence} className="play-button">
                           🔊
                         </button>
                         {sentence.map(
@@ -321,9 +271,15 @@ function App() {
                     )
                   })
                 })()}
+
+                {getGlobalSceneNumber() && (
+                  <div className="page-number">
+                    Page {getGlobalSceneNumber()}
+                  </div>
+                )}
               </div>
 
-              <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+              <div className="nav-buttons">
                 <button
                   onClick={() => setSceneIndex((prev) => Math.max(prev - 1, 0))}
                   disabled={sceneIndex === 0}
