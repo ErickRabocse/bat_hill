@@ -70,9 +70,9 @@ function App() {
   }
 
   const getWordTimings = (textArray, delayBeforeStart = 1000) => {
-    const baseWPM = 390
+    const baseWPM = 290
     const wps = (baseWPM / 60) * voiceRate
-    const baseWordDuration = 950 / wps
+    const baseWordDuration = 1000 / wps
     const punctuationMarks = ['.', ',', '...', '!', '?']
     const isPunctuation = (token) => punctuationMarks.includes(token)
 
@@ -83,7 +83,7 @@ function App() {
       const word = textArray[i]
       timings.push(time)
       const charDelay = isPunctuation(word) ? 0 : word.length * 10
-      const punctuationPause = isPunctuation(word) ? 600 : 0
+      const punctuationPause = isPunctuation(word) ? 500 : 0
       time += baseWordDuration + charDelay + punctuationPause
     }
 
