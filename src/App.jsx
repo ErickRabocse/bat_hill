@@ -240,29 +240,49 @@ function App() {
                               '?',
                               '...',
                             ].includes(word)
-                            return isPunctuation ? (
-                              <span key={`${word}-${globalIndex}`}>{word}</span>
-                            ) : (
+                            const prevWord =
+                              localIndex > 0
+                                ? sentence[localIndex - 1].word
+                                : ''
+                            const prevIsPunctuation = [
+                              '.',
+                              ',',
+                              '!',
+                              '?',
+                              '...',
+                            ].includes(prevWord)
+
+                            return (
                               <span
                                 key={`${word}-${globalIndex}`}
-                                style={{ marginRight: '0.5rem' }}
+                                style={{
+                                  marginLeft: isPunctuation
+                                    ? 0
+                                    : prevIsPunctuation
+                                    ? '0.5rem'
+                                    : '0.25rem',
+                                }}
                               >
-                                <Word
-                                  text={word}
-                                  translation={translation}
-                                  activeWord={activeWord}
-                                  setActiveWord={setActiveWord}
-                                  onSpeak={speakWord}
-                                  isHighlighted={
-                                    sIndex === highlightedSentenceIndex &&
-                                    localIndex === highlightedIndex
-                                  }
-                                  isSameAsActive={activeWord === word}
-                                  fontSize={fontSize}
-                                  highlightColor={
-                                    darkMode ? '#00ffff' : '#007acc'
-                                  }
-                                />
+                                {isPunctuation ? (
+                                  word
+                                ) : (
+                                  <Word
+                                    text={word}
+                                    translation={translation}
+                                    activeWord={activeWord}
+                                    setActiveWord={setActiveWord}
+                                    onSpeak={speakWord}
+                                    isHighlighted={
+                                      sIndex === highlightedSentenceIndex &&
+                                      localIndex === highlightedIndex
+                                    }
+                                    isSameAsActive={activeWord === word}
+                                    fontSize={fontSize}
+                                    highlightColor={
+                                      darkMode ? '#00ffff' : '#007acc'
+                                    }
+                                  />
+                                )}
                               </span>
                             )
                           }
