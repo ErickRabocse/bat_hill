@@ -28,19 +28,6 @@ function App() {
   const fontSize = fontSizes[fontSizeIndex] || '1.2rem'
   const currentScene = chapters[chapterIndex].scenes[sceneIndex]
   const [activeWord, setActiveWord] = useState(null)
-  const voiceRate = 0.6
-  const [highlightedSentenceIndex, setHighlightedSentenceIndex] = useState(null)
-  const [highlightedIndex, setHighlightedIndex] = useState(-1)
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (!e.target.closest('.word-span')) {
-        setActiveWord(null)
-      }
-    }
-    document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
-  }, [])
 
   const getPreferredVoice = () => {
     const voices = speechSynthesis.getVoices()
@@ -61,33 +48,12 @@ function App() {
   const speakWord = (word) => {
     const utter = new SpeechSynthesisUtterance(word)
     utter.lang = 'en-US'
-    utter.rate = voiceRate
+    utter.rate = 1
     const preferred = getPreferredVoice()
     if (preferred) utter.voice = preferred
     speechSynthesis.cancel()
     speechSynthesis.speak(utter)
     setActiveWord(word)
-  }
-
-  const getWordTimings = (textArray, delayBeforeStart = 1000) => {
-    const baseWPM = 290
-    const wps = (baseWPM / 60) * voiceRate
-    const baseWordDuration = 1000 / wps
-    const punctuationMarks = ['.', ',', '...', '!', '?']
-    const isPunctuation = (token) => punctuationMarks.includes(token)
-
-    let timings = []
-    let time = delayBeforeStart
-
-    for (let i = 0; i < textArray.length; i++) {
-      const word = textArray[i]
-      timings.push(time)
-      const charDelay = isPunctuation(word) ? 0 : word.length * 10
-      const punctuationPause = isPunctuation(word) ? 500 : 0
-      time += baseWordDuration + charDelay + punctuationPause
-    }
-
-    return timings
   }
 
   const handleChapterChange = (newIndex) => {
@@ -187,40 +153,11 @@ function App() {
                     const playSentence = () => {
                       const utter = new SpeechSynthesisUtterance(sentenceText)
                       utter.lang = 'en-US'
-                      utter.rate = voiceRate
+                      utter.rate = 1
                       const preferred = getPreferredVoice()
                       if (preferred) utter.voice = preferred
-
-                      const textArray = sentence.map(({ word }) => word)
-                      const delayBeforeStart = 1000
-                      const timings = getWordTimings(
-                        textArray,
-                        delayBeforeStart
-                      )
-                      let timerIds = []
-
-                      setHighlightedSentenceIndex(sIndex)
-                      setHighlightedIndex(-1)
-
-                      timings.forEach((time, index) => {
-                        const id = setTimeout(() => {
-                          setHighlightedIndex(index)
-                        }, time)
-                        timerIds.push(id)
-                      })
-
-                      utter.onend = () => {
-                        setTimeout(() => {
-                          setHighlightedIndex(-1)
-                          setHighlightedSentenceIndex(null)
-                          timerIds.forEach(clearTimeout)
-                        }, 400)
-                      }
-
                       speechSynthesis.cancel()
-                      setTimeout(() => {
-                        speechSynthesis.speak(utter)
-                      }, delayBeforeStart)
+                      speechSynthesis.speak(utter)
                     }
 
                     return (
@@ -272,15 +209,7 @@ function App() {
                                     activeWord={activeWord}
                                     setActiveWord={setActiveWord}
                                     onSpeak={speakWord}
-                                    isHighlighted={
-                                      sIndex === highlightedSentenceIndex &&
-                                      localIndex === highlightedIndex
-                                    }
-                                    isSameAsActive={activeWord === word}
                                     fontSize={fontSize}
-                                    highlightColor={
-                                      darkMode ? '#00ffff' : '#007acc'
-                                    }
                                   />
                                 )}
                               </span>

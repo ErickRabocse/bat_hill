@@ -6,21 +6,12 @@ function Word({
   activeWord,
   setActiveWord,
   onSpeak,
-  isHighlighted,
   fontSize,
 }) {
   const isActive = activeWord === text
   const isDarkMode =
     window.matchMedia &&
     window.matchMedia('(prefers-color-scheme: dark)').matches
-
-  const highlightStyle = {
-    backgroundColor: isDarkMode ? '#444' : '#d0eaff',
-    color: isDarkMode ? '#ffffff' : '#000000',
-    padding: '2px 4px',
-    borderRadius: '4px',
-    transition: 'background-color 0.3s, color 0.3s',
-  }
 
   const tooltipStyle = {
     position: 'absolute',
@@ -53,11 +44,7 @@ function Word({
         cursor: 'pointer',
         fontSize: fontSize || '1.2rem',
         lineHeight: '2.5',
-        ...(isHighlighted
-          ? highlightStyle
-          : isActive
-          ? { color: 'darkred', fontWeight: 'bold' }
-          : {}),
+        ...(isActive ? { color: 'darkred', fontWeight: 'bold' } : {}),
       }}
       onClick={handleClick}
     >
