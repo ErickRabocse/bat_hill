@@ -1,32 +1,49 @@
+// En components/ChapterSelector.jsx
+
 import React, { useState, useEffect, useRef } from 'react'
 import './chapterSelector.css'
 
-function ChapterSelector({ chapters, chapterIndex, setChapterIndex }) {
+// Añadir la prop isDisabled
+function ChapterSelector({
+  chapters,
+  chapterIndex,
+  setChapterIndex,
+  isDisabled,
+}) {
   const [showTranslation, setShowTranslation] = useState(false)
   const timeoutRef = useRef(null)
 
   const handleChange = (event) => {
-    const selectedIndex = parseInt(event.target.value, 10)
-    setChapterIndex(selectedIndex)
-    setShowTranslation(false) // Reset translation view when chapter changes
-    clearTimeout(timeoutRef.current) // Clear any existing timeout
+    // Solo permitir el cambio si no está deshabilitado
+    if (!isDisabled) {
+      const selectedIndex = parseInt(event.target.value, 10)
+      setChapterIndex(selectedIndex)
+      setShowTranslation(false)
+      clearTimeout(timeoutRef.current)
+    }
   }
 
   const handleTitleClick = () => {
     setShowTranslation(true)
-    clearTimeout(timeoutRef.current) // Clear any existing timeout
+    clearTimeout(timeoutRef.current)
     timeoutRef.current = setTimeout(() => {
       setShowTranslation(false)
-    }, 3000) // Revert after 5 seconds
+    }, 3000)
   }
 
   useEffect(() => {
-    return () => clearTimeout(timeoutRef.current) // Cleanup on unmount
+    return () => clearTimeout(timeoutRef.current)
   }, [])
 
   return (
     <div>
-      <select value={chapterIndex} onChange={handleChange}>
+      <select
+        value={chapterIndex}
+        onChange={handleChange}
+        disabled={isDisabled}
+      >
+        {' '}
+        {/* <-- CAMBIO CLAVE AQUÍ */}
         {chapters.map((chapter, index) => (
           <option key={chapter.id} value={index}>
             {index === 0 ? 'Introduction' : `Chapter ${index}`}

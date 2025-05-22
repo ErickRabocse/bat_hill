@@ -1,5 +1,6 @@
 /* app.css */
 
+/* --- Reset básico y box-sizing --- */
 *,
 *::before,
 *::after {
@@ -10,29 +11,42 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: #1e1e1e; /* Color base para el modo oscuro */
+  /* El background-color directo aquí es un fallback,
+     el color principal se controla por las variables CSS */
+  background-color: #f0f0f0;
+  height: 100%; /* Asegura que html y body ocupen toda la altura */
+  width: 100%;
 }
 
-/* Variables CSS para facilitar el cambio de tema */
-/* Modo claro por defecto */
+/* --- Variables CSS para un tema claro y oscuro fácil de cambiar --- */
+
+/* Modo claro por defecto (aplicado a html) */
 html {
-  --background-color: #fffbe6;
-  --text-color: #333;
+  --background-color: #fffbe6; /* Color de fondo general */
+  --text-color: #333; /* Color de texto general */
+
+  /* Botones generales */
+  --button-default-bg: transparent;
+  --button-default-text: var(--text-color);
+  --button-default-border: var(--text-color);
+  --button-default-hover-bg: rgba(0, 0, 0, 0.1);
+
+  /* Botones específicos */
   --play-button-bg: #f8f8f8;
   --play-button-border: #ccc;
   --play-button-hover-bg: #e6f0ff;
-  --button-primary-bg: #007bff;
-  --button-primary-hover-bg: #0056b3;
-  --button-success-bg: #28a745;
-  --button-success-hover-bg: #218838;
-  --button-warning-bg: #ffc107;
-  --button-warning-text: #333;
-  --button-warning-hover-bg: #e0a800;
-  --button-toggle-bg: #007bff; /* Color para el botón de alternancia */
-  --button-toggle-hover-bg: #0056b3;
-  --input-border: #ccc;
-  --input-bg: white;
-  --input-text: #333;
+
+  --show-activity-button-bg: #28a745; /* Verde para "Show Exercise" */
+  --show-activity-button-hover-bg: #218838;
+
+  --toggle-blur-button-bg: #007bff; /* Azul para "Ver Texto/Ejercicio" */
+  --toggle-blur-button-hover-bg: #0056b3;
+
+  --reset-activity-button-bg: #ffc107; /* Amarillo/Naranja para "Reiniciar Ejercicio" */
+  --reset-activity-button-text: #333;
+  --reset-activity-button-hover-bg: #e0a800;
+
+  /* Colores de feedback y modales (usados en componentes específicos, pero definidos aquí para consistencia) */
   --error-message-color: #a94442;
   --error-background: #fcebeb;
   --error-border: #e0b4b4;
@@ -40,36 +54,51 @@ html {
   --modal-bg: #fff;
   --modal-text: #000;
   --modal-border: #ccc;
+
+  /* Elementos de la actividad Drag & Drop (usados en DragDropSentence.css, definidos aquí para consistencia) */
   --blank-border-color: #999;
   --blank-bg-color: #e0e0e0;
   --blank-hover-bg-color: #f0f0f0;
+  --blank-correct-color: green;
+  --blank-incorrect-color: red;
   --word-bank-bg: #f9f9f9;
   --word-bank-border: #ccc;
   --draggable-word-bg: #e6f0ff;
   --draggable-word-border: #cce0ff;
   --draggable-word-hover-bg: #d0e0ff;
-  --success-text-color: green;
+
+  /* Barra de progreso */
+  --progress-bar-outer-bg: #e0e0e0;
+  --progress-bar-inner-bg: #4caf50; /* Verde de progreso */
 }
 
-/* Modo oscuro */
+/* Modo oscuro (aplicado a html.dark-mode) */
 html.dark-mode {
   --background-color: #1e1e1e;
   --text-color: #f0f0f0;
+
+  /* Botones generales */
+  --button-default-bg: transparent;
+  --button-default-text: var(--text-color);
+  --button-default-border: #555;
+  --button-default-hover-bg: #2a2a2a;
+
+  /* Botones específicos */
   --play-button-bg: #333;
   --play-button-border: #555;
   --play-button-hover-bg: #444;
-  --button-primary-bg: #0056b3;
-  --button-primary-hover-bg: #003e82;
-  --button-success-bg: #4caf50;
-  --button-success-hover-bg: #45a049;
-  --button-warning-bg: #d1c41f;
-  --button-warning-text: #1e1e1e;
-  --button-warning-hover-bg: #b7a91a;
-  --button-toggle-bg: #0056b3; /* Color para el botón de alternancia en dark mode */
-  --button-toggle-hover-bg: #003e82;
-  --input-border: #666;
-  --input-bg: #333;
-  --input-text: #f0f0f0;
+
+  --show-activity-button-bg: #4caf50;
+  --show-activity-button-hover-bg: #45a049;
+
+  --toggle-blur-button-bg: #0056b3;
+  --toggle-blur-button-hover-bg: #003e82;
+
+  --reset-activity-button-bg: #d1c41f;
+  --reset-activity-button-text: #1e1e1e;
+  --reset-activity-button-hover-bg: #b7a91a;
+
+  /* Colores de feedback y modales */
   --error-message-color: #f1a9a9;
   --error-background: #3b2a2a;
   --error-border: #5a3e3e;
@@ -77,62 +106,97 @@ html.dark-mode {
   --modal-bg: #2a2a2a;
   --modal-text: #f0f0f0;
   --modal-border: #555;
+
+  /* Elementos de la actividad Drag & Drop */
   --blank-border-color: #777;
   --blank-bg-color: #2a2a2a;
   --blank-hover-bg-color: #333;
+  --blank-correct-color: #66ff66;
+  --blank-incorrect-color: #ff6666;
   --word-bank-bg: #333;
   --word-bank-border: #555;
   --draggable-word-bg: #444;
   --draggable-word-border: #666;
   --draggable-word-hover-bg: #555;
-  --success-text-color: #66ff66;
+
+  /* Barra de progreso */
+  --progress-bar-outer-bg: #333;
+  --progress-bar-inner-bg: #66bb6a; /* Verde más brillante */
 }
 
+/* --- Estilos de Layout y Contenedores Principales --- */
 .app-container {
   padding: 2rem;
   font-family: Georgia, serif;
   min-height: 100vh;
-  transition: background-color 0.3s, color 0.3s;
-  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   background-color: var(--background-color);
   color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s; /* Transición suave para el modo oscuro */
 }
 
 .top-button-bar {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem; /* Espacio entre los elementos de la barra superior */
+  position: relative; /* Necesario para posicionar page-number-top-right */
+  width: 100%;
+  padding-bottom: 1rem;
+  padding-top: 10px; /* Ajusta este valor para bajar toda la barra */
+}
+
+.left-controls {
+  display: flex;
+  gap: 0.5rem; /* Espacio entre los botones A-, A+, y Modo */
+  margin-right: auto; /* Empuja este div a la izquierda y el siguiente a la derecha */
+}
+
+.right-indicators {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* Espacio entre el progreso y el número de página */
+  margin-left: auto; /* Empuja este div a la derecha */
 }
 
 .scene-layout {
   display: flex;
   align-items: flex-start;
   margin-top: 2rem;
+  flex-grow: 1; /* Permite que el layout ocupe el espacio disponible */
 }
 
 .scene-image {
   width: 33%;
-  height: 90vh;
+  height: 90vh; /* Ajustado para ser responsive y no exceder la vista */
+  max-height: 700px; /* Limitar altura máxima para pantallas muy grandes */
   object-fit: cover;
   border-radius: 8px;
   margin-right: 2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .text-container {
   flex: 1;
   padding: 25px;
+  display: flex;
+  flex-direction: column;
 }
 
 .chapter-title {
-  margin: 0;
+  margin: 0 0 1rem 0;
   text-align: center;
-  color: var(--text-color); /* Asegúrate de que herede el color del texto */
+  color: var(--text-color);
 }
 
-/* Estilos para el texto desplazable */
+/* --- Estilos para el texto de la historia --- */
 .scrollable-text {
-  max-height: 60vh; /* Ajusta la altura según sea necesario */
+  max-height: 60vh;
   overflow-y: auto;
-  padding-right: 1rem; /* Opcional: agrega espacio para la barra de desplazamiento */
+  padding-right: 1rem;
+  line-height: 1.6; /* Mayor legibilidad */
+  margin-bottom: 1rem;
+
   /* Propiedades de filtro y transición para el desenfoque */
   filter: blur(0px); /* Por defecto no borroso */
   transition: filter 0.3s ease-in-out;
@@ -141,7 +205,7 @@ html.dark-mode {
 }
 
 .scrollable-text.blur-active {
-  filter: blur(6px); /* Valor del desenfoque cuando la clase está activa */
+  filter: blur(4px); /* Valor del desenfoque cuando la clase está activa */
   pointer-events: none; /* Deshabilita la interacción cuando está borroso */
   user-select: none; /* Evita que el texto se pueda seleccionar cuando está borroso */
 }
@@ -151,6 +215,7 @@ html.dark-mode {
   align-items: center;
   flex-wrap: wrap;
   margin-right: 0.5rem;
+  margin-bottom: 0.5rem; /* Espacio entre oraciones */
 }
 
 .play-button {
@@ -163,9 +228,8 @@ html.dark-mode {
   transition: background-color 0.2s, box-shadow 0.2s;
   margin-right: 0.3rem;
   line-height: 1;
-  color: var(
-    --text-color
-  ); /* Para asegurar que el icono de altavoz tenga el color correcto */
+  color: var(--text-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .play-button:hover {
@@ -173,166 +237,187 @@ html.dark-mode {
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }
 
-.page-number {
-  position: absolute;
-  bottom: 3rem;
-  right: 8rem;
-  font-weight: bold;
-  color: var(--text-color);
-}
-
+/* --- Estilos de Navegación y Botones Globales --- */
 .nav-buttons {
   margin-top: 2rem;
   display: flex;
   gap: 1rem;
+  justify-content: center; /* Centra los botones de navegación */
 }
 
-/* Estilos para el botón inicial "Show Exercise" */
-.show-activity-button {
-  background-color: var(--button-success-bg); /* Un color verde amigable */
-  color: white;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 5px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.show-activity-button:hover {
-  background-color: var(--button-success-hover-bg);
-  transform: translateY(-1px);
-}
-
-.show-activity-button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-/* Estilos para el BOTÓN ÚNICO de alternancia (Show/View Exercise/Text) */
-.toggle-blur-button {
-  background-color: var(
-    --button-toggle-bg
-  ); /* Color primario azul, para destacar */
-  color: white;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 5px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  display: block; /* Para que ocupe todo el ancho si quieres, o flex si lo prefieres */
-  margin: 1rem auto; /* Centrarlo */
-}
-
-.toggle-blur-button:hover {
-  background-color: var(--button-toggle-hover-bg);
-  transform: translateY(-1px);
-}
-
-.toggle-blur-button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-/* Estilos para el botón de Reiniciar Ejercicio */
-.reset-activity-button {
-  background-color: var(--button-warning-bg); /* Un color amarillo/naranja */
-  color: var(--button-warning-text); /* Texto oscuro para contraste */
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.reset-activity-button:hover {
-  background-color: var(--button-warning-hover-bg);
-  transform: translateY(-1px);
-}
-
-.reset-activity-button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-/* Contenedor de la actividad para aplicar el desenfoque */
-.activity-container {
-  position: relative;
-  margin-top: 1.5rem;
-  /* Propiedades de filtro y transición para el desenfoque */
-  filter: blur(0px); /* Por defecto no borroso */
-  transition: filter 0.3s ease-in-out;
-  pointer-events: auto; /* Por defecto interactuable */
-  user-select: auto; /* Por defecto seleccionable */
-}
-
-.activity-container.blur-active {
-  filter: blur(6px); /* Valor del desenfoque cuando la clase está activa */
-  pointer-events: none; /* Deshabilita la interacción cuando está borroso */
-  user-select: none; /* Evita que el texto se pueda seleccionar cuando está borroso */
-}
-
-/* Estilos de botones generales que ya existían */
 button {
   padding: 0.5rem 1rem;
-  border: 1px solid var(--text-color);
+  border: 1px solid var(--button-default-border);
   border-radius: 5px;
-  background-color: transparent;
-  color: var(--text-color);
+  background-color: var(--button-default-bg);
+  color: var(--button-default-text);
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+    transform 0.1s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-button:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+button:hover:not(:disabled) {
+  background-color: var(--button-default-hover-bg);
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
-/* --- Estilos para componentes específicos que importan su propio CSS --- */
+.show-activity-button {
+  background-color: var(--show-activity-button-bg);
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
 
-/* Estilos para FeedbackModal (se importan directamente en FeedbackModal.jsx) */
-/* Los estilos para .modal-overlay y .modal-box son comunes y podrían estar aquí si se comparten,
-   pero si son exclusivos del modal, es mejor que sigan en FeedbackModal.css */
-/* He dejado los específicos de .feedback-modal-box, etc. en FeedbackModal.css */
+.show-activity-button:hover:not(:disabled) {
+  background-color: var(--show-activity-button-hover-bg);
+}
 
-/* Estilos para DragDropSentence (se importan directamente en DragDropSentence.jsx) */
-/* He dejado los específicos de .drag-drop-activity-container, .blank-spot, etc. en DragDropSentence.css */
+.toggle-blur-button {
+  background-color: var(--toggle-blur-button-bg);
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  display: block;
+  margin: 1rem auto;
+}
 
-/* --- Secciones eliminadas de CSS que ya no son necesarias --- */
-/*
-.blur-text { ... } // Reemplazado por .blur-active con lógica condicional en JS
-.blur-toggle-buttons { ... } // Reemplazado por el nuevo botón único
-*/
+.toggle-blur-button:hover:not(:disabled) {
+  background-color: var(--toggle-blur-button-hover-bg);
+}
 
-/* Modo oscuro para el body (ahora controlado por variables CSS en :root/html.dark-mode) */
-/*
-.app-container.dark-mode {
-  background-color: #1e1e1e;
-  color: #f0f0f0;
+.reset-activity-button {
+  background-color: var(--reset-activity-button-bg);
+  color: var(--reset-activity-button-text);
+  padding: 10px 20px;
+  border: none;
+  font-size: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
-.app-container.dark-mode .top-button-bar button {
-  background-color: #333;
-  color: #f0f0f0;
-  border-color: #555;
+
+.reset-activity-button:hover:not(:disabled) {
+  background-color: var(--reset-activity-button-hover-bg);
 }
-.app-container.dark-mode .top-button-bar button:hover {
-  background-color: #444;
+
+/* --- Estilos para la Actividad (Contenedor y Mensajes) --- */
+.activity-container {
+  position: relative;
+  margin-top: 1.5rem;
+  filter: blur(0px);
+  transition: filter 0.3s ease-in-out;
+  pointer-events: auto;
+  user-select: auto;
 }
-.app-container.dark-mode .play-button {
-  background-color: #333;
-  border-color: #555;
-  color: #f0f0f0;
+
+.activity-container.blur-active {
+  filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
 }
-.app-container.dark-mode .play-button:hover {
-  background-color: #444;
+
+.activity-status-section {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
-*/
+
+.lock-message {
+  color: var(--error-message-color);
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0.5rem;
+  border: 1px solid var(--error-border);
+  border-radius: 5px;
+  background-color: var(--error-background);
+}
+
+.glance-count-message {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+/* --- Estilos para Indicadores de Progreso y Número de Página --- */
+
+/* Contenedor de progreso del capítulo (barra y texto) */
+.chapter-progress-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Alinea el texto y la barra a la DERECHA dentro de su contenedor */
+  gap: 0.2rem;
+  padding-right: 0.5rem; /* Pequeño padding para despegar del borde si es necesario */
+}
+
+.chapter-progress-text {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--text-color);
+  white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
+}
+
+.progress-bar-outer {
+  width: 120px; /* Ancho fijo para la barra */
+  height: 8px;
+  background-color: var(--progress-bar-outer-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar-inner {
+  height: 100%;
+  background-color: var(--progress-bar-inner-bg);
+  border-radius: 4px;
+  transition: width 0.5s ease-out; /* Animación de la barra */
+}
+
+/* Posición del número de página en la esquina superior derecha */
+.page-number-top-right {
+  font-weight: bold;
+  color: var(--text-color);
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 0.2rem 0.6rem;
+  border-radius: 5px;
+  margin-top: 5px; /* Ajuste para bajarlo 5 píxeles desde el top-button-bar */
+}
+
+html.dark-mode .page-number-top-right {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: var(--text-color);
+}
+
+/* --- Efecto Glow (si se usa) --- */
+.glow {
+  color: black;
+  animation: glow 20s ease-in-out infinite alternate;
+  text-shadow: 0 0 10px #fff, 0 0 5px #eff1ea, 0 0 3px #ffc800;
+}
+
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 10px #fff, 0 0 5px #eff1ea, 0 0 3px #ffc800;
+  }
+  50% {
+    text-shadow: 0 0 20px #fff, 0 0 10px #eff1ea, 0 0 5px #ffc800;
+  }
+  100% {
+    text-shadow: 0 0 10px #fff, 0 0 5px #eff1ea, 0 0 3px #ffc800;
+  }
+}
