@@ -1,0 +1,91 @@
+/* Estilos para el overlay del modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6); /* Fondo semi-transparente oscuro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Asegura que esté por encima de todo */
+}
+
+/* Estilos para la caja del modal */
+.modal-box {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 450px;
+  width: 90%;
+  position: relative; /* Para posicionamiento absoluto de elementos internos si es necesario */
+}
+
+/* Estilos específicos para el modal de feedback */
+.feedback-modal-box {
+  background-color: #fcebeb; /* Fondo claro para errores, con un toque de rojo */
+  border: 1px solid #e0b4b4;
+  color: #a94442; /* Texto en tono rojo para el error */
+}
+
+.feedback-modal-box h3 {
+  color: #a94442; /* Título también en rojo */
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.feedback-message {
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.feedback-hint {
+  font-style: italic;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+  color: #721c24; /* Un tono más oscuro de rojo para la pista */
+}
+
+.feedback-button {
+  background-color: #dc3545; /* Botón rojo */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.feedback-button:hover {
+  background-color: #c82333; /* Tono más oscuro al pasar el ratón */
+}
+
+/* Adaptación para el modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .feedback-modal-box {
+    background-color: #3b2a2a; /* Fondo más oscuro para errores en dark mode */
+    border: 1px solid #5a3e3e;
+    color: #f1a9a9; /* Texto más claro */
+  }
+
+  .feedback-modal-box h3 {
+    color: #f1a9a9;
+  }
+
+  .feedback-hint {
+    color: #e2b7b7;
+  }
+
+  .feedback-button {
+    background-color: #8c2a35; /* Botón en dark mode */
+  }
+
+  .feedback-button:hover {
+    background-color: #75232b;
+  }
+}

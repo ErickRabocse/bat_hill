@@ -1,8 +1,10 @@
+// En App.js
+
 import { useEffect, useState } from 'react'
 import Word from './Word'
 import chapters from './chapters'
 import ChapterSelector from './components/ChapterSelector'
-// eslint-disable-next-line no-unused-vars
+import DragDropSentence from './components/DragDropSentence'
 import { motion, AnimatePresence } from 'framer-motion'
 import './app.css'
 
@@ -15,9 +17,38 @@ function App() {
     return saved !== null ? parseInt(saved, 10) : 2
   })
 
+  const [isActivityCompleted, setIsActivityCompleted] = useState(() => {
+    const savedActivities = localStorage.getItem('completedActivities')
+    return savedActivities ? JSON.parse(savedActivities) : {}
+  })
+
+  const [showActivity, setShowActivity] = useState(false)
+
+  useEffect(() => {
+    setShowActivity(false)
+    const scrollableTextElement = document.querySelector('.scrollable-text')
+    if (scrollableTextElement) {
+      scrollableTextElement.scrollTop = 0
+    }
+  }, [chapterIndex, sceneIndex])
+
+  useEffect(() => {
+    localStorage.setItem(
+      'completedActivities',
+      JSON.stringify(isActivityCompleted)
+    )
+  }, [isActivityCompleted])
+
   useEffect(() => {
     document.body.style.backgroundColor = darkMode ? '#1e1e1e' : '#fffbe6'
     document.body.style.margin = '0'
+    if (darkMode) {
+      document.documentElement.classList.add('dark-mode')
+      document.body.classList.add('dark-mode')
+    } else {
+      document.documentElement.classList.remove('dark-mode')
+      document.body.classList.remove('dark-mode')
+    }
   }, [darkMode])
 
   useEffect(() => {
@@ -26,8 +57,14 @@ function App() {
 
   const fontSizes = ['1rem', '1.25rem', '1.5rem', '1.75rem', '2rem']
   const fontSize = fontSizes[fontSizeIndex] || '1.2rem'
-  const currentScene = chapters[chapterIndex].scenes[sceneIndex]
+  const currentChapter = chapters[chapterIndex]
+  const currentScene = currentChapter.scenes[sceneIndex]
   const [activeWord, setActiveWord] = useState(null)
+
+  const hasActivity = currentScene.activity !== undefined
+  const currentActivityId = `${chapterIndex}-${sceneIndex}`
+  const activityIsCompletedForCurrentScene =
+    isActivityCompleted[currentActivityId]
 
   const getPreferredVoice = () => {
     const voices = speechSynthesis.getVoices()
@@ -75,9 +112,35 @@ function App() {
   const backgroundColor = darkMode ? '#1e1e1e' : '#fffbe6'
   const textColor = darkMode ? '#f0f0f0' : '#333'
 
+  const handleActivityComplete = (success) => {
+    if (success) {
+      setIsActivityCompleted((prev) => ({
+        ...prev,
+        [currentActivityId]: true,
+      }))
+    }
+  }
+
+  // Función para reiniciar la actividad de la escena actual
+  const handleResetActivity = () => {
+    setIsActivityCompleted((prev) => {
+      const newState = { ...prev }
+      delete newState[currentActivityId] // Elimina la marca de completado para esta actividad
+      return newState
+    })
+    setShowActivity(true) // Vuelve a mostrar la actividad inmediatamente
+  }
+
+  const nextButtonDisabled = hasActivity && !activityIsCompletedForCurrentScene
+
+  const nextChapterAvailable =
+    sceneIndex === currentChapter.scenes.length - 1 &&
+    chapterIndex < chapters.length - 1 &&
+    (!hasActivity || activityIsCompletedForCurrentScene)
+
   return (
     <div
-      className="app-container"
+      className={`app-container ${darkMode ? 'dark-mode' : ''}`}
       style={{ fontSize, backgroundColor, color: textColor }}
       onClick={() => setActiveWord(null)}
     >
@@ -129,6 +192,7 @@ function App() {
                 </div>
               </div>
 
+              {/* Contenido de la escena (texto y página) */}
               <div className="scrollable-text">
                 {(() => {
                   const sentences = []
@@ -228,9 +292,69 @@ function App() {
                 )}
               </div>
 
+              {/* Lógica de los botones de actividad */}
+              {hasActivity &&
+                !activityIsCompletedForCurrentScene &&
+                !showActivity && (
+                  // Mostrar botón para revelar el ejercicio si hay actividad, no completada y no visible
+                  <button
+                    onClick={() => setShowActivity(true)}
+                    className="show-activity-button"
+                    style={{
+                      marginTop: '1.5rem',
+                      marginBottom: '1.5rem',
+                      width: '100%',
+                    }}
+                  >
+                    Show Exercise
+                  </button>
+                )}
+
+              {hasActivity &&
+                showActivity &&
+                !activityIsCompletedForCurrentScene && (
+                  // Mostrar la actividad si hay actividad, visible y no completada
+                  <DragDropSentence
+                    key={currentActivityId + '-active'} // Usar key para forzar remonte del componente si se resetea
+                    activityData={currentScene.activity}
+                    onActivityComplete={handleActivityComplete}
+                  />
+                )}
+
+              {hasActivity && activityIsCompletedForCurrentScene && (
+                // Mostrar mensaje de completado y botón de reinicio si está completada
+                <div
+                  style={{
+                    textAlign: 'center',
+                    marginTop: '1.5rem',
+                    marginBottom: '1.5rem',
+                  }}
+                >
+                  <p
+                    style={{
+                      color: 'green',
+                      fontWeight: 'bold',
+                      display: 'inline-block',
+                      marginRight: '1rem',
+                    }}
+                  >
+                    ¡Ejercicio completado!
+                  </p>
+                  <button
+                    onClick={handleResetActivity}
+                    className="reset-activity-button"
+                  >
+                    Reset Exercise
+                  </button>
+                </div>
+              )}
+
               <div className="nav-buttons">
                 <button
-                  onClick={() => setSceneIndex((prev) => Math.max(prev - 1, 0))}
+                  onClick={() => {
+                    setSceneIndex((prev) => Math.max(prev - 1, 0))
+                    setShowActivity(false)
+                  }}
                   disabled={sceneIndex === 0}
                 >
                   ⬅️ Previous
@@ -244,23 +368,20 @@ function App() {
                       )
                     )
                   }
-                  disabled={
-                    sceneIndex === chapters[chapterIndex].scenes.length - 1
-                  }
+                  disabled={nextButtonDisabled}
                 >
                   Next ➡️
                 </button>
-                {sceneIndex === chapters[chapterIndex].scenes.length - 1 &&
-                  chapterIndex < chapters.length - 1 && (
-                    <button
-                      onClick={() => {
-                        setChapterIndex(chapterIndex + 1)
-                        setSceneIndex(0)
-                      }}
-                    >
-                      👉 Next Chapter
-                    </button>
-                  )}
+                {nextChapterAvailable && (
+                  <button
+                    onClick={() => {
+                      setChapterIndex(chapterIndex + 1)
+                      setSceneIndex(0)
+                    }}
+                  >
+                    👉 Next Chapter
+                  </button>
+                )}
               </div>
             </div>
           </div>

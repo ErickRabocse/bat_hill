@@ -77,3 +77,73 @@
   display: flex;
   gap: 1rem;
 }
+
+/* En app.css o en un nuevo archivo CSS, por ejemplo, GlobalButtons.css */
+
+.show-activity-button {
+  background-color: #28a745; /* Un color verde amigable */
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.show-activity-button:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+}
+
+.show-activity-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Modo oscuro para el botón de actividad */
+.app-container.dark-mode .show-activity-button {
+  background-color: #4caf50; /* Un verde que contraste mejor en dark mode */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.app-container.dark-mode .show-activity-button:hover {
+  background-color: #45a049;
+}
+
+/* En app.css */
+
+/* Estilos para el botón de Reiniciar Ejercicio */
+.reset-activity-button {
+  background-color: #ffc107; /* Un color amarillo/naranja */
+  color: #333; /* Texto oscuro para contraste */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.reset-activity-button:hover {
+  background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+  transform: translateY(-1px);
+}
+
+.reset-activity-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Modo oscuro para el botón de Reiniciar */
+.app-container.dark-mode .reset-activity-button {
+  background-color: #d1c41f; /* Amarillo más brillante para dark mode */
+  color: #1e1e1e;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.app-container.dark-mode .reset-activity-button:hover {
+  background-color: #b7a91a;
+}

@@ -110,6 +110,78 @@ const chapters = [
           { word: 'It feels lonely', translation: 'Se siente solitario' },
           { word: '.', translation: '' },
         ],
+        // NUEVA PROPIEDAD DE ACTIVIDAD
+        activity: {
+          type: 'DragDropSentence',
+          instructions:
+            'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+          sentences: [
+            {
+              id: 'sentence1_ch1_sc1',
+              parts: [
+                { type: 'text', value: 'It is a ' },
+                {
+                  type: 'blank',
+                  correctWord: 'cold',
+                  translation: 'fría',
+                  hint: 'Describe la temperatura de la noche.',
+                },
+                { type: 'text', value: ' night.' },
+              ],
+            },
+            {
+              id: 'sentence2_ch1_sc1',
+              parts: [
+                { type: 'text', value: 'The wind is ' },
+                {
+                  type: 'blank',
+                  correctWord: 'strong',
+                  translation: 'fuerte',
+                  hint: '¿Cómo es la intensidad del viento?',
+                },
+                { type: '.' },
+              ],
+            },
+            {
+              id: 'sentence3_ch1_sc1',
+              parts: [
+                { type: 'text', value: 'Mama is a ' },
+                {
+                  type: 'blank',
+                  correctWord: 'stray',
+                  translation: 'callejera',
+                  hint: 'Describe el tipo de perro que es Mama. ¿Tiene hogar?',
+                },
+                { type: 'text', value: ' dog.' },
+              ],
+            },
+            {
+              id: 'sentence4_ch1_sc1',
+              parts: [
+                { type: 'text', value: 'Her belly is ' },
+                {
+                  type: 'blank',
+                  correctWord: 'round',
+                  translation: 'redondo',
+                  hint: 'Mama está embarazada, ¿cómo es su barriga?',
+                },
+                { type: '.' },
+              ],
+            },
+          ],
+          // Palabras adicionales para dificultar o despistar un poco, si lo deseas
+          // Por ahora, solo las palabras correctas. En el componente, las mezclaremos.
+          allWords: [
+            'cold',
+            'strong',
+            'stray',
+            'round',
+            'big',
+            'dark',
+            'tired',
+            'messy',
+          ], // Asegúrate de incluir las palabras incorrectas si las quieres, pero por ahora solo las correctas y algunas del texto.
+        },
       },
       {
         id: 2,

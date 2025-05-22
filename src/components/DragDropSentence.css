@@ -1,0 +1,160 @@
+.drag-drop-activity-container {
+  background-color: var(
+    --background-color
+  ); /* Usar variables para modo oscuro/claro */
+  border-radius: 8px;
+  padding: 25px;
+  margin-top: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  color: var(--text-color);
+  font-family: Georgia, serif;
+}
+
+.drag-drop-activity-container h3 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
+}
+
+.sentence-line {
+  margin-bottom: 15px;
+  line-height: 2.5; /* Mayor espacio para los blanks */
+  display: flex; /* Para alinear el texto y los blanks */
+  flex-wrap: wrap; /* Permitir que las oraciones se envuelvan */
+  align-items: center;
+}
+
+.blank-spot {
+  display: inline-block;
+  min-width: 80px; /* Ancho mínimo para el blank */
+  height: 30px; /* Altura para el blank */
+  border-bottom: 2px dashed #999;
+  margin: 0 5px;
+  text-align: center;
+  line-height: 30px;
+  font-weight: bold;
+  color: var(--text-color); /* Color del texto cuando se suelta */
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.blank-spot:hover {
+  background-color: #f0f0f0;
+}
+
+.blank-spot.incorrect-solution {
+  border-bottom: 2px dashed red;
+  color: red;
+}
+
+.blank-spot.correct-solution {
+  border-bottom: 2px solid green;
+  color: green;
+}
+
+.word-bank {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 2rem;
+  padding: 15px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.draggable-word {
+  background-color: #e6f0ff; /* Color para las palabras arrastrables */
+  border: 1px solid #cce0ff;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: grab;
+  font-weight: bold;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  user-select: none; /* Evita que el texto se seleccione al arrastrar */
+}
+
+.draggable-word:hover {
+  background-color: #d0e0ff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.check-button {
+  display: block;
+  margin: 2rem auto 0;
+  padding: 12px 25px;
+  background-color: #007bff; /* Color primario del botón */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.check-button:hover {
+  background-color: #0056b3;
+}
+
+.activity-success-message {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  color: green;
+  font-weight: bold;
+}
+
+/* Modo oscuro */
+.app-container.dark-mode .drag-drop-activity-container {
+  background-color: #2a2a2a;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.app-container.dark-mode .drag-drop-activity-container h3,
+.app-container.dark-mode .sentence-line,
+.app-container.dark-mode .blank-spot {
+  color: #f0f0f0;
+}
+
+.app-container.dark-mode .blank-spot {
+  border-bottom-color: #777;
+}
+
+.app-container.dark-mode .blank-spot.incorrect-solution {
+  border-bottom-color: #ff6666;
+  color: #ff6666;
+}
+
+.app-container.dark-mode .blank-spot.correct-solution {
+  border-bottom-color: #66ff66;
+  color: #66ff66;
+}
+
+.app-container.dark-mode .word-bank {
+  background-color: #333;
+  border-color: #555;
+}
+
+.app-container.dark-mode .draggable-word {
+  background-color: #444;
+  border-color: #666;
+  color: #f0f0f0;
+}
+
+.app-container.dark-mode .draggable-word:hover {
+  background-color: #555;
+}
+
+.app-container.dark-mode .check-button {
+  background-color: #0056b3;
+}
+
+.app-container.dark-mode .check-button:hover {
+  background-color: #003e82;
+}
+
+.app-container.dark-mode .activity-success-message {
+  color: #66ff66;
+}
