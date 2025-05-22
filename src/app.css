@@ -1,7 +1,91 @@
-.scrollable-text {
-  max-height: 60vh; /* Adjust the height as needed */
-  overflow-y: auto;
-  padding-right: 1rem; /* Optional: adds space for scrollbar */
+/* app.css */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #1e1e1e; /* Color base para el modo oscuro */
+}
+
+/* Variables CSS para facilitar el cambio de tema */
+/* Modo claro por defecto */
+html {
+  --background-color: #fffbe6;
+  --text-color: #333;
+  --play-button-bg: #f8f8f8;
+  --play-button-border: #ccc;
+  --play-button-hover-bg: #e6f0ff;
+  --button-primary-bg: #007bff;
+  --button-primary-hover-bg: #0056b3;
+  --button-success-bg: #28a745;
+  --button-success-hover-bg: #218838;
+  --button-warning-bg: #ffc107;
+  --button-warning-text: #333;
+  --button-warning-hover-bg: #e0a800;
+  --button-toggle-bg: #007bff; /* Color para el botón de alternancia */
+  --button-toggle-hover-bg: #0056b3;
+  --input-border: #ccc;
+  --input-bg: white;
+  --input-text: #333;
+  --error-message-color: #a94442;
+  --error-background: #fcebeb;
+  --error-border: #e0b4b4;
+  --feedback-hint-color: #721c24;
+  --modal-bg: #fff;
+  --modal-text: #000;
+  --modal-border: #ccc;
+  --blank-border-color: #999;
+  --blank-bg-color: #e0e0e0;
+  --blank-hover-bg-color: #f0f0f0;
+  --word-bank-bg: #f9f9f9;
+  --word-bank-border: #ccc;
+  --draggable-word-bg: #e6f0ff;
+  --draggable-word-border: #cce0ff;
+  --draggable-word-hover-bg: #d0e0ff;
+  --success-text-color: green;
+}
+
+/* Modo oscuro */
+html.dark-mode {
+  --background-color: #1e1e1e;
+  --text-color: #f0f0f0;
+  --play-button-bg: #333;
+  --play-button-border: #555;
+  --play-button-hover-bg: #444;
+  --button-primary-bg: #0056b3;
+  --button-primary-hover-bg: #003e82;
+  --button-success-bg: #4caf50;
+  --button-success-hover-bg: #45a049;
+  --button-warning-bg: #d1c41f;
+  --button-warning-text: #1e1e1e;
+  --button-warning-hover-bg: #b7a91a;
+  --button-toggle-bg: #0056b3; /* Color para el botón de alternancia en dark mode */
+  --button-toggle-hover-bg: #003e82;
+  --input-border: #666;
+  --input-bg: #333;
+  --input-text: #f0f0f0;
+  --error-message-color: #f1a9a9;
+  --error-background: #3b2a2a;
+  --error-border: #5a3e3e;
+  --feedback-hint-color: #e2b7b7;
+  --modal-bg: #2a2a2a;
+  --modal-text: #f0f0f0;
+  --modal-border: #555;
+  --blank-border-color: #777;
+  --blank-bg-color: #2a2a2a;
+  --blank-hover-bg-color: #333;
+  --word-bank-bg: #333;
+  --word-bank-border: #555;
+  --draggable-word-bg: #444;
+  --draggable-word-border: #666;
+  --draggable-word-hover-bg: #555;
+  --success-text-color: #66ff66;
 }
 
 .app-container {
@@ -10,6 +94,8 @@
   min-height: 100vh;
   transition: background-color 0.3s, color 0.3s;
   box-sizing: border-box;
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 .top-button-bar {
@@ -39,6 +125,25 @@
 .chapter-title {
   margin: 0;
   text-align: center;
+  color: var(--text-color); /* Asegúrate de que herede el color del texto */
+}
+
+/* Estilos para el texto desplazable */
+.scrollable-text {
+  max-height: 60vh; /* Ajusta la altura según sea necesario */
+  overflow-y: auto;
+  padding-right: 1rem; /* Opcional: agrega espacio para la barra de desplazamiento */
+  /* Propiedades de filtro y transición para el desenfoque */
+  filter: blur(0px); /* Por defecto no borroso */
+  transition: filter 0.3s ease-in-out;
+  pointer-events: auto; /* Por defecto interactuable */
+  user-select: auto; /* Por defecto seleccionable */
+}
+
+.scrollable-text.blur-active {
+  filter: blur(6px); /* Valor del desenfoque cuando la clase está activa */
+  pointer-events: none; /* Deshabilita la interacción cuando está borroso */
+  user-select: none; /* Evita que el texto se pueda seleccionar cuando está borroso */
 }
 
 .sentence-wrapper {
@@ -52,16 +157,19 @@
   font-size: 0.75rem;
   padding: 0.2rem 0.35rem;
   cursor: pointer;
-  border: 1px solid #ccc;
+  border: 1px solid var(--play-button-border);
   border-radius: 6px;
-  background-color: #f8f8f8;
+  background-color: var(--play-button-bg);
   transition: background-color 0.2s, box-shadow 0.2s;
   margin-right: 0.3rem;
   line-height: 1;
+  color: var(
+    --text-color
+  ); /* Para asegurar que el icono de altavoz tenga el color correcto */
 }
 
 .play-button:hover {
-  background-color: #e6f0ff;
+  background-color: var(--play-button-hover-bg);
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }
 
@@ -70,6 +178,7 @@
   bottom: 3rem;
   right: 8rem;
   font-weight: bold;
+  color: var(--text-color);
 }
 
 .nav-buttons {
@@ -78,10 +187,9 @@
   gap: 1rem;
 }
 
-/* En app.css o en un nuevo archivo CSS, por ejemplo, GlobalButtons.css */
-
+/* Estilos para el botón inicial "Show Exercise" */
 .show-activity-button {
-  background-color: #28a745; /* Un color verde amigable */
+  background-color: var(--button-success-bg); /* Un color verde amigable */
   color: white;
   padding: 12px 25px;
   border: none;
@@ -93,7 +201,7 @@
 }
 
 .show-activity-button:hover {
-  background-color: #218838;
+  background-color: var(--button-success-hover-bg);
   transform: translateY(-1px);
 }
 
@@ -102,22 +210,37 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Modo oscuro para el botón de actividad */
-.app-container.dark-mode .show-activity-button {
-  background-color: #4caf50; /* Un verde que contraste mejor en dark mode */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+/* Estilos para el BOTÓN ÚNICO de alternancia (Show/View Exercise/Text) */
+.toggle-blur-button {
+  background-color: var(
+    --button-toggle-bg
+  ); /* Color primario azul, para destacar */
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  display: block; /* Para que ocupe todo el ancho si quieres, o flex si lo prefieres */
+  margin: 1rem auto; /* Centrarlo */
 }
 
-.app-container.dark-mode .show-activity-button:hover {
-  background-color: #45a049;
+.toggle-blur-button:hover {
+  background-color: var(--button-toggle-hover-bg);
+  transform: translateY(-1px);
 }
 
-/* En app.css */
+.toggle-blur-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
 
 /* Estilos para el botón de Reiniciar Ejercicio */
 .reset-activity-button {
-  background-color: #ffc107; /* Un color amarillo/naranja */
-  color: #333; /* Texto oscuro para contraste */
+  background-color: var(--button-warning-bg); /* Un color amarillo/naranja */
+  color: var(--button-warning-text); /* Texto oscuro para contraste */
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
@@ -128,7 +251,7 @@
 }
 
 .reset-activity-button:hover {
-  background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+  background-color: var(--button-warning-hover-bg);
   transform: translateY(-1px);
 }
 
@@ -137,13 +260,79 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Modo oscuro para el botón de Reiniciar */
-.app-container.dark-mode .reset-activity-button {
-  background-color: #d1c41f; /* Amarillo más brillante para dark mode */
-  color: #1e1e1e;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+/* Contenedor de la actividad para aplicar el desenfoque */
+.activity-container {
+  position: relative;
+  margin-top: 1.5rem;
+  /* Propiedades de filtro y transición para el desenfoque */
+  filter: blur(0px); /* Por defecto no borroso */
+  transition: filter 0.3s ease-in-out;
+  pointer-events: auto; /* Por defecto interactuable */
+  user-select: auto; /* Por defecto seleccionable */
 }
 
-.app-container.dark-mode .reset-activity-button:hover {
-  background-color: #b7a91a;
+.activity-container.blur-active {
+  filter: blur(6px); /* Valor del desenfoque cuando la clase está activa */
+  pointer-events: none; /* Deshabilita la interacción cuando está borroso */
+  user-select: none; /* Evita que el texto se pueda seleccionar cuando está borroso */
 }
+
+/* Estilos de botones generales que ya existían */
+button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--text-color);
+  border-radius: 5px;
+  background-color: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- Estilos para componentes específicos que importan su propio CSS --- */
+
+/* Estilos para FeedbackModal (se importan directamente en FeedbackModal.jsx) */
+/* Los estilos para .modal-overlay y .modal-box son comunes y podrían estar aquí si se comparten,
+   pero si son exclusivos del modal, es mejor que sigan en FeedbackModal.css */
+/* He dejado los específicos de .feedback-modal-box, etc. en FeedbackModal.css */
+
+/* Estilos para DragDropSentence (se importan directamente en DragDropSentence.jsx) */
+/* He dejado los específicos de .drag-drop-activity-container, .blank-spot, etc. en DragDropSentence.css */
+
+/* --- Secciones eliminadas de CSS que ya no son necesarias --- */
+/*
+.blur-text { ... } // Reemplazado por .blur-active con lógica condicional en JS
+.blur-toggle-buttons { ... } // Reemplazado por el nuevo botón único
+*/
+
+/* Modo oscuro para el body (ahora controlado por variables CSS en :root/html.dark-mode) */
+/*
+.app-container.dark-mode {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+}
+.app-container.dark-mode .top-button-bar button {
+  background-color: #333;
+  color: #f0f0f0;
+  border-color: #555;
+}
+.app-container.dark-mode .top-button-bar button:hover {
+  background-color: #444;
+}
+.app-container.dark-mode .play-button {
+  background-color: #333;
+  border-color: #555;
+  color: #f0f0f0;
+}
+.app-container.dark-mode .play-button:hover {
+  background-color: #444;
+}
+*/

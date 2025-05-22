@@ -6,7 +6,7 @@ import chapters from './chapters'
 import ChapterSelector from './components/ChapterSelector'
 import DragDropSentence from './components/DragDropSentence'
 import { motion, AnimatePresence } from 'framer-motion'
-import './app.css'
+import './app.css' // Asegúrate de que este archivo CSS contiene los estilos para .blur-active, etc.
 
 function App() {
   const [chapterIndex, setChapterIndex] = useState(0)
@@ -17,21 +17,48 @@ function App() {
     return saved !== null ? parseInt(saved, 10) : 2
   })
 
+  // Estado para controlar si la actividad de la escena actual está completada
   const [isActivityCompleted, setIsActivityCompleted] = useState(() => {
     const savedActivities = localStorage.getItem('completedActivities')
     return savedActivities ? JSON.parse(savedActivities) : {}
   })
 
+  // Estado para controlar si la actividad está visible en la escena actual
   const [showActivity, setShowActivity] = useState(false)
 
+  // Estado: true si el texto está borroso, false si el ejercicio está borroso
+  // Inicialmente, cuando la actividad no se ha mostrado, no hay desenfoque.
+  // Una vez que se muestra, por defecto el texto se desenfoca.
+  const [isTextBlurred, setIsTextBlurred] = useState(false)
+
+  // Variables calculadas que dependen de los estados. Deben declararse después de los estados.
+  const currentChapter = chapters[chapterIndex]
+  const currentScene = currentChapter.scenes[sceneIndex]
+  const hasActivity = currentScene.activity !== undefined
+  const currentActivityId = `${chapterIndex}-${sceneIndex}`
+  const activityIsCompletedForCurrentScene =
+    isActivityCompleted[currentActivityId]
+  // isActivityBlurred se calculará directamente para el CSS
+
+  // Efecto para restablecer showActivity, isTextBlurred y hacer scroll al inicio al cambiar de escena o capítulo
   useEffect(() => {
     setShowActivity(false)
+    setIsTextBlurred(false) // Resetear el desenfoque al cambiar de escena
     const scrollableTextElement = document.querySelector('.scrollable-text')
     if (scrollableTextElement) {
       scrollableTextElement.scrollTop = 0
     }
   }, [chapterIndex, sceneIndex])
 
+  // Efecto para establecer el desenfoque inicial cuando la actividad se muestra
+  useEffect(() => {
+    if (hasActivity && showActivity && !activityIsCompletedForCurrentScene) {
+      // Cuando la actividad se muestra por primera vez, el texto se desenfoca por defecto
+      setIsTextBlurred(true)
+    }
+  }, [showActivity, hasActivity, activityIsCompletedForCurrentScene])
+
+  // Sincronizar el estado de las actividades completadas con localStorage
   useEffect(() => {
     localStorage.setItem(
       'completedActivities',
@@ -39,6 +66,7 @@ function App() {
     )
   }, [isActivityCompleted])
 
+  // Manejo del modo oscuro y estilos del body
   useEffect(() => {
     document.body.style.backgroundColor = darkMode ? '#1e1e1e' : '#fffbe6'
     document.body.style.margin = '0'
@@ -51,20 +79,15 @@ function App() {
     }
   }, [darkMode])
 
+  // Persistencia del tamaño de fuente en localStorage
   useEffect(() => {
     localStorage.setItem('fontSizeIndex', fontSizeIndex.toString())
   }, [fontSizeIndex])
 
   const fontSizes = ['1rem', '1.25rem', '1.5rem', '1.75rem', '2rem']
   const fontSize = fontSizes[fontSizeIndex] || '1.2rem'
-  const currentChapter = chapters[chapterIndex]
-  const currentScene = currentChapter.scenes[sceneIndex]
-  const [activeWord, setActiveWord] = useState(null)
 
-  const hasActivity = currentScene.activity !== undefined
-  const currentActivityId = `${chapterIndex}-${sceneIndex}`
-  const activityIsCompletedForCurrentScene =
-    isActivityCompleted[currentActivityId]
+  const [activeWord, setActiveWord] = useState(null)
 
   const getPreferredVoice = () => {
     const voices = speechSynthesis.getVoices()
@@ -118,21 +141,30 @@ function App() {
         ...prev,
         [currentActivityId]: true,
       }))
+      setIsTextBlurred(false) // Texto claro al completar
+      // showActivity ya estará en true, no necesitamos cambiarlo
     }
   }
 
-  // Función para reiniciar la actividad de la escena actual
   const handleResetActivity = () => {
     setIsActivityCompleted((prev) => {
       const newState = { ...prev }
-      delete newState[currentActivityId] // Elimina la marca de completado para esta actividad
+      delete newState[currentActivityId]
       return newState
     })
-    setShowActivity(true) // Vuelve a mostrar la actividad inmediatamente
+    setShowActivity(true)
+    setIsTextBlurred(true) // Texto borroso al reiniciar
   }
 
+  // NUEVA FUNCIÓN para alternar el desenfoque
+  const handleToggleBlur = () => {
+    setIsTextBlurred((prev) => !prev) // Invierte el estado del desenfoque del texto
+  }
+
+  // Bloquear el botón 'Next' si hay actividad y no está completada
   const nextButtonDisabled = hasActivity && !activityIsCompletedForCurrentScene
 
+  // Comprobar si se puede avanzar al siguiente capítulo
   const nextChapterAvailable =
     sceneIndex === currentChapter.scenes.length - 1 &&
     chapterIndex < chapters.length - 1 &&
@@ -193,7 +225,12 @@ function App() {
               </div>
 
               {/* Contenido de la escena (texto y página) */}
-              <div className="scrollable-text">
+              {/* Aplicar la clase 'blur-active' si isTextBlurred es true */}
+              <div
+                className={`scrollable-text ${
+                  isTextBlurred ? 'blur-active' : ''
+                }`}
+              >
                 {(() => {
                   const sentences = []
                   let currentSentence = []
@@ -292,11 +329,10 @@ function App() {
                 )}
               </div>
 
-              {/* Lógica de los botones de actividad */}
+              {/* Botón inicial para mostrar la actividad */}
               {hasActivity &&
                 !activityIsCompletedForCurrentScene &&
                 !showActivity && (
-                  // Mostrar botón para revelar el ejercicio si hay actividad, no completada y no visible
                   <button
                     onClick={() => setShowActivity(true)}
                     className="show-activity-button"
@@ -310,19 +346,43 @@ function App() {
                   </button>
                 )}
 
+              {/* Botón Único de Alternancia de Desenfoque (aparece cuando la actividad ya está visible) */}
               {hasActivity &&
                 showActivity &&
                 !activityIsCompletedForCurrentScene && (
-                  // Mostrar la actividad si hay actividad, visible y no completada
-                  <DragDropSentence
-                    key={currentActivityId + '-active'} // Usar key para forzar remonte del componente si se resetea
-                    activityData={currentScene.activity}
-                    onActivityComplete={handleActivityComplete}
-                  />
+                  <button
+                    onClick={handleToggleBlur}
+                    className="toggle-blur-button" // Usaremos esta clase para estilizarlo
+                    style={{
+                      marginTop: '1rem',
+                      marginBottom: '1rem',
+                      width: '100%',
+                    }}
+                  >
+                    {isTextBlurred ? 'View Text' : 'View Exercise'}{' '}
+                    {/* Cambia el texto del botón */}
+                  </button>
+                )}
+
+              {/* Renderizado condicional de la actividad */}
+              {hasActivity &&
+                showActivity &&
+                !activityIsCompletedForCurrentScene && (
+                  // La actividad se desenfoca si isTextBlurred es false (es decir, el texto está claro)
+                  <div
+                    className={`activity-container ${
+                      !isTextBlurred ? 'blur-active' : ''
+                    }`}
+                  >
+                    <DragDropSentence
+                      key={currentActivityId + '-active'}
+                      activityData={currentScene.activity}
+                      onActivityComplete={handleActivityComplete}
+                    />
+                  </div>
                 )}
 
               {hasActivity && activityIsCompletedForCurrentScene && (
-                // Mostrar mensaje de completado y botón de reinicio si está completada
                 <div
                   style={{
                     textAlign: 'center',
@@ -354,6 +414,7 @@ function App() {
                   onClick={() => {
                     setSceneIndex((prev) => Math.max(prev - 1, 0))
                     setShowActivity(false)
+                    setIsTextBlurred(false) // Asegurarse de quitar cualquier desenfoque al retroceder
                   }}
                   disabled={sceneIndex === 0}
                 >
