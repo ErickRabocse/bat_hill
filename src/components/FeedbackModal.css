@@ -1,3 +1,5 @@
+/* components/FeedbackModal.css */
+
 /* Estilos para el overlay del modal */
 .modal-overlay {
   position: fixed;
@@ -5,7 +7,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6); /* Fondo semi-transparente oscuro */
+  background-color: rgba(0, 0, 0, 0.4); /* Fondo semi-transparente más sutil */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,78 +16,99 @@
 
 /* Estilos para la caja del modal */
 .modal-box {
-  background-color: #fff;
+  background-color: var(--modal-bg);
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   text-align: center;
   max-width: 450px;
   width: 90%;
-  position: relative; /* Para posicionamiento absoluto de elementos internos si es necesario */
+  /* REMOVIDO: Posicionamiento absoluto/transform aquí porque lo gestionará el JS */
+  /* position: relative; */
+  /* transform: translate(-50%, -50%); */
 }
 
 /* Estilos específicos para el modal de feedback */
 .feedback-modal-box {
-  background-color: #fcebeb; /* Fondo claro para errores, con un toque de rojo */
-  border: 1px solid #e0b4b4;
-  color: #a94442; /* Texto en tono rojo para el error */
+  background-color: var(
+    --error-background
+  ); /* Fondo claro para errores, con un toque de rojo */
+  border: 1px solid var(--error-border);
+  color: var(--error-message-color); /* Texto en tono rojo para el error */
+  z-index: 1001; /* Asegura que esté sobre el overlay */
+
+  /* Para el modal flotante, eliminamos el max-width/width para que se ajuste al contenido */
+  max-width: 300px; /* Tamaño más pequeño para que no ocupe mucho espacio flotante */
+  width: auto; /* Ancho automático según el contenido */
+  min-width: 200px; /* Ancho mínimo para que sea legible */
+  text-align: left; /* Alinea el texto a la izquierda dentro del modal flotante */
+  padding: 15px; /* Padding más ajustado */
 }
 
 .feedback-modal-box h3 {
-  color: #a94442; /* Título también en rojo */
+  color: var(--error-message-color); /* Título también en rojo */
   margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 1.5rem;
+  margin-bottom: 10px; /* Margen inferior ajustado */
+  font-size: 1.2rem; /* Tamaño de fuente ajustado */
 }
 
 .feedback-message {
-  margin-bottom: 10px;
-  font-size: 1.1rem;
+  margin-bottom: 8px; /* Margen inferior ajustado */
+  font-size: 1rem; /* Tamaño de fuente ajustado */
 }
 
 .feedback-hint {
   font-style: italic;
-  font-size: 0.95rem;
-  margin-bottom: 20px;
-  color: #721c24; /* Un tono más oscuro de rojo para la pista */
+  font-size: 0.85rem; /* Tamaño de fuente ajustado */
+  margin-bottom: 15px; /* Margen inferior ajustado */
+  color: var(
+    --feedback-hint-color
+  ); /* Un tono más oscuro de rojo para la pista */
 }
 
 .feedback-button {
-  background-color: #dc3545; /* Botón rojo */
+  background-color: var(
+    --error-message-color
+  ); /* Botón en tono rojo del error */
   color: white;
-  padding: 10px 20px;
+  padding: 8px 15px; /* Padding ajustado */
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem; /* Tamaño de fuente ajustado */
   transition: background-color 0.3s ease;
+  display: block; /* Para que ocupe todo el ancho del modal y se centre si es necesario */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .feedback-button:hover {
-  background-color: #c82333; /* Tono más oscuro al pasar el ratón */
+  background-color: var(
+    --feedback-hint-color
+  ); /* Tono más oscuro al pasar el ratón */
 }
 
 /* Adaptación para el modo oscuro */
 @media (prefers-color-scheme: dark) {
   .feedback-modal-box {
-    background-color: #3b2a2a; /* Fondo más oscuro para errores en dark mode */
-    border: 1px solid #5a3e3e;
-    color: #f1a9a9; /* Texto más claro */
+    background-color: var(--error-background);
+    border: 1px solid var(--error-border);
+    color: var(--error-message-color);
   }
 
   .feedback-modal-box h3 {
-    color: #f1a9a9;
+    color: var(--error-message-color);
   }
 
   .feedback-hint {
-    color: #e2b7b7;
+    color: var(--feedback-hint-color);
   }
 
   .feedback-button {
-    background-color: #8c2a35; /* Botón en dark mode */
+    background-color: var(--error-message-color);
   }
 
   .feedback-button:hover {
-    background-color: #75232b;
+    background-color: var(--feedback-hint-color);
   }
 }

@@ -66,7 +66,8 @@ function App() {
 
   const [availableWords, setAvailableWords] = useState([]) // Palabras arrastrables del ejercicio (gestionado en App.jsx)
 
-  // --- Variables calculadas (siempre después de todos los estados) ---
+  // --- Variables calculadas (SIEMPRE DESPUÉS DE TODOS LOS ESTADOS DE LA FUNCIÓN) ---
+  // ESTA ES LA SECCIÓN MÁS IMPORTANTE PARA EL ORDEN DE LAS DECLARACIONES.
   const currentChapter = chapters[chapterIndex]
   const currentScene = currentChapter.scenes[sceneIndex]
   const hasActivity = currentScene.activity !== undefined
@@ -80,18 +81,15 @@ function App() {
   const completedScenesInCurrentChapter = currentChapter.scenes.filter(
     (scene, index) => {
       const activityId = `${chapterIndex}-${index}`
-      if (chapterIndex === 0) return true // Intro scenes are always "completed" for progress
+      if (chapterIndex === 0) return true
 
       if (index === sceneIndex) {
-        // Current scene
         return !hasActivity || activityIsCompletedForCurrentScene
       }
 
       if (scene.activity) {
-        // Previous scenes with activity
         return isActivityCompleted[activityId]
       } else {
-        // Previous scenes without activity
         return true
       }
     }
@@ -99,6 +97,16 @@ function App() {
 
   const chapterProgress =
     (completedScenesInCurrentChapter / currentChapter.scenes.length) * 100
+
+  // ESTA ES LA DECLARACIÓN CLAVE QUE FALTABA O ESTABA EN EL LUGAR INCORRECTO.
+  // Debe ir aquí, después de todos los estados y variables dependientes directas,
+  // pero antes de los useEffects y el bloque return del JSX.
+  const shouldShowExerciseFullscreen =
+    hasActivity &&
+    showActivity &&
+    !activityIsCompletedForCurrentScene &&
+    !isActivityLocked &&
+    !isShowingTextDuringActivity
 
   // --- Efectos de React ---
   useEffect(() => {
@@ -132,7 +140,7 @@ function App() {
     if (scrollableTextElement) {
       scrollableTextElement.scrollTop = 0
     }
-  }, [chapterIndex, sceneIndex, currentScene]) // currentScene es una dependencia importante
+  }, [chapterIndex, sceneIndex, currentScene])
 
   useEffect(() => {
     if (lockTimerRef.current) {
@@ -230,7 +238,6 @@ function App() {
   const speakWord = (word) => {
     const utter = new SpeechSynthesisUtterance(word)
     utter.lang = 'en-US'
-    utter.rate = 1
     const preferred = getPreferredVoice()
     if (preferred) utter.voice = preferred
     speechSynthesis.cancel()
@@ -327,14 +334,6 @@ function App() {
 
   // Determinar si los botones de navegación previa deben estar deshabilitados
   const prevButtonDisabled = sceneIndex === 0 && chapterIndex === 0
-
-  // Lógica para decidir qué mostrar: la imagen/texto normal o el ejercicio a pantalla completa.
-  const isShowingFullscreenExercise =
-    hasActivity &&
-    showActivity &&
-    !activityIsCompletedForCurrentScene &&
-    !isActivityLocked &&
-    !isShowingTextDuringActivity
 
   return (
     // DndProvider envuelve TODO el App
@@ -458,52 +457,70 @@ function App() {
             transition={{ duration: 0.8 }}
             className="scene-and-activity-container"
           >
-            {/* Este div scene-layout se adapta para mostrar la imagen y texto, o solo el ejercicio a pantalla completa */}
-            <div
-              className={`scene-layout ${
-                isShowingFullscreenExercise ? 'exercise-fullscreen-layout' : ''
-              }`}
-            >
-              {/* La imagen se muestra condicionalmente. Se oculta si es el modo de ejercicio de pantalla completa */}
-              <img
-                src={currentScene.image}
-                alt={`Scene ${sceneIndex + 1}`}
-                className={`scene-image ${
-                  isShowingFullscreenExercise ? 'hidden-for-exercise' : ''
-                }`}
-              />
-
-              {/* text-container, que puede ser la caja de texto normal O el ejercicio a pantalla completa */}
-              <div
-                className={`text-container ${
-                  isShowingFullscreenExercise ? 'full-width-exercise' : ''
-                }`}
-              >
-                <div style={{ marginBottom: '1rem' }}>
-                  {/* CAMBIO: Ocultar título del capítulo cuando el ejercicio está activo */}
-                  {chapterIndex === 0 ? (
-                    <h1
-                      className={`main-book-title ${
-                        isShowingFullscreenExercise ? 'hidden' : ''
-                      }`}
-                    >
-                      Luna's journey
-                    </h1>
-                  ) : (
-                    <h2
-                      className={`chapter-title-main ${
-                        isShowingFullscreenExercise ? 'hidden' : ''
-                      }`}
-                    >
-                      {currentChapter.title}
-                    </h2>
-                  )}
-                </div>
-                {/* Contenedor principal que alternará entre el texto de la historia y el ejercicio */}
-                {/* Ocupa el 100% de la altura disponible para el contenido */}
-                <div className="content-area-wrapper">
-                  {/* Contenido de la escena (texto) - Visible si NO es el modo de ejercicio de pantalla completa */}
-                  {!isShowingFullscreenExercise && (
+            {/* CAMBIO CLAVE: Estructura condicional separada para la vista normal y la vista de ejercicio */}
+            {shouldShowExerciseFullscreen ? (
+              // VISTA DE EJERCICIO A PANTALLA COMPLETA
+              <div className="scene-layout exercise-fullscreen-layout">
+                {/* No hay imagen lateral en esta vista */}
+                {/* text-container, que ahora ocupa todo el ancho y contiene el título y el ejercicio */}
+                <div className="text-container full-width-exercise">
+                  <div style={{ marginBottom: '1rem' }}>
+                    {/* Ocultar el título del capítulo cuando el ejercicio está activo */}
+                    {/* La variable shouldShowExerciseFullscreen ya está definida correctamente */}
+                    {chapterIndex === 0 ? (
+                      <h1
+                        className={`main-book-title ${
+                          shouldShowExerciseFullscreen ? 'hidden' : ''
+                        }`}
+                      >
+                        Luna's journey
+                      </h1>
+                    ) : (
+                      <h2
+                        className={`chapter-title-main ${
+                          shouldShowExerciseFullscreen ? 'hidden' : ''
+                        }`}
+                      >
+                        {currentChapter.title}
+                      </h2>
+                    )}
+                  </div>
+                  {/* Contenedor del ejercicio que se superpone al texto */}
+                  <div className="content-area-wrapper">
+                    <div className="activity-overlay-container">
+                      <DragDropSentence
+                        key={currentActivityId + '-active'}
+                        activityData={currentScene.activity}
+                        initialWords={availableWords}
+                        onWordsChanged={handleWordsInBankChange}
+                        onActivityComplete={handleActivityComplete}
+                      />
+                    </div>
+                  </div>{' '}
+                  {/* Fin de content-area-wrapper */}
+                </div>{' '}
+                {/* Fin de text-container */}
+              </div> // Fin de scene-layout.exercise-fullscreen-layout
+            ) : (
+              // VISTA NORMAL DE IMAGEN + TEXTO (o si el ejercicio está completado/bloqueado/viendo texto)
+              <div className="scene-layout">
+                <img
+                  src={currentScene.image}
+                  alt={`Scene ${sceneIndex + 1}`}
+                  className="scene-image"
+                />
+                <div className="text-container">
+                  <div style={{ marginBottom: '1rem' }}>
+                    {chapterIndex === 0 ? (
+                      <h1 className="main-book-title">Luna's journey</h1>
+                    ) : (
+                      <h2 className="chapter-title-main">
+                        {currentChapter.title}
+                      </h2>
+                    )}
+                  </div>
+                  {/* Contenedor principal para el texto (no para el ejercicio aquí) */}
+                  <div className="content-area-wrapper">
                     <div className="scrollable-text">
                       {(() => {
                         const sentences = []
@@ -600,122 +617,115 @@ function App() {
                         })
                       })()}
                     </div>
-                  )}
-
-                  {/* Renderizado del ejercicio (se superpondrá si está activo y no es el texto) */}
-                  {isShowingFullscreenExercise && (
-                    <div className="activity-overlay-container">
-                      <DragDropSentence
-                        key={currentActivityId + '-active'}
-                        activityData={currentScene.activity}
-                        initialWords={availableWords}
-                        onWordsChanged={handleWordsInBankChange}
-                        onActivityComplete={handleActivityComplete}
-                      />
-                    </div>
-                  )}
+                  </div>{' '}
+                  {/* Fin de content-area-wrapper */}
                 </div>{' '}
-                {/* Fin de content-area-wrapper */}
-                {/* Botón inicial para mostrar la actividad */}
-                {hasActivity &&
-                  !activityIsCompletedForCurrentScene &&
-                  !showActivity &&
-                  !isActivityLocked && (
-                    <button
-                      onClick={() => setShowActivity(true)}
-                      className="show-activity-button"
-                      style={{
-                        marginTop: '1.5rem',
-                        marginBottom: '1.5rem',
-                        width: '100%',
-                      }}
-                    >
-                      Show Exercise
-                    </button>
-                  )}
-                {/* Contenedor del estado del ejercicio */}
-                {hasActivity && showActivity && (
-                  <div
-                    className="activity-status-section"
-                    style={{
-                      marginTop: '1.5rem',
-                      marginBottom: '1.5rem',
-                      textAlign: 'center',
-                    }}
-                  >
-                    {isActivityLocked && (
-                      <p
-                        className="lock-message"
-                        style={{ color: 'red', fontWeight: 'bold' }}
-                      >
-                        Actividad bloqueada. Espera{' '}
-                        {Math.floor(remainingLockTime / 60)
-                          .toString()
-                          .padStart(2, '0')}
-                        :{(remainingLockTime % 60).toString().padStart(2, '0')}{' '}
-                        para reintentar.
-                        <br />
-                        <small>
-                          Mientras tanto, puedes revisar el texto y el
-                          vocabulario.
-                        </small>
-                      </p>
-                    )}
-
-                    {!activityIsCompletedForCurrentScene &&
-                      !isActivityLocked && (
-                        <>
-                          <p
-                            className="glance-count-message"
-                            style={{ color: textColor }}
-                          >
-                            Vistazos restantes: {glanceCount}
-                          </p>
-                          <button
-                            onClick={handleToggleActivityView}
-                            className="toggle-activity-view-button"
-                            style={{ width: '100%' }}
-                            disabled={
-                              isShowingTextDuringActivity && glanceCount <= 0
-                            }
-                          >
-                            {isShowingTextDuringActivity
-                              ? 'Ver Ejercicio'
-                              : 'Ver Texto (Gastar vistazo)'}
-                          </button>
-                        </>
-                      )}
-
-                    {activityIsCompletedForCurrentScene && (
-                      <div>
-                        <p
-                          style={{
-                            color: 'green',
-                            fontWeight: 'bold',
-                            display: 'inline-block',
-                            marginRight: '1rem',
-                          }}
-                        >
-                          ¡Ejercicio completado!
-                        </p>
-                        <button
-                          onClick={handleResetActivity}
-                          className="reset-activity-button"
-                        >
-                          Reiniciar Ejercicio
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+                {/* Fin de text-container */}
+              </div> // Fin de scene-layout
+            )}{' '}
+            {/* Fin de la condición principal de renderizado de la vista */}
           </motion.div>
         </AnimatePresence>
-      </div>
+
+        {/* Estos elementos (botones de actividad y el banco de palabras fijo)
+            siempre se renderizan fuera de la lógica de scene-layout,
+            pero su visibilidad se controla con las mismas variables. */}
+
+        {/* Botón inicial para mostrar la actividad */}
+        {hasActivity &&
+          !activityIsCompletedForCurrentScene &&
+          !showActivity &&
+          !isActivityLocked && (
+            <button
+              onClick={() => setShowActivity(true)}
+              className="show-activity-button"
+              style={{
+                marginTop: '1.5rem',
+                marginBottom: '1.5rem',
+                width: '100%',
+              }}
+            >
+              Show Exercise
+            </button>
+          )}
+
+        {/* Contenedor del estado del ejercicio */}
+        {/* CAMBIO: showActivity solo aquí para envolver los botones de la actividad */}
+        {hasActivity && showActivity && (
+          <div
+            className="activity-status-section"
+            style={{
+              marginTop: '1.5rem',
+              marginBottom: '1.5rem',
+              textAlign: 'center',
+            }}
+          >
+            {isActivityLocked && (
+              <p
+                className="lock-message"
+                style={{ color: 'red', fontWeight: 'bold' }}
+              >
+                Actividad bloqueada. Espera{' '}
+                {Math.floor(remainingLockTime / 60)
+                  .toString()
+                  .padStart(2, '0')}
+                :{(remainingLockTime % 60).toString().padStart(2, '0')} para
+                reintentar.
+                <br />
+                <small>
+                  Mientras tanto, puedes revisar el texto y el vocabulario.
+                </small>
+              </p>
+            )}
+
+            {!activityIsCompletedForCurrentScene && !isActivityLocked && (
+              <>
+                <p
+                  className="glance-count-message"
+                  style={{ color: textColor }}
+                >
+                  Vistazos restantes: {glanceCount}
+                </p>
+                <button
+                  onClick={handleToggleActivityView}
+                  className="toggle-activity-view-button"
+                  style={{ width: '100%' }}
+                  disabled={isShowingTextDuringActivity && glanceCount <= 0}
+                >
+                  {isShowingTextDuringActivity
+                    ? 'Ver Ejercicio'
+                    : 'Ver Texto (Gastar vistazo)'}
+                </button>
+              </>
+            )}
+
+            {activityIsCompletedForCurrentScene && (
+              <div>
+                <p
+                  style={{
+                    color: 'green',
+                    fontWeight: 'bold',
+                    display: 'inline-block',
+                    marginRight: '1rem',
+                  }}
+                >
+                  ¡Ejercicio completado!
+                </p>
+                <button
+                  onClick={handleResetActivity}
+                  className="reset-activity-button"
+                >
+                  Reiniciar Ejercicio
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>{' '}
+      {/* Cierre del div principal (app-container) */}
       {/* Contenedor Fijo para las palabras arrastrables, fuera de todo, en el root de App */}
       {/* Solo visible si el ejercicio está activo y no completado/bloqueado Y NO estamos viendo el texto */}
-      {isShowingFullscreenExercise && (
+      {shouldShowExerciseFullscreen && ( // Usamos la misma variable para su visibilidad
         <div className="fixed-word-bank-container">
           {availableWords.map((word, index) => (
             <DraggableWord

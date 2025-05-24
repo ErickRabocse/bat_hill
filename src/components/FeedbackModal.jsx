@@ -1,5 +1,5 @@
-import React from 'react';
-import './FeedbackModal.css'; // Crearemos este archivo CSS a continuación
+import React from 'react'
+import './FeedbackModal.css' // Crearemos este archivo CSS a continuación
 
 function FeedbackModal({ message, hint, onClose }) {
   return (
@@ -13,7 +13,7 @@ function FeedbackModal({ message, hint, onClose }) {
         </button>
       </div>
     </div>
-  );
+  )
 }
 
-export default FeedbackModal;
+export default FeedbackModal

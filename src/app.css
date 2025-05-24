@@ -55,6 +55,11 @@ html {
   --progress-bar-outer-bg: #e0e0e0;
   --progress-bar-inner-bg: #4caf50;
   --select-arrow-color: #000;
+
+  /* Altura aproximada de la top-button-bar */
+  --top-bar-height: 60px; /* min-height + padding-top/bottom */
+  /* Altura aproximada del fixed-word-bank-container */
+  --fixed-word-bank-height: 80px; /* padding + altura del contenido */
 }
 
 html.dark-mode {
@@ -111,13 +116,13 @@ html.dark-mode {
   background-color: var(--background-color);
   color: var(--text-color);
   transition: background-color 0.3s, color 0.3s;
-  overflow: hidden; /* Asegura que el app-container maneje el scroll, si lo necesita */
+  overflow: hidden; /* OCULTAR EL SCROLLBAR GLOBAL DEL BODY/HTML */
 }
 
 .top-button-bar {
   display: flex;
   align-items: center;
-  gap: 2rem; /* Aumentado a 2rem para más espacio */
+  gap: 2rem;
   position: relative;
   width: 100%;
   padding-bottom: 1rem;
@@ -181,7 +186,6 @@ html.dark-mode {
   overflow-y: auto; /* Permitir scroll vertical solo dentro de este contenedor */
   overflow-x: hidden; /* Ocultar scroll horizontal */
   padding-bottom: 80px; /* Espacio para el fixed-word-bank-container */
-  /* Borde de depuración eliminado */
 }
 
 /* Contenedor del scene-layout (imagen + text-container) */
@@ -190,11 +194,9 @@ html.dark-mode {
   align-items: flex-start;
   margin-top: 2rem;
   flex-grow: 1; /* Esto le permite ocupar el espacio restante en .scene-and-activity-container */
-  /* CAMBIO CLAVE: Eliminar altura fija y dejar que flex-grow: 1 gestione la altura */
-  /* height: calc(100% - 2rem); */
+  height: auto; /* Permitir que la altura se ajuste al contenido, o flex-grow la fuerce */
   overflow-y: hidden; /* No scroll aquí, el padre lo gestiona */
   position: relative;
-  /* Borde de depuración eliminado */
 }
 
 /* Layout cuando el ejercicio toma la pantalla completa (sin imagen) */
@@ -203,7 +205,7 @@ html.dark-mode {
   align-items: stretch; /* Estira el text-container */
   padding-right: 0 !important;
   padding-left: 0 !important;
-  /* Borde de depuración eliminado */
+  height: 100%; /* Aseguramos que ocupe el 100% de la altura de su padre (.scene-and-activity-container) */
 }
 
 .scene-image {
@@ -233,9 +235,8 @@ html.dark-mode {
   position: relative; /* Para posicionar el contenido de la actividad */
   display: flex;
   flex-direction: column;
-  height: 100%; /* Ocupa el 100% de la altura de su padre (.scene-layout) */
+  height: 100%; /* Asegura que ocupe el 100% de la altura de su padre (.scene-layout) */
   box-sizing: border-box; /* Asegura que el padding no desborde el 100% de altura */
-  /* Borde de depuración eliminado */
 }
 
 /* Clase para el text-container cuando el ejercicio es a pantalla completa */
@@ -244,7 +245,12 @@ html.dark-mode {
   padding-left: 50px; /* Padding extra para que el contenido no esté pegado al borde */
   padding-right: 50px;
   transition: padding-left 0.3s ease-in-out, padding-right 0.3s ease-in-out;
-  /* Borde de depuración eliminado */
+  height: 100%; /* Asegura que se estire al 100% cuando es full-width-exercise */
+  /* CAMBIO CLAVE: min-height para que la parte del ejercicio no colapse */
+  /* Este min-height se aplica a text-container.full-width-exercise para asegurar que tenga suficiente espacio */
+  min-height: calc(
+    100% - 1rem - 40px
+  ); /* Ajusta si es necesario, 100% - margen_bottom_titulo - altura_titulo_aprox */
 }
 
 /* Título principal del libro (solo en la introducción) */
@@ -273,21 +279,12 @@ html.dark-mode {
   flex-grow: 1; /* Ocupa el espacio restante en la columna */
   overflow-y: auto; /* Permitir overflow vertical aquí si el contenido del texto/ejercicio es largo */
   overflow-x: hidden; /* Ocultar horizontal */
-  /* CAMBIO CLAVE: Altura calculada con la altura de los elementos de títulos*/
-  height: calc(
-    100% - var(--main-book-title-height) - var(--chapter-title-margin-bottom)
-  );
-  /* Nota: Aquí asumimos que `--main-book-title-height` y `--chapter-title-margin-bottom`
-           son alturas ya definidas o que se pueden calcular bien.
-           Si no, el 70px anterior era una aproximación.
-           Por simplicidad y para que funcione, volvamos a la aproximación directa
-           o definamos esas variables.
-           Vamos a usar 70px como una estimación para títulos + margen.*/
+  /* CAMBIO CLAVE: Altura calculada con la altura de los elementos encima */
   height: calc(
     100% - 70px
   ); /* Aproximación de Altura total del título + su margen inferior */
-
-  /* Borde de depuración eliminado */
+  /* Este calc es crucial y lo que nos dio 0px en la depuración anterior */
+  /* Asegura que este div tenga una altura real para que activity-overlay-container la herede */
 }
 
 /* Contenedor del texto de la historia */
@@ -321,7 +318,6 @@ html.dark-mode {
   display: flex;
   flex-direction: column;
   transition: opacity 0.3s ease-in-out;
-  /* Borde de depuración eliminado */
 }
 
 /* Estilos para el contenedor del ejercicio (el que envuelve a DragDropSentence) */
