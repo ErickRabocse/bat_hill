@@ -1,68 +1,27 @@
-// En components/ChapterSelector.jsx
+import React from 'react'; // Ya no necesitamos useState, useEffect, useRef para este componente
 
-import React, { useState, useEffect, useRef } from 'react'
-import './chapterSelector.css'
-
-// Añadir la prop isDisabled
-function ChapterSelector({
-  chapters,
-  chapterIndex,
-  setChapterIndex,
-  isDisabled,
-}) {
-  const [showTranslation, setShowTranslation] = useState(false)
-  const timeoutRef = useRef(null)
-
+function ChapterSelector({ chapters, chapterIndex, setChapterIndex, isDisabled }) { 
   const handleChange = (event) => {
-    // Solo permitir el cambio si no está deshabilitado
-    if (!isDisabled) {
-      const selectedIndex = parseInt(event.target.value, 10)
-      setChapterIndex(selectedIndex)
-      setShowTranslation(false)
-      clearTimeout(timeoutRef.current)
+    if (!isDisabled) { 
+      const selectedIndex = parseInt(event.target.value, 10);
+      setChapterIndex(selectedIndex);
     }
-  }
-
-  const handleTitleClick = () => {
-    setShowTranslation(true)
-    clearTimeout(timeoutRef.current)
-    timeoutRef.current = setTimeout(() => {
-      setShowTranslation(false)
-    }, 3000)
-  }
-
-  useEffect(() => {
-    return () => clearTimeout(timeoutRef.current)
-  }, [])
+  };
 
   return (
-    <div>
-      <select
-        value={chapterIndex}
-        onChange={handleChange}
-        disabled={isDisabled}
-      >
-        {' '}
-        {/* <-- CAMBIO CLAVE AQUÍ */}
+    // ELIMINAR CUALQUIER DIV O H2 QUE CONTENGA EL TÍTULO DEL CAPÍTULO.
+    // ESTE COMPONENTE SOLO DEBE RENDERIZAR EL SELECTOR.
+    <div className="chapter-selector-container"> {/* Mantener un div contenedor si es necesario para los estilos */}
+      <select value={chapterIndex} onChange={handleChange} disabled={isDisabled}>
         {chapters.map((chapter, index) => (
           <option key={chapter.id} value={index}>
+            {/* Aquí solo el texto de la opción del selector, NO el título del capítulo */}
             {index === 0 ? 'Introduction' : `Chapter ${index}`}
           </option>
         ))}
       </select>
-      <div>
-        <h2
-          onClick={handleTitleClick}
-          className="glow"
-          style={{ cursor: 'pointer', userSelect: 'none' }}
-        >
-          {showTranslation
-            ? chapters[chapterIndex].titleTranslation || 'Translation missing'
-            : chapters[chapterIndex].title}
-        </h2>
-      </div>
     </div>
-  )
+  );
 }
 
-export default ChapterSelector
+export default ChapterSelector;

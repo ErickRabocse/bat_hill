@@ -1,18 +1,47 @@
-// En App.jsx
-
 import { useEffect, useState, useRef } from 'react'
 import Word from './Word'
 import chapters from './chapters'
 import ChapterSelector from './components/ChapterSelector'
 import DragDropSentence from './components/DragDropSentence'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import { DndProvider, useDrag } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 import './app.css'
 
 // Constantes para la lógica de los vistazos y el temporizador
-const MAX_GLANCES_ALLOWED = 2
-const LOCK_DURATION_MS = 3 * 60 * 1000
+const MAX_GLANCES_ALLOWED = 2 // Máximo número de vistazos
+const LOCK_DURATION_MS = 1 * 60 * 1000 // 1 minuto en milisegundos
+
+// Componente para una palabra arrastrable (definida en App.jsx)
+function DraggableWord({ word, onDropWord }) {
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: 'word', // ItemType
+    item: { word },
+    end: (item, monitor) => {
+      const dropResult = monitor.getDropResult()
+      if (!dropResult) {
+        // Si no se soltó en un blank
+        onDropWord(item.word) // Devuelve la palabra a las disponibles si no fue usada
+      }
+    },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }))
+
+  return (
+    <span
+      ref={drag}
+      className={`draggable-word-fixed ${isDragging ? 'is-dragging' : ''}`}
+      style={{ opacity: isDragging ? 0.5 : 1 }}
+    >
+      {word}
+    </span>
+  )
+}
 
 function App() {
+  // --- Estados de la aplicación ---
   const [chapterIndex, setChapterIndex] = useState(0)
   const [sceneIndex, setSceneIndex] = useState(0)
   const [darkMode, setDarkMode] = useState(false)
@@ -26,70 +55,44 @@ function App() {
     return savedActivities ? JSON.parse(savedActivities) : {}
   })
 
-  const [showActivity, setShowActivity] = useState(false)
-  const [isTextBlurred, setIsTextBlurred] = useState(false)
+  const [showActivity, setShowActivity] = useState(false) // true si el ejercicio está visible, false si solo se ve el texto/botón "Show Exercise"
+  const [isShowingTextDuringActivity, setIsShowingTextDuringActivity] =
+    useState(false) // true si el texto de la historia está visible (ejercicio oculto) durante la actividad.
 
-  const [glanceCount, setGlanceCount] = useState(() => {
-    const savedGlanceData = localStorage.getItem('glanceData')
-    if (savedGlanceData) {
-      const data = JSON.parse(savedGlanceData)
-      if (
-        data.currentChapterIndex === chapterIndex &&
-        data.currentSceneIndex === sceneIndex
-      ) {
-        return data.count
-      }
-    }
-    return MAX_GLANCES_ALLOWED
-  })
-
-  const [lockTimestamp, setLockTimestamp] = useState(() => {
-    const savedGlanceData = localStorage.getItem('glanceData')
-    if (savedGlanceData) {
-      const data = JSON.parse(savedGlanceData)
-      if (
-        data.currentChapterIndex === chapterIndex &&
-        data.currentSceneIndex === sceneIndex
-      ) {
-        return data.lockUntil
-      }
-    }
-    return null
-  })
+  const [glanceCount, setGlanceCount] = useState(MAX_GLANCES_ALLOWED)
+  const [lockTimestamp, setLockTimestamp] = useState(null)
   const [remainingLockTime, setRemainingLockTime] = useState(0)
   const lockTimerRef = useRef(null)
 
+  const [availableWords, setAvailableWords] = useState([]) // Palabras arrastrables del ejercicio (gestionado en App.jsx)
+
+  // --- Variables calculadas (siempre después de todos los estados) ---
   const currentChapter = chapters[chapterIndex]
   const currentScene = currentChapter.scenes[sceneIndex]
   const hasActivity = currentScene.activity !== undefined
   const currentActivityId = `${chapterIndex}-${sceneIndex}`
   const activityIsCompletedForCurrentScene =
     isActivityCompleted[currentActivityId]
-
   const isActivityLocked = lockTimestamp && lockTimestamp > Date.now()
-
   const isChapterSelectorDisabled =
     hasActivity && !activityIsCompletedForCurrentScene && showActivity
 
-  // Cálculo del progreso
   const completedScenesInCurrentChapter = currentChapter.scenes.filter(
     (scene, index) => {
       const activityId = `${chapterIndex}-${index}`
-      // Si el capítulo es el 0 (introducción), todas las escenas se consideran completadas.
-      if (chapterIndex === 0) return true
+      if (chapterIndex === 0) return true // Intro scenes are always "completed" for progress
 
-      // Si la escena actual es la que se está viendo, solo se cuenta si ya está completada.
-      // Esto evita que las escenas futuras se cuenten como completadas antes de tiempo.
       if (index === sceneIndex) {
+        // Current scene
         return !hasActivity || activityIsCompletedForCurrentScene
       }
 
-      // Para escenas anteriores, si tienen actividad, se consideran completadas si isActivityCompleted es true.
-      // Si no tienen actividad, se consideran completadas automáticamente.
       if (scene.activity) {
+        // Previous scenes with activity
         return isActivityCompleted[activityId]
       } else {
-        return true // Escenas sin actividad se consideran completadas por defecto al avanzar
+        // Previous scenes without activity
+        return true
       }
     }
   ).length
@@ -97,16 +100,23 @@ function App() {
   const chapterProgress =
     (completedScenesInCurrentChapter / currentChapter.scenes.length) * 100
 
+  // --- Efectos de React ---
   useEffect(() => {
     setShowActivity(false)
-    setIsTextBlurred(false)
+    setIsShowingTextDuringActivity(false)
 
-    const storedGlanceData = localStorage.getItem('glanceData')
+    if (currentScene.activity && currentScene.activity.allWords) {
+      setAvailableWords(shuffleArray(currentScene.activity.allWords))
+    } else {
+      setAvailableWords([])
+    }
+
+    const storedGlanceDataString = localStorage.getItem('glanceData')
     let initialGlanceCount = MAX_GLANCES_ALLOWED
     let initialLockTimestamp = null
 
-    if (storedGlanceData) {
-      const data = JSON.parse(storedGlanceData)
+    if (storedGlanceDataString) {
+      const data = JSON.parse(storedGlanceDataString)
       if (
         data.currentChapterIndex === chapterIndex &&
         data.currentSceneIndex === sceneIndex
@@ -122,20 +132,9 @@ function App() {
     if (scrollableTextElement) {
       scrollableTextElement.scrollTop = 0
     }
-  }, [chapterIndex, sceneIndex])
+  }, [chapterIndex, sceneIndex, currentScene]) // currentScene es una dependencia importante
 
   useEffect(() => {
-    if (
-      hasActivity &&
-      showActivity &&
-      !activityIsCompletedForCurrentScene &&
-      !isActivityLocked
-    ) {
-      setIsTextBlurred(true)
-    } else {
-      setIsTextBlurred(false)
-    }
-
     if (lockTimerRef.current) {
       clearInterval(lockTimerRef.current)
     }
@@ -153,7 +152,7 @@ function App() {
           lockTimerRef.current = null
           setGlanceCount(MAX_GLANCES_ALLOWED)
           setShowActivity(true)
-          setIsTextBlurred(true)
+          setIsShowingTextDuringActivity(false)
         }
       }
 
@@ -169,15 +168,7 @@ function App() {
         lockTimerRef.current = null
       }
     }
-  }, [
-    showActivity,
-    hasActivity,
-    activityIsCompletedForCurrentScene,
-    lockTimestamp,
-    isActivityLocked,
-    chapterIndex,
-    sceneIndex,
-  ])
+  }, [lockTimestamp, isActivityLocked, chapterIndex, sceneIndex])
 
   useEffect(() => {
     localStorage.setItem(
@@ -214,7 +205,8 @@ function App() {
     localStorage.setItem('fontSizeIndex', fontSizeIndex.toString())
   }, [fontSizeIndex])
 
-  const fontSizes = ['1rem', '1.25rem', '1.5rem', '1.75rem', '2rem']
+  // --- Funciones de utilidad ---
+  const fontSizes = ['1.5rem', '1.75rem', '2rem']
   const fontSize = fontSizes[fontSizeIndex] || '1.2rem'
 
   const [activeWord, setActiveWord] = useState(null)
@@ -265,13 +257,27 @@ function App() {
   const backgroundColor = darkMode ? '#1e1e1e' : '#fffbe6'
   const textColor = darkMode ? '#f0f0f0' : '#333'
 
+  const shuffleArray = (array) => {
+    const newArray = [...array]
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
+    }
+    return newArray
+  }
+
+  const handleWordsInBankChange = (newWordsArray) => {
+    setAvailableWords(newWordsArray)
+  }
+
   const handleActivityComplete = (success) => {
     if (success) {
       setIsActivityCompleted((prev) => ({
         ...prev,
         [currentActivityId]: true,
       }))
-      setIsTextBlurred(false)
+      setShowActivity(true)
+      setIsShowingTextDuringActivity(false)
     }
   }
 
@@ -283,12 +289,17 @@ function App() {
     })
     setGlanceCount(MAX_GLANCES_ALLOWED)
     setLockTimestamp(null)
-    setShowActivity(true)
-    setIsTextBlurred(true)
+    setShowActivity(true) // Mostrar la actividad
+    setIsShowingTextDuringActivity(false) // Al reiniciar, ocultar texto y mostrar ejercicio
+
+    if (currentScene.activity && currentScene.activity.allWords) {
+      setAvailableWords(shuffleArray(currentScene.activity.allWords))
+    }
   }
 
-  const handleToggleBlur = () => {
-    if (isTextBlurred) {
+  const handleToggleActivityView = () => {
+    if (!isShowingTextDuringActivity) {
+      // Si actualmente NO estamos mostrando texto (estamos en ejercicio)
       setGlanceCount((prevCount) => {
         const updatedCount = prevCount - 1
         if (updatedCount <= 0) {
@@ -297,351 +308,432 @@ function App() {
         return updatedCount
       })
     }
-    setIsTextBlurred((prev) => !prev)
+    setIsShowingTextDuringActivity((prev) => !prev) // Alterna la vista
   }
 
+  // Condición para deshabilitar el botón Next:
+  // - Si hay actividad Y no está completada
+  // - O si la actividad está bloqueada
+  // - O si estamos en la introducción (chapterIndex === 0) y no hay más escenas (sceneIndex === currentChapter.scenes.length - 1)
   const nextButtonDisabled =
-    (hasActivity && !activityIsCompletedForCurrentScene) || isActivityLocked
+    (hasActivity && !activityIsCompletedForCurrentScene) ||
+    isActivityLocked ||
+    (chapterIndex === 0 && sceneIndex === currentChapter.scenes.length - 1)
 
   const nextChapterAvailable =
     sceneIndex === currentChapter.scenes.length - 1 &&
     chapterIndex < chapters.length - 1 &&
     (!hasActivity || activityIsCompletedForCurrentScene)
 
+  // Determinar si los botones de navegación previa deben estar deshabilitados
+  const prevButtonDisabled = sceneIndex === 0 && chapterIndex === 0
+
+  // Lógica para decidir qué mostrar: la imagen/texto normal o el ejercicio a pantalla completa.
+  const isShowingFullscreenExercise =
+    hasActivity &&
+    showActivity &&
+    !activityIsCompletedForCurrentScene &&
+    !isActivityLocked &&
+    !isShowingTextDuringActivity
+
   return (
-    <div
-      className={`app-container ${darkMode ? 'dark-mode' : ''}`}
-      style={{ fontSize, backgroundColor, color: textColor }}
-      onClick={() => setActiveWord(null)}
-    >
-      <div className="top-button-bar">
-        {/* Lado izquierdo: Botones de Modo Oscuro y Tamaño de Fuente */}
-        <div className="left-controls">
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            style={{ fontSize: '0.9rem', marginRight: '0.5rem' }}
-          >
-            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-          </button>
-          <button
-            onClick={() => setFontSizeIndex((prev) => Math.max(0, prev - 1))}
-            style={{ marginRight: '0.25rem' }}
-          >
-            A-
-          </button>
-          <button
-            onClick={() =>
-              setFontSizeIndex((prev) =>
-                Math.min(fontSizes.length - 1, prev + 1)
-              )
-            }
-          >
-            A+
-          </button>
-        </div>
-
-        {/* Lado derecho: Indicador de progreso del capítulo y Número de Página */}
-        <div className="right-indicators">
-          {' '}
-          {/* Nuevo div para agrupar y posicionar a la derecha */}
-          {chapterIndex > 0 && ( // No mostrar progreso en la introducción
-            <div className="chapter-progress-container">
-              <span className="chapter-progress-text">
-                Chapter {chapterIndex}: {completedScenesInCurrentChapter}/
-                {currentChapter.scenes.length} completed
-              </span>
-              <div className="progress-bar-outer">
-                <div
-                  className="progress-bar-inner"
-                  style={{ width: `${chapterProgress}%` }}
-                ></div>
-              </div>
-            </div>
-          )}
-          {getGlobalSceneNumber() && (
-            <div className="page-number-top-right">
-              Page {getGlobalSceneNumber()}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`${chapterIndex}-${sceneIndex}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="scene-layout">
-            <img
-              src={currentScene.image}
-              alt={`Scene ${sceneIndex + 1}`}
-              className="scene-image"
+    // DndProvider envuelve TODO el App
+    <DndProvider backend={HTML5Backend}>
+      <div
+        className={`app-container ${darkMode ? 'dark-mode' : ''}`}
+        style={{ fontSize, backgroundColor, color: textColor }}
+        onClick={() => setActiveWord(null)}
+      >
+        <div className="top-button-bar">
+          {/* Lado izquierdo: Botones de Modo Oscuro y Tamaño de Fuente, y Selector de Capítulos */}
+          <div className="left-controls">
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              style={{ fontSize: '0.9rem', marginRight: '0.5rem' }}
+            >
+              {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+            </button>
+            <button
+              onClick={() => setFontSizeIndex((prev) => Math.max(0, prev - 1))}
+              style={{ marginRight: '0.25rem' }}
+            >
+              A-
+            </button>
+            <button
+              onClick={() =>
+                setFontSizeIndex((prev) =>
+                  Math.min(fontSizes.length - 1, prev + 1)
+                )
+              }
+            >
+              A+
+            </button>
+            {/* Selector de Capítulos */}
+            <ChapterSelector
+              chapters={chapters}
+              chapterIndex={chapterIndex}
+              setChapterIndex={handleChapterChange}
+              isDisabled={isChapterSelectorDisabled}
             />
-            <div className="text-container">
-              <div style={{ marginBottom: '1rem' }}>
-                <h1 className="chapter-title">Luna's journey</h1>
-                <div style={{ marginTop: '0.5rem' }}>
-                  <ChapterSelector
-                    chapters={chapters}
-                    chapterIndex={chapterIndex}
-                    setChapterIndex={handleChapterChange}
-                    isDisabled={isChapterSelectorDisabled}
-                  />
+          </div>
+
+          {/* Lado derecho: Botones de navegación (Previous, Next, Next Chapter), Indicador de progreso del capítulo y Número de Página */}
+          <div className="right-indicators">
+            {/* Botones de navegación (ahora aquí arriba) */}
+            <div className="nav-buttons-top">
+              <button
+                onClick={() => {
+                  if (sceneIndex > 0) {
+                    setSceneIndex((prev) => prev - 1)
+                  } else if (chapterIndex > 0) {
+                    setChapterIndex((prev) => prev - 1)
+                    setSceneIndex(chapters[chapterIndex - 1].scenes.length - 1)
+                  }
+                  setShowActivity(false)
+                  setIsShowingTextDuringActivity(false)
+                }}
+                disabled={prevButtonDisabled}
+              >
+                ⬅️ Previous
+              </button>
+              <button
+                onClick={() => {
+                  setSceneIndex((prev) => prev + 1)
+                  setShowActivity(false)
+                  setIsShowingTextDuringActivity(false)
+                }}
+                className={
+                  chapterIndex === 0 &&
+                  sceneIndex === currentChapter.scenes.length - 1
+                    ? 'hidden'
+                    : ''
+                } // Oculta si es la última escena de la introducción
+                disabled={nextButtonDisabled}
+              >
+                Next ➡️
+              </button>
+              {nextChapterAvailable && (
+                <button
+                  onClick={() => {
+                    setChapterIndex(chapterIndex + 1)
+                    setSceneIndex(0)
+                    setShowActivity(false)
+                    setIsShowingTextDuringActivity(false)
+                  }}
+                >
+                  👉 Next Chapter
+                </button>
+              )}
+            </div>
+
+            {chapterIndex > 0 && (
+              <div className="chapter-progress-container">
+                <span className="chapter-progress-text">
+                  Chapter {chapterIndex}: {completedScenesInCurrentChapter}/
+                  {currentChapter.scenes.length} completed
+                </span>
+                <div className="progress-bar-outer">
+                  <div
+                    className="progress-bar-inner"
+                    style={{ width: `${chapterProgress}%` }}
+                  ></div>
                 </div>
               </div>
+            )}
 
-              {/* Contenido de la escena (texto y página) */}
+            {getGlobalSceneNumber() && (
+              <div className="page-number-top-right">
+                Page {getGlobalSceneNumber()}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${chapterIndex}-${sceneIndex}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            className="scene-and-activity-container"
+          >
+            {/* Este div scene-layout se adapta para mostrar la imagen y texto, o solo el ejercicio a pantalla completa */}
+            <div
+              className={`scene-layout ${
+                isShowingFullscreenExercise ? 'exercise-fullscreen-layout' : ''
+              }`}
+            >
+              {/* La imagen se muestra condicionalmente. Se oculta si es el modo de ejercicio de pantalla completa */}
+              <img
+                src={currentScene.image}
+                alt={`Scene ${sceneIndex + 1}`}
+                className={`scene-image ${
+                  isShowingFullscreenExercise ? 'hidden-for-exercise' : ''
+                }`}
+              />
+
+              {/* text-container, que puede ser la caja de texto normal O el ejercicio a pantalla completa */}
               <div
-                className={`scrollable-text ${
-                  isTextBlurred ? 'blur-active' : ''
+                className={`text-container ${
+                  isShowingFullscreenExercise ? 'full-width-exercise' : ''
                 }`}
               >
-                {(() => {
-                  const sentences = []
-                  let currentSentence = []
-                  currentScene.text.forEach((item, index) => {
-                    currentSentence.push({ ...item, index })
-                    if (['.', '!', '?'].includes(item.word)) {
-                      sentences.push(currentSentence)
-                      currentSentence = []
-                    }
-                  })
-                  if (currentSentence.length) {
-                    sentences.push(currentSentence)
-                  }
-
-                  return sentences.map((sentence, sIndex) => {
-                    const sentenceText = sentence
-                      .map((item) => item.word)
-                      .join(' ')
-                      .replace(/\s+([.,!?])/g, '$1')
-
-                    const playSentence = () => {
-                      const utter = new SpeechSynthesisUtterance(sentenceText)
-                      utter.lang = 'en-US'
-                      utter.rate = 1
-                      const preferred = getPreferredVoice()
-                      if (preferred) utter.voice = preferred
-                      speechSynthesis.cancel()
-                      speechSynthesis.speak(utter)
-                    }
-
-                    return (
-                      <span key={sIndex} className="sentence-wrapper">
-                        <button onClick={playSentence} className="play-button">
-                          🔊
-                        </button>
-                        {sentence.map(
-                          (
-                            { word, translation, index: globalIndex },
-                            localIndex
-                          ) => {
-                            const isPunctuation = [
-                              '.',
-                              ',',
-                              '!',
-                              '?',
-                              '...',
-                            ].includes(word)
-                            const prevWord =
-                              localIndex > 0
-                                ? sentence[localIndex - 1].word
-                                : ''
-                            const prevIsPunctuation = [
-                              '.',
-                              ',',
-                              '!',
-                              '?',
-                              '...',
-                            ].includes(prevWord)
-
-                            return (
-                              <span
-                                key={`${word}-${globalIndex}`}
-                                style={{
-                                  marginLeft: isPunctuation
-                                    ? 0
-                                    : prevIsPunctuation
-                                    ? '0.5rem'
-                                    : '0.25rem',
-                                }}
-                              >
-                                {isPunctuation ? (
-                                  word
-                                ) : (
-                                  <Word
-                                    text={word}
-                                    translation={translation}
-                                    activeWord={activeWord}
-                                    setActiveWord={setActiveWord}
-                                    onSpeak={speakWord}
-                                    fontSize={fontSize}
-                                  />
-                                )}
-                              </span>
-                            )
+                <div style={{ marginBottom: '1rem' }}>
+                  {/* CAMBIO: Ocultar título del capítulo cuando el ejercicio está activo */}
+                  {chapterIndex === 0 ? (
+                    <h1
+                      className={`main-book-title ${
+                        isShowingFullscreenExercise ? 'hidden' : ''
+                      }`}
+                    >
+                      Luna's journey
+                    </h1>
+                  ) : (
+                    <h2
+                      className={`chapter-title-main ${
+                        isShowingFullscreenExercise ? 'hidden' : ''
+                      }`}
+                    >
+                      {currentChapter.title}
+                    </h2>
+                  )}
+                </div>
+                {/* Contenedor principal que alternará entre el texto de la historia y el ejercicio */}
+                {/* Ocupa el 100% de la altura disponible para el contenido */}
+                <div className="content-area-wrapper">
+                  {/* Contenido de la escena (texto) - Visible si NO es el modo de ejercicio de pantalla completa */}
+                  {!isShowingFullscreenExercise && (
+                    <div className="scrollable-text">
+                      {(() => {
+                        const sentences = []
+                        let currentSentence = []
+                        currentScene.text.forEach((item, index) => {
+                          currentSentence.push({ ...item, index })
+                          if (['.', '!', '?'].includes(item.word)) {
+                            sentences.push(currentSentence)
+                            currentSentence = []
                           }
-                        )}
-                      </span>
-                    )
-                  })
-                })()}
-              </div>
+                        })
+                        if (currentSentence.length) {
+                          sentences.push(currentSentence)
+                        }
 
-              {/* Botón inicial para mostrar la actividad */}
-              {hasActivity &&
-                !activityIsCompletedForCurrentScene &&
-                !showActivity &&
-                !isActivityLocked && (
-                  <button
-                    onClick={() => setShowActivity(true)}
-                    className="show-activity-button"
+                        return sentences.map((sentence, sIndex) => {
+                          const sentenceText = sentence
+                            .map((item) => item.word)
+                            .join(' ')
+                            .replace(/\s+([.,!?])/g, '$1')
+
+                          const playSentence = () => {
+                            const utter = new SpeechSynthesisUtterance(
+                              sentenceText
+                            )
+                            utter.lang = 'en-US'
+                            const preferred = getPreferredVoice()
+                            if (preferred) utter.voice = preferred
+                            speechSynthesis.cancel()
+                            speechSynthesis.speak(utter)
+                          }
+
+                          return (
+                            <span key={sIndex} className="sentence-wrapper">
+                              <button
+                                onClick={playSentence}
+                                className="play-button"
+                              >
+                                🔊
+                              </button>
+                              {sentence.map(
+                                (
+                                  { word, translation, index: globalIndex },
+                                  localIndex
+                                ) => {
+                                  const isPunctuation = [
+                                    '.',
+                                    ',',
+                                    '!',
+                                    '?',
+                                    '...',
+                                  ].includes(word)
+                                  const prevWord =
+                                    localIndex > 0
+                                      ? sentence[localIndex - 1].word
+                                      : ''
+                                  const prevIsPunctuation = [
+                                    '.',
+                                    ',',
+                                    '!',
+                                    '?',
+                                    '...',
+                                  ].includes(prevWord)
+
+                                  return (
+                                    <span
+                                      key={`${word}-${globalIndex}`}
+                                      style={{
+                                        marginLeft: isPunctuation
+                                          ? 0
+                                          : prevIsPunctuation
+                                          ? '0.5rem'
+                                          : '0.25rem',
+                                      }}
+                                    >
+                                      {isPunctuation ? (
+                                        word
+                                      ) : (
+                                        <Word
+                                          text={word}
+                                          translation={translation}
+                                          activeWord={activeWord}
+                                          setActiveWord={setActiveWord}
+                                          onSpeak={speakWord}
+                                          fontSize={fontSize}
+                                        />
+                                      )}
+                                    </span>
+                                  )
+                                }
+                              )}
+                            </span>
+                          )
+                        })
+                      })()}
+                    </div>
+                  )}
+
+                  {/* Renderizado del ejercicio (se superpondrá si está activo y no es el texto) */}
+                  {isShowingFullscreenExercise && (
+                    <div className="activity-overlay-container">
+                      <DragDropSentence
+                        key={currentActivityId + '-active'}
+                        activityData={currentScene.activity}
+                        initialWords={availableWords}
+                        onWordsChanged={handleWordsInBankChange}
+                        onActivityComplete={handleActivityComplete}
+                      />
+                    </div>
+                  )}
+                </div>{' '}
+                {/* Fin de content-area-wrapper */}
+                {/* Botón inicial para mostrar la actividad */}
+                {hasActivity &&
+                  !activityIsCompletedForCurrentScene &&
+                  !showActivity &&
+                  !isActivityLocked && (
+                    <button
+                      onClick={() => setShowActivity(true)}
+                      className="show-activity-button"
+                      style={{
+                        marginTop: '1.5rem',
+                        marginBottom: '1.5rem',
+                        width: '100%',
+                      }}
+                    >
+                      Show Exercise
+                    </button>
+                  )}
+                {/* Contenedor del estado del ejercicio */}
+                {hasActivity && showActivity && (
+                  <div
+                    className="activity-status-section"
                     style={{
                       marginTop: '1.5rem',
                       marginBottom: '1.5rem',
-                      width: '100%',
+                      textAlign: 'center',
                     }}
                   >
-                    Show Exercise
-                  </button>
-                )}
-
-              {/* Contenedor del estado del ejercicio */}
-              {hasActivity && (
-                <div
-                  className="activity-status-section"
-                  style={{
-                    marginTop: '1.5rem',
-                    marginBottom: '1.5rem',
-                    textAlign: 'center',
-                  }}
-                >
-                  {isActivityLocked && (
-                    <p
-                      className="lock-message"
-                      style={{ color: 'red', fontWeight: 'bold' }}
-                    >
-                      Actividad bloqueada. Espera{' '}
-                      {Math.floor(remainingLockTime / 60)
-                        .toString()
-                        .padStart(2, '0')}
-                      :{(remainingLockTime % 60).toString().padStart(2, '0')}{' '}
-                      para reintentar.
-                      <br />
-                      <small>
-                        Mientras tanto, puedes revisar el texto y el
-                        vocabulario.
-                      </small>
-                    </p>
-                  )}
-
-                  {!activityIsCompletedForCurrentScene &&
-                    showActivity &&
-                    !isActivityLocked && (
-                      <>
-                        <p
-                          className="glance-count-message"
-                          style={{ color: textColor }}
-                        >
-                          Vistazos restantes: {glanceCount}
-                        </p>
-                        <button
-                          onClick={handleToggleBlur}
-                          className="toggle-blur-button"
-                          style={{ width: '100%' }}
-                          disabled={glanceCount <= 0 && isTextBlurred}
-                        >
-                          {isTextBlurred
-                            ? 'Ver Texto (Gastar vistazo)'
-                            : 'Ver Ejercicio'}
-                        </button>
-                      </>
+                    {isActivityLocked && (
+                      <p
+                        className="lock-message"
+                        style={{ color: 'red', fontWeight: 'bold' }}
+                      >
+                        Actividad bloqueada. Espera{' '}
+                        {Math.floor(remainingLockTime / 60)
+                          .toString()
+                          .padStart(2, '0')}
+                        :{(remainingLockTime % 60).toString().padStart(2, '0')}{' '}
+                        para reintentar.
+                        <br />
+                        <small>
+                          Mientras tanto, puedes revisar el texto y el
+                          vocabulario.
+                        </small>
+                      </p>
                     )}
 
-                  {activityIsCompletedForCurrentScene && (
-                    <div>
-                      <p
-                        style={{
-                          color: 'green',
-                          fontWeight: 'bold',
-                          display: 'inline-block',
-                          marginRight: '1rem',
-                        }}
-                      >
-                        ¡Ejercicio completado!
-                      </p>
-                      <button
-                        onClick={handleResetActivity}
-                        className="reset-activity-button"
-                      >
-                        Reiniciar Ejercicio
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+                    {!activityIsCompletedForCurrentScene &&
+                      !isActivityLocked && (
+                        <>
+                          <p
+                            className="glance-count-message"
+                            style={{ color: textColor }}
+                          >
+                            Vistazos restantes: {glanceCount}
+                          </p>
+                          <button
+                            onClick={handleToggleActivityView}
+                            className="toggle-activity-view-button"
+                            style={{ width: '100%' }}
+                            disabled={
+                              isShowingTextDuringActivity && glanceCount <= 0
+                            }
+                          >
+                            {isShowingTextDuringActivity
+                              ? 'Ver Ejercicio'
+                              : 'Ver Texto (Gastar vistazo)'}
+                          </button>
+                        </>
+                      )}
 
-              {/* Renderizado condicional de la actividad (DragDropSentence) */}
-              {hasActivity &&
-                showActivity &&
-                !activityIsCompletedForCurrentScene &&
-                !isActivityLocked && (
-                  <div
-                    className={`activity-container ${
-                      !isTextBlurred ? 'blur-active' : ''
-                    }`}
-                  >
-                    <DragDropSentence
-                      key={currentActivityId + '-active'}
-                      activityData={currentScene.activity}
-                      onActivityComplete={handleActivityComplete}
-                    />
+                    {activityIsCompletedForCurrentScene && (
+                      <div>
+                        <p
+                          style={{
+                            color: 'green',
+                            fontWeight: 'bold',
+                            display: 'inline-block',
+                            marginRight: '1rem',
+                          }}
+                        >
+                          ¡Ejercicio completado!
+                        </p>
+                        <button
+                          onClick={handleResetActivity}
+                          className="reset-activity-button"
+                        >
+                          Reiniciar Ejercicio
+                        </button>
+                      </div>
+                    )}
                   </div>
-                )}
-
-              <div className="nav-buttons">
-                <button
-                  onClick={() => {
-                    setSceneIndex((prev) => Math.max(prev - 1, 0))
-                    setShowActivity(false)
-                    setIsTextBlurred(false)
-                  }}
-                  disabled={sceneIndex === 0}
-                >
-                  ⬅️ Previous
-                </button>
-                <button
-                  onClick={() =>
-                    setSceneIndex((prev) =>
-                      Math.min(
-                        prev + 1,
-                        chapters[chapterIndex].scenes.length - 1
-                      )
-                    )
-                  }
-                  disabled={nextButtonDisabled}
-                >
-                  Next ➡️
-                </button>
-                {nextChapterAvailable && (
-                  <button
-                    onClick={() => {
-                      setChapterIndex(chapterIndex + 1)
-                      setSceneIndex(0)
-                    }}
-                  >
-                    👉 Next Chapter
-                  </button>
                 )}
               </div>
             </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+      {/* Contenedor Fijo para las palabras arrastrables, fuera de todo, en el root de App */}
+      {/* Solo visible si el ejercicio está activo y no completado/bloqueado Y NO estamos viendo el texto */}
+      {isShowingFullscreenExercise && (
+        <div className="fixed-word-bank-container">
+          {availableWords.map((word, index) => (
+            <DraggableWord
+              key={word + index}
+              word={word}
+              onDropWord={(returnedWord) => {
+                setAvailableWords((prev) => {
+                  if (!prev.includes(returnedWord)) {
+                    return [...prev, returnedWord]
+                  }
+                  return prev
+                })
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </DndProvider>
   )
 }
 

@@ -11,42 +11,30 @@ html,
 body {
   margin: 0;
   padding: 0;
-  /* El background-color directo aquí es un fallback,
-     el color principal se controla por las variables CSS */
-  background-color: #f0f0f0;
-  height: 100%; /* Asegura que html y body ocupen toda la altura */
+  background-color: #f0f0f0; /* Fallback */
+  height: 100%;
   width: 100%;
+  overflow: hidden; /* OCULTAR EL SCROLLBAR GLOBAL DEL BODY/HTML */
 }
 
-/* --- Variables CSS para un tema claro y oscuro fácil de cambiar --- */
-
-/* Modo claro por defecto (aplicado a html) */
+/* --- Variables CSS para un tema claro y oscuro --- */
 html {
-  --background-color: #fffbe6; /* Color de fondo general */
-  --text-color: #333; /* Color de texto general */
-
-  /* Botones generales */
+  --background-color: #fffbe6;
+  --text-color: #333;
   --button-default-bg: transparent;
   --button-default-text: var(--text-color);
   --button-default-border: var(--text-color);
   --button-default-hover-bg: rgba(0, 0, 0, 0.1);
-
-  /* Botones específicos */
   --play-button-bg: #f8f8f8;
   --play-button-border: #ccc;
   --play-button-hover-bg: #e6f0ff;
-
-  --show-activity-button-bg: #28a745; /* Verde para "Show Exercise" */
+  --show-activity-button-bg: #28a745;
   --show-activity-button-hover-bg: #218838;
-
-  --toggle-blur-button-bg: #007bff; /* Azul para "Ver Texto/Ejercicio" */
-  --toggle-blur-button-hover-bg: #0056b3;
-
-  --reset-activity-button-bg: #ffc107; /* Amarillo/Naranja para "Reiniciar Ejercicio" */
+  --toggle-activity-view-button-bg: #007bff;
+  --toggle-activity-view-button-hover-bg: #0056b3;
+  --reset-activity-button-bg: #ffc107;
   --reset-activity-button-text: #333;
   --reset-activity-button-hover-bg: #e0a800;
-
-  /* Colores de feedback y modales (usados en componentes específicos, pero definidos aquí para consistencia) */
   --error-message-color: #a94442;
   --error-background: #fcebeb;
   --error-border: #e0b4b4;
@@ -54,51 +42,38 @@ html {
   --modal-bg: #fff;
   --modal-text: #000;
   --modal-border: #ccc;
-
-  /* Elementos de la actividad Drag & Drop (usados en DragDropSentence.css, definidos aquí para consistencia) */
   --blank-border-color: #999;
   --blank-bg-color: #e0e0e0;
   --blank-hover-bg-color: #f0f0f0;
   --blank-correct-color: green;
   --blank-incorrect-color: red;
-  --word-bank-bg: #f9f9f9;
-  --word-bank-border: #ccc;
-  --draggable-word-bg: #e6f0ff;
+  --word-bank-bg: #f9f9f9; /* Color de fondo para el banco de palabras fijo */
+  --word-bank-border: #ccc; /* Borde para el banco de palabras fijo */
+  --draggable-word-bg: #e6f0ff; /* Color para las palabras arrastrables individuales */
   --draggable-word-border: #cce0ff;
   --draggable-word-hover-bg: #d0e0ff;
-
-  /* Barra de progreso */
   --progress-bar-outer-bg: #e0e0e0;
-  --progress-bar-inner-bg: #4caf50; /* Verde de progreso */
+  --progress-bar-inner-bg: #4caf50;
+  --select-arrow-color: #000;
 }
 
-/* Modo oscuro (aplicado a html.dark-mode) */
 html.dark-mode {
   --background-color: #1e1e1e;
   --text-color: #f0f0f0;
-
-  /* Botones generales */
   --button-default-bg: transparent;
   --button-default-text: var(--text-color);
   --button-default-border: #555;
   --button-default-hover-bg: #2a2a2a;
-
-  /* Botones específicos */
   --play-button-bg: #333;
   --play-button-border: #555;
   --play-button-hover-bg: #444;
-
   --show-activity-button-bg: #4caf50;
   --show-activity-button-hover-bg: #45a049;
-
-  --toggle-blur-button-bg: #0056b3;
-  --toggle-blur-button-hover-bg: #003e82;
-
+  --toggle-activity-view-button-bg: #0056b3;
+  --toggle-activity-view-button-hover-bg: #003e82;
   --reset-activity-button-bg: #d1c41f;
   --reset-activity-button-text: #1e1e1e;
   --reset-activity-button-hover-bg: #b7a91a;
-
-  /* Colores de feedback y modales */
   --error-message-color: #f1a9a9;
   --error-background: #3b2a2a;
   --error-border: #5a3e3e;
@@ -106,8 +81,6 @@ html.dark-mode {
   --modal-bg: #2a2a2a;
   --modal-text: #f0f0f0;
   --modal-border: #555;
-
-  /* Elementos de la actividad Drag & Drop */
   --blank-border-color: #777;
   --blank-bg-color: #2a2a2a;
   --blank-hover-bg-color: #333;
@@ -118,104 +91,298 @@ html.dark-mode {
   --draggable-word-bg: #444;
   --draggable-word-border: #666;
   --draggable-word-hover-bg: #555;
-
-  /* Barra de progreso */
   --progress-bar-outer-bg: #333;
-  --progress-bar-inner-bg: #66bb6a; /* Verde más brillante */
+  --progress-bar-inner-bg: #66bb6a;
+  --select-arrow-color: #f0f0f0;
+}
+
+/* --- Clases de utilidad --- */
+.hidden {
+  display: none !important;
 }
 
 /* --- Estilos de Layout y Contenedores Principales --- */
 .app-container {
   padding: 2rem;
   font-family: Georgia, serif;
-  min-height: 100vh;
+  height: 100vh; /* Ocupa el 100% de la altura del viewport */
   display: flex;
   flex-direction: column;
   background-color: var(--background-color);
   color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s; /* Transición suave para el modo oscuro */
+  transition: background-color 0.3s, color 0.3s;
+  overflow: hidden; /* Asegura que el app-container maneje el scroll, si lo necesita */
 }
 
 .top-button-bar {
   display: flex;
   align-items: center;
-  gap: 1rem; /* Espacio entre los elementos de la barra superior */
-  position: relative; /* Necesario para posicionar page-number-top-right */
+  gap: 2rem; /* Aumentado a 2rem para más espacio */
+  position: relative;
   width: 100%;
   padding-bottom: 1rem;
-  padding-top: 10px; /* Ajusta este valor para bajar toda la barra */
+  padding-top: 10px;
+  min-height: 60px; /* Altura mínima aproximada de la barra superior */
 }
 
 .left-controls {
   display: flex;
-  gap: 0.5rem; /* Espacio entre los botones A-, A+, y Modo */
-  margin-right: auto; /* Empuja este div a la izquierda y el siguiente a la derecha */
+  align-items: center;
+  gap: 0.75rem;
+  margin-right: auto;
+}
+
+.left-controls button,
+.left-controls select {
+  padding: 0.5em 1em;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+    transform 0.1s;
+}
+
+.left-controls select {
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="292.4" height="292.4"><path fill="var(--select-arrow-color)" d="M287 69.9H5.4c-7.3 0-11 8.9-6 14.2l140.7 140.8c2.8 2.8 7.7 2.8 10.5 0l140.7-140.8c5-5.3 1.3-14.2-6-14.2z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 0.7em top 50%, 0 0;
+  background-size: 0.65em auto, 100%;
+  padding-right: 2em;
+  border: 1px solid var(--button-default-border);
+  background-color: var(--button-default-bg);
+  color: var(--button-default-text);
+  margin-left: 1rem;
 }
 
 .right-indicators {
   display: flex;
   align-items: center;
-  gap: 1.5rem; /* Espacio entre el progreso y el número de página */
-  margin-left: auto; /* Empuja este div a la derecha */
+  gap: 1.5rem;
+  margin-left: auto;
 }
 
+/* Contenedor de los botones de navegación en la parte superior */
+.nav-buttons-top {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Contenedor flexible para toda la sección de contenido de la escena/actividad */
+.scene-and-activity-container {
+  flex-grow: 1; /* Ocupa todo el espacio vertical restante del app-container */
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* Permitir scroll vertical solo dentro de este contenedor */
+  overflow-x: hidden; /* Ocultar scroll horizontal */
+  padding-bottom: 80px; /* Espacio para el fixed-word-bank-container */
+  /* Borde de depuración eliminado */
+}
+
+/* Contenedor del scene-layout (imagen + text-container) */
 .scene-layout {
   display: flex;
   align-items: flex-start;
   margin-top: 2rem;
-  flex-grow: 1; /* Permite que el layout ocupe el espacio disponible */
+  flex-grow: 1; /* Esto le permite ocupar el espacio restante en .scene-and-activity-container */
+  /* CAMBIO CLAVE: Eliminar altura fija y dejar que flex-grow: 1 gestione la altura */
+  /* height: calc(100% - 2rem); */
+  overflow-y: hidden; /* No scroll aquí, el padre lo gestiona */
+  position: relative;
+  /* Borde de depuración eliminado */
+}
+
+/* Layout cuando el ejercicio toma la pantalla completa (sin imagen) */
+.scene-layout.exercise-fullscreen-layout {
+  flex-direction: column; /* Cambia a columna para que text-container ocupe todo el ancho */
+  align-items: stretch; /* Estira el text-container */
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+  /* Borde de depuración eliminado */
 }
 
 .scene-image {
   width: 33%;
-  height: 90vh; /* Ajustado para ser responsive y no exceder la vista */
-  max-height: 700px; /* Limitar altura máxima para pantallas muy grandes */
-  object-fit: cover;
+  height: 90vh; /* REGRESADO A SU TAMAÑO ORIGINAL: 90% del viewport height */
+  max-height: none; /* ELIMINA EL LÍMITE DE ALTURA */
+  object-fit: cover; /* Mantiene la proporción y cubre el área */
   border-radius: 8px;
   margin-right: 2rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.3s ease-in-out, width 0.3s ease-in-out,
+    margin-right 0.3s ease-in-out;
+}
+
+/* Ocultar la imagen con opacidad y colapsar su espacio */
+.scene-image.hidden-for-exercise {
+  opacity: 0;
+  width: 0; /* Colapsa el ancho para que el text-container ocupe todo el espacio */
+  margin-right: 0; /* Elimina el margen derecho */
+  pointer-events: none;
+  user-select: none;
 }
 
 .text-container {
-  flex: 1;
+  flex: 1; /* El área de texto ocupa el resto del espacio */
   padding: 25px;
+  position: relative; /* Para posicionar el contenido de la actividad */
   display: flex;
   flex-direction: column;
+  height: 100%; /* Ocupa el 100% de la altura de su padre (.scene-layout) */
+  box-sizing: border-box; /* Asegura que el padding no desborde el 100% de altura */
+  /* Borde de depuración eliminado */
 }
 
-.chapter-title {
-  margin: 0 0 1rem 0;
+/* Clase para el text-container cuando el ejercicio es a pantalla completa */
+.text-container.full-width-exercise {
+  flex: 1; /* Asegura que ocupe todo el ancho disponible en scene-layout */
+  padding-left: 50px; /* Padding extra para que el contenido no esté pegado al borde */
+  padding-right: 50px;
+  transition: padding-left 0.3s ease-in-out, padding-right 0.3s ease-in-out;
+  /* Borde de depuración eliminado */
+}
+
+/* Título principal del libro (solo en la introducción) */
+.main-book-title {
+  margin: 0 auto 1rem auto;
   text-align: center;
+  color: var(--text-color);
+  font-size: 2.5rem;
+  font-weight: bold;
+  min-height: 40px; /* Altura mínima para el título */
+}
+
+/* Título del capítulo (aparece en lugar del título del libro en otros capítulos) */
+.chapter-title-main {
+  text-align: center;
+  margin: 0 auto 1rem auto;
+  color: var(--text-color);
+  font-size: 2rem;
+  font-weight: bold;
+  min-height: 30px; /* Altura mínima para el título del capítulo */
+}
+
+/* Nuevo contenedor para el área de contenido principal (texto o ejercicio) */
+.content-area-wrapper {
+  position: relative; /* Base para el posicionamiento absoluto del ejercicio */
+  flex-grow: 1; /* Ocupa el espacio restante en la columna */
+  overflow-y: auto; /* Permitir overflow vertical aquí si el contenido del texto/ejercicio es largo */
+  overflow-x: hidden; /* Ocultar horizontal */
+  /* CAMBIO CLAVE: Altura calculada con la altura de los elementos de títulos*/
+  height: calc(
+    100% - var(--main-book-title-height) - var(--chapter-title-margin-bottom)
+  );
+  /* Nota: Aquí asumimos que `--main-book-title-height` y `--chapter-title-margin-bottom`
+           son alturas ya definidas o que se pueden calcular bien.
+           Si no, el 70px anterior era una aproximación.
+           Por simplicidad y para que funcione, volvamos a la aproximación directa
+           o definamos esas variables.
+           Vamos a usar 70px como una estimación para títulos + margen.*/
+  height: calc(
+    100% - 70px
+  ); /* Aproximación de Altura total del título + su margen inferior */
+
+  /* Borde de depuración eliminado */
+}
+
+/* Contenedor del texto de la historia */
+.scrollable-text {
+  height: 100%; /* Ocupa la altura del content-area-wrapper */
+  max-height: unset; /* Quita cualquier límite de altura */
+  overflow-y: auto; /* Aquí sí permitimos scroll si el texto es largo */
+  padding-right: 1rem;
+  line-height: 1.6;
+  flex-grow: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* La clase 'hidden' para ocultar elementos */
+.hidden {
+  display: none !important;
+}
+
+/* Contenedor del ejercicio que se superpone al texto */
+.activity-overlay-container {
+  position: absolute; /* Superposición */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; /* Ocupa el 100% de la altura del content-area-wrapper */
+  background-color: var(--background-color);
+  padding: 0; /* padding se maneja internamente en DragDropSentence.css */
+  box-sizing: border-box;
+  overflow-y: auto; /* Permitir scroll dentro del ejercicio si el contenido es largo */
+  z-index: 2; /* Asegura que esté sobre el texto, pero debajo de los modales */
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.3s ease-in-out;
+  /* Borde de depuración eliminado */
+}
+
+/* Estilos para el contenedor del ejercicio (el que envuelve a DragDropSentence) */
+.activity-container {
+  /* Este div está dentro de activity-overlay-container */
+  flex-grow: 1; /* Permite que el contenido del ejercicio ocupe el espacio disponible */
+}
+
+/* --- Palabras arrastrables fijas en la parte inferior de la ventana --- */
+.fixed-word-bank-container {
+  position: fixed; /* Fijo en la ventana del navegador */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px;
+  background-color: var(--word-bank-bg);
+  border-top: 1px solid var(--word-bank-border);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100; /* Asegura que esté SIEMPRE encima de todo */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.fixed-word-bank-container.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.draggable-word-fixed {
+  background-color: var(--draggable-word-bg);
+  border: 1px solid var(--draggable-word-border);
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: grab;
+  font-weight: bold;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+  flex-shrink: 0;
   color: var(--text-color);
 }
 
-/* --- Estilos para el texto de la historia --- */
-.scrollable-text {
-  max-height: 60vh;
-  overflow-y: auto;
-  padding-right: 1rem;
-  line-height: 1.6; /* Mayor legibilidad */
-  margin-bottom: 1rem;
-
-  /* Propiedades de filtro y transición para el desenfoque */
-  filter: blur(0px); /* Por defecto no borroso */
-  transition: filter 0.3s ease-in-out;
-  pointer-events: auto; /* Por defecto interactuable */
-  user-select: auto; /* Por defecto seleccionable */
+.draggable-word-fixed:hover {
+  background-color: var(--draggable-word-hover-bg);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }
 
-.scrollable-text.blur-active {
-  filter: blur(4px); /* Valor del desenfoque cuando la clase está activa */
-  pointer-events: none; /* Deshabilita la interacción cuando está borroso */
-  user-select: none; /* Evita que el texto se pueda seleccionar cuando está borroso */
+.draggable-word-fixed.is-dragging {
+  opacity: 0; /* Hacerlo invisible al arrastrar */
 }
 
+/* --- Estilos de Reproducción de Oraciones --- */
 .sentence-wrapper {
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
   margin-right: 0.5rem;
-  margin-bottom: 0.5rem; /* Espacio entre oraciones */
+  margin-bottom: 0.5rem;
 }
 
 .play-button {
@@ -237,14 +404,16 @@ html.dark-mode {
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }
 
-/* --- Estilos de Navegación y Botones Globales --- */
+/* --- Estilos de Navegación (botones inferiores, si los hay) --- */
 .nav-buttons {
+  /* Este div puede que ya no sea necesario si todos los botones están arriba */
   margin-top: 2rem;
   display: flex;
   gap: 1rem;
-  justify-content: center; /* Centra los botones de navegación */
+  justify-content: center;
 }
 
+/* Estilos de botones generales que ya existían y se comparten */
 button {
   padding: 0.5rem 1rem;
   border: 1px solid var(--button-default-border);
@@ -286,8 +455,8 @@ button:disabled {
   background-color: var(--show-activity-button-hover-bg);
 }
 
-.toggle-blur-button {
-  background-color: var(--toggle-blur-button-bg);
+.toggle-activity-view-button {
+  background-color: var(--toggle-activity-view-button-bg);
   color: white;
   padding: 12px 25px;
   border: none;
@@ -297,8 +466,8 @@ button:disabled {
   margin: 1rem auto;
 }
 
-.toggle-blur-button:hover:not(:disabled) {
-  background-color: var(--toggle-blur-button-hover-bg);
+.toggle-activity-view-button:hover:not(:disabled) {
+  background-color: var(--toggle-activity-view-button-hover-bg);
 }
 
 .reset-activity-button {
@@ -306,7 +475,7 @@ button:disabled {
   color: var(--reset-activity-button-text);
   padding: 10px 20px;
   border: none;
-  font-size: 1rem;
+  font-size: 1.1rem; /* Tamaño de fuente un poco más grande */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
@@ -314,22 +483,7 @@ button:disabled {
   background-color: var(--reset-activity-button-hover-bg);
 }
 
-/* --- Estilos para la Actividad (Contenedor y Mensajes) --- */
-.activity-container {
-  position: relative;
-  margin-top: 1.5rem;
-  filter: blur(0px);
-  transition: filter 0.3s ease-in-out;
-  pointer-events: auto;
-  user-select: auto;
-}
-
-.activity-container.blur-active {
-  filter: blur(4px);
-  pointer-events: none;
-  user-select: none;
-}
-
+/* --- Estilos para la Sección de Estado de la Actividad --- */
 .activity-status-section {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
@@ -354,25 +508,23 @@ button:disabled {
 }
 
 /* --- Estilos para Indicadores de Progreso y Número de Página --- */
-
-/* Contenedor de progreso del capítulo (barra y texto) */
 .chapter-progress-container {
   display: flex;
   flex-direction: column;
-  align-items: flex-end; /* Alinea el texto y la barra a la DERECHA dentro de su contenedor */
+  align-items: flex-end;
   gap: 0.2rem;
-  padding-right: 0.5rem; /* Pequeño padding para despegar del borde si es necesario */
+  padding-right: 0.5rem;
 }
 
 .chapter-progress-text {
   font-size: 0.9rem;
   font-weight: bold;
   color: var(--text-color);
-  white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
+  white-space: nowrap;
 }
 
 .progress-bar-outer {
-  width: 120px; /* Ancho fijo para la barra */
+  width: 120px;
   height: 8px;
   background-color: var(--progress-bar-outer-bg);
   border-radius: 4px;
@@ -384,10 +536,9 @@ button:disabled {
   height: 100%;
   background-color: var(--progress-bar-inner-bg);
   border-radius: 4px;
-  transition: width 0.5s ease-out; /* Animación de la barra */
+  transition: width 0.5s ease-out;
 }
 
-/* Posición del número de página en la esquina superior derecha */
 .page-number-top-right {
   font-weight: bold;
   color: var(--text-color);
@@ -395,7 +546,7 @@ button:disabled {
   background-color: rgba(255, 255, 255, 0.7);
   padding: 0.2rem 0.6rem;
   border-radius: 5px;
-  margin-top: 5px; /* Ajuste para bajarlo 5 píxeles desde el top-button-bar */
+  margin-top: 5px;
 }
 
 html.dark-mode .page-number-top-right {

@@ -1,16 +1,25 @@
-.drag-drop-activity-container {
-  background-color: var(
-    --background-color
-  ); /* Usar variables para modo oscuro/claro */
+/* components/DragDropSentence.css */
+
+.drag-drop-activity-content {
+  background-color: var(--background-color);
   border-radius: 8px;
-  padding: 25px;
-  margin-top: 2rem;
+  padding: 25px; /* Padding interno para el contenido de la actividad */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   color: var(--text-color);
   font-family: Georgia, serif;
+
+  /* CAMBIOS CLAVE AQUÍ para asegurar que ocupe todo el espacio vertical */
+  display: flex; /* Usamos flexbox para que el contenido se distribuya */
+  flex-direction: column; /* Apila los elementos verticalmente */
+  flex-grow: 1; /* Permite que este contenedor ocupe todo el espacio disponible */
+  height: 100%; /* Asegura que ocupe el 100% de la altura de su padre (.activity-overlay-container) */
+  min-height: 0; /* Permite que el contenido se encoja si es necesario */
+  overflow-y: auto; /* Permite el scroll si el contenido es demasiado largo */
+
+  justify-content: flex-start; /* Alinea el contenido al inicio, no space-between */
 }
 
-.drag-drop-activity-container h3 {
+.drag-drop-activity-content h3 {
   text-align: center;
   margin-bottom: 1.5rem;
   color: var(--text-color);
@@ -28,7 +37,7 @@
   display: inline-block;
   min-width: 80px; /* Ancho mínimo para el blank */
   height: 30px; /* Altura para el blank */
-  border-bottom: 2px dashed #999;
+  border-bottom: 2px dashed var(--blank-border-color);
   margin: 0 5px;
   text-align: center;
   line-height: 30px;
@@ -36,56 +45,29 @@
   color: var(--text-color); /* Color del texto cuando se suelta */
   cursor: pointer;
   border-radius: 4px;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .blank-spot:hover {
-  background-color: #f0f0f0;
+  background-color: var(--blank-hover-bg-color);
 }
 
 .blank-spot.incorrect-solution {
-  border-bottom: 2px dashed red;
-  color: red;
+  border-bottom: 2px dashed var(--blank-incorrect-color);
+  color: var(--blank-incorrect-color);
 }
 
 .blank-spot.correct-solution {
-  border-bottom: 2px solid green;
-  color: green;
-}
-
-.word-bank {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 2rem;
-  padding: 15px;
-  border: 1px dashed #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.draggable-word {
-  background-color: #e6f0ff; /* Color para las palabras arrastrables */
-  border: 1px solid #cce0ff;
-  padding: 8px 15px;
-  border-radius: 20px;
-  cursor: grab;
-  font-weight: bold;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-  user-select: none; /* Evita que el texto se seleccione al arrastrar */
-}
-
-.draggable-word:hover {
-  background-color: #d0e0ff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid var(--blank-correct-color);
+  color: var(--blank-correct-color);
 }
 
 .check-button {
   display: block;
   margin: 2rem auto 0;
   padding: 12px 25px;
-  background-color: #007bff; /* Color primario del botón */
+  background-color: var(--button-primary-bg);
   color: white;
   border: none;
   border-radius: 5px;
@@ -95,66 +77,13 @@
 }
 
 .check-button:hover {
-  background-color: #0056b3;
+  background-color: var(--button-primary-hover-bg);
 }
 
 .activity-success-message {
   text-align: center;
   margin-top: 2rem;
   font-size: 1.2rem;
-  color: green;
+  color: var(--blank-correct-color);
   font-weight: bold;
-}
-
-/* Modo oscuro */
-.app-container.dark-mode .drag-drop-activity-container {
-  background-color: #2a2a2a;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-}
-
-.app-container.dark-mode .drag-drop-activity-container h3,
-.app-container.dark-mode .sentence-line,
-.app-container.dark-mode .blank-spot {
-  color: #f0f0f0;
-}
-
-.app-container.dark-mode .blank-spot {
-  border-bottom-color: #777;
-}
-
-.app-container.dark-mode .blank-spot.incorrect-solution {
-  border-bottom-color: #ff6666;
-  color: #ff6666;
-}
-
-.app-container.dark-mode .blank-spot.correct-solution {
-  border-bottom-color: #66ff66;
-  color: #66ff66;
-}
-
-.app-container.dark-mode .word-bank {
-  background-color: #333;
-  border-color: #555;
-}
-
-.app-container.dark-mode .draggable-word {
-  background-color: #444;
-  border-color: #666;
-  color: #f0f0f0;
-}
-
-.app-container.dark-mode .draggable-word:hover {
-  background-color: #555;
-}
-
-.app-container.dark-mode .check-button {
-  background-color: #0056b3;
-}
-
-.app-container.dark-mode .check-button:hover {
-  background-color: #003e82;
-}
-
-.app-container.dark-mode .activity-success-message {
-  color: #66ff66;
 }
