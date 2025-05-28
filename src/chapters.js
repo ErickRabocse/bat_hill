@@ -168,19 +168,6 @@ const chapters = [
                 { type: '.' },
               ],
             },
-            {
-              id: 'sentence4_ch1_sc1',
-              parts: [
-                { type: 'text', value: 'Her belly is ' },
-                {
-                  type: 'blank',
-                  correctWord: 'round',
-                  translation: 'redondo',
-                  hint: 'Mama está embarazada, ¿cómo es su barriga?',
-                },
-                { type: '.' },
-              ],
-            },
           ],
           // Palabras adicionales para dificultar o despistar un poco, si lo deseas
           // Por ahora, solo las palabras correctas. En el componente, las mezclaremos.
