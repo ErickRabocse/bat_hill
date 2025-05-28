@@ -1,3 +1,5 @@
+// src/data/chapters/chapter1Data.js
+
 export const chapter1Data = {
   id: 1,
   title: 'A Cold Night',
@@ -23,7 +25,7 @@ export const chapter1Data = {
         { word: 'is messy', translation: 'está alborotado' },
         { word: '.', translation: '' },
         { word: 'Her eyes', translation: 'Sus ojos' },
-        { word: 'are tired', translation: 'están cansandos' },
+        { word: 'are tired', translation: 'están cansados' },
         { word: '.', translation: '' },
         { word: 'Her belly', translation: 'Su vientre' },
         { word: 'is round', translation: 'está redondo' },
@@ -32,10 +34,7 @@ export const chapter1Data = {
         { word: 'have puppies', translation: 'tener cachorros' },
         { word: '.', translation: '' },
         { word: 'She', translation: 'Ella' },
-        {
-          word: 'walks slowly into',
-          translation: 'se adentra lentamente en',
-        },
+        { word: 'walks slowly into', translation: 'se adentra lentamente en' },
         { word: 'a quiet alley', translation: 'un callejón tranquilo' },
         { word: '.', translation: '' },
         { word: 'The walls', translation: 'Las paredes' },
@@ -47,7 +46,6 @@ export const chapter1Data = {
         { word: 'It feels lonely', translation: 'Se siente solitario' },
         { word: '.', translation: '' },
       ],
-      // NUEVA PROPIEDAD DE ACTIVIDAD
       activity: {
         type: 'DragDropSentence',
         instructions:
@@ -87,7 +85,7 @@ export const chapter1Data = {
                 type: 'blank',
                 correctWord: 'stray',
                 translation: 'callejera',
-                hint: 'Describe el tipo de perro que es Mama. ¿Tiene hogar?',
+                hint: 'Describe el tipo de perro que es Mama.',
               },
               { type: 'text', value: ' dog.' },
             ],
@@ -100,31 +98,48 @@ export const chapter1Data = {
                 type: 'blank',
                 correctWord: 'round',
                 translation: 'redondo',
-                hint: 'Mama está embarazada, ¿cómo es su barriga?',
+                hint: '¿Cómo es su barriga?',
+              },
+              { type: '.' },
+            ],
+          },
+          {
+            // NUEVA ORACIÓN 5
+            id: 'sentence5_ch1_sc1',
+            parts: [
+              { type: 'text', value: 'The moon is big and ' },
+              {
+                type: 'blank',
+                correctWord: 'bright',
+                translation: 'brillante',
+                hint: '¿Cómo es la luna además de grande?',
               },
               { type: '.' },
             ],
           },
         ],
-        // Palabras adicionales para dificultar o despistar un poco, si lo deseas
-        // Por ahora, solo las palabras correctas. En el componente, las mezclaremos.
         allWords: [
           'cold',
           'strong',
           'stray',
           'round',
-          'big',
+          'bright',
+          'high',
           'dark',
           'tired',
           'messy',
-        ], // Asegúrate de incluir las palabras incorrectas si las quieres, pero por ahora solo las correctas y algunas del texto.
+          'sky',
+        ], // Añadida 'bright', 'high', 'sky'
       },
     },
     {
       id: 2,
       image: '/images/1.2.png',
       text: [
-        { word: 'Mama finds', translation: 'Mama encuentra' },
+        /* ... (texto original de la escena 2) ... */ {
+          word: 'Mama finds',
+          translation: 'Mama encuentra',
+        },
         { word: 'a corner', translation: 'una esquina' },
         { word: '.', translation: '' },
         { word: 'There is a box', translation: 'Hay una caja' },
@@ -162,12 +177,100 @@ export const chapter1Data = {
         { word: 'gently', translation: 'suavemente' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch1_sc2',
+            parts: [
+              { type: 'text', value: 'Mama ' },
+              {
+                type: 'blank',
+                correctWord: 'finds',
+                translation: 'encuentra',
+                hint: '¿Qué hace mamá en la esquina?',
+              },
+              { type: 'text', value: ' a corner.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch1_sc2',
+            parts: [
+              { type: 'text', value: 'It is ' },
+              {
+                type: 'blank',
+                correctWord: 'soft',
+                translation: 'suave',
+                hint: '¿Cómo es la caja de cartón?',
+              },
+              { type: 'text', value: ' and dry.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch1_sc2',
+            parts: [
+              { type: 'text', value: 'The puppies are ' },
+              {
+                type: 'blank',
+                correctWord: 'born',
+                translation: 'nacen',
+                hint: '¿Qué les sucede a los cachorros?',
+              },
+              { type: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch1_sc2',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'licks',
+                translation: 'lame',
+                hint: '¿Qué hace mamá a sus cachorros?',
+              },
+              { type: 'text', value: ' them gently.' },
+            ],
+          },
+          {
+            // NUEVA ORACIÓN 5
+            id: 'sentence5_ch1_sc2',
+            parts: [
+              { type: 'text', value: 'The third is light ' },
+              {
+                type: 'blank',
+                correctWord: 'orange',
+                translation: 'naranja',
+                hint: '¿De qué color es el tercer cachorro?',
+              },
+              { type: '.' },
+            ],
+          },
+        ],
+        allWords: [
+          'finds',
+          'soft',
+          'born',
+          'licks',
+          'orange',
+          'box',
+          'deeply',
+          'ready',
+          'cardboard',
+          'love',
+        ], // Añadida 'orange', 'cardboard', 'love'
+      },
     },
     {
       id: 3,
       image: '/images/1.3.png',
       text: [
-        { word: 'She tries', translation: 'Ella intenta' },
+        /* ... (texto original de la escena 3) ... */ {
+          word: 'She tries',
+          translation: 'Ella intenta',
+        },
         { word: 'to feed them', translation: 'alimentarlos' },
         { word: ',', translation: '' },
         { word: 'but there is not', translation: 'pero no hay' },
@@ -201,18 +304,103 @@ export const chapter1Data = {
         { word: 'The water is grey', translation: 'El agua está gris' },
         { word: 'and sour', translation: 'y agria' },
         { word: ',', translation: '' },
-        {
-          word: 'but she is thirsty',
-          translation: 'pero ella está sedienta',
-        },
+        { word: 'but she is thirsty', translation: 'pero ella está sedienta' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch1_sc3',
+            parts: [
+              { type: 'text', value: 'She is ' },
+              {
+                type: 'blank',
+                correctWord: 'hungry',
+                translation: 'hambrienta',
+                hint: '¿Cómo se siente mamá?',
+              },
+              { type: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch1_sc3',
+            parts: [
+              { type: 'text', value: 'Her legs are ' },
+              {
+                type: 'blank',
+                correctWord: 'weak',
+                translation: 'débiles',
+                hint: '¿Cómo están sus piernas?',
+              },
+              { type: '.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch1_sc3',
+            parts: [
+              { type: 'text', value: 'She wants to find ' },
+              {
+                type: 'blank',
+                correctWord: 'food',
+                translation: 'comida',
+                hint: '¿Qué busca ella?',
+              },
+              { type: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch1_sc3',
+            parts: [
+              { type: 'text', value: 'The water is grey and ' },
+              {
+                type: 'blank',
+                correctWord: 'sour',
+                translation: 'agria',
+                hint: '¿Cómo es el agua?',
+              },
+              { type: '.' },
+            ],
+          },
+          {
+            // NUEVA ORACIÓN 5
+            id: 'sentence5_ch1_sc3',
+            parts: [
+              { type: 'text', value: 'She checks ' },
+              {
+                type: 'blank',
+                correctWord: 'trash',
+                translation: 'basura',
+                hint: '¿Qué revisa para buscar comida?',
+              },
+              { type: 'text', value: ' cans.' },
+            ],
+          },
+        ],
+        allWords: [
+          'hungry',
+          'weak',
+          'food',
+          'sour',
+          'trash',
+          'milk',
+          'tummy',
+          'alley',
+          'fast',
+          'puddle',
+        ], // Añadida 'trash', 'puddle'
+      },
     },
     {
       id: 4,
       image: '/images/1.4.png',
       text: [
-        { word: 'Then', translation: 'Después' },
+        /* ... (texto original de la escena 4) ... */ {
+          word: 'Then',
+          translation: 'Después',
+        },
         { word: 'she turns back', translation: 'ella regresa' },
         { word: '.', translation: '' },
         { word: 'She wants', translation: 'Ella quiere' },
@@ -234,12 +422,100 @@ export const chapter1Data = {
         { word: 'on the road', translation: 'en la carretera' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch1_sc4',
+            parts: [
+              { type: 'text', value: 'She wants to see her ' },
+              {
+                type: 'blank',
+                correctWord: 'babies',
+                translation: 'bebés',
+                hint: '¿A quién quiere ver?',
+              },
+              { type: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch1_sc4',
+            parts: [
+              { type: 'text', value: 'A car comes too ' },
+              {
+                type: 'blank',
+                correctWord: 'fast',
+                translation: 'rápido',
+                hint: '¿Cómo viene el auto?',
+              },
+              { type: '.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch1_sc4',
+            parts: [
+              { type: 'text', value: 'It ' },
+              {
+                type: 'blank',
+                correctWord: 'hits',
+                translation: 'golpea',
+                hint: '¿Qué le hace el auto?',
+              },
+              { type: 'text', value: ' her.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch1_sc4',
+            parts: [
+              { type: 'text', value: 'Her body ' },
+              {
+                type: 'blank',
+                correctWord: 'hurts',
+                translation: 'duele',
+                hint: '¿Cómo está su cuerpo?',
+              },
+              { type: '.' },
+            ],
+          },
+          {
+            // NUEVA ORACIÓN 5
+            id: 'sentence5_ch1_sc4',
+            parts: [
+              { type: 'text', value: 'She lies ' },
+              {
+                type: 'blank',
+                correctWord: 'still',
+                translation: 'quieta',
+                hint: '¿Cómo yace en la carretera?',
+              },
+              { type: 'text', value: ' on the road.' },
+            ],
+          },
+        ],
+        allWords: [
+          'babies',
+          'fast',
+          'hits',
+          'hurts',
+          'still',
+          'back',
+          'street',
+          'road',
+          'falls',
+          'car',
+        ], // Añadida 'still', 'falls', 'car'
+      },
     },
     {
       id: 5,
       image: '/images/1.5.png',
       text: [
-        { word: 'The car stops', translation: 'El auto se detiene' },
+        /* ... (texto original de la escena 5) ... */ {
+          word: 'The car stops',
+          translation: 'El auto se detiene',
+        },
         { word: 'for a moment', translation: 'por un momento' },
         { word: '.', translation: '' },
         { word: 'Mama opens', translation: 'Mamá abre' },
@@ -264,6 +540,91 @@ export const chapter1Data = {
         { word: 'forever', translation: 'para siempre' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch1_sc5',
+            parts: [
+              { type: 'text', value: 'The car ' },
+              {
+                type: 'blank',
+                correctWord: 'stops',
+                translation: 'se detiene',
+                hint: '¿Qué hace el auto?',
+              },
+              { type: 'text', value: ' for a moment.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch1_sc5',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'hopes',
+                translation: 'espera',
+                hint: '¿Qué siente ella?',
+              },
+              { type: 'text', value: ' someone will help.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch1_sc5',
+            parts: [
+              { type: 'text', value: 'Mama cannot ' },
+              {
+                type: 'blank',
+                correctWord: 'move',
+                translation: 'moverse',
+                hint: '¿Qué no puede hacer mamá?',
+              },
+              { type: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch1_sc5',
+            parts: [
+              { type: 'text', value: 'She closes her eyes ' },
+              {
+                type: 'blank',
+                correctWord: 'forever',
+                translation: 'para siempre',
+                hint: '¿Por cuánto tiempo?',
+              },
+              { type: '.' },
+            ],
+          },
+          {
+            // NUEVA ORACIÓN 5
+            id: 'sentence5_ch1_sc5',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'thinks',
+                translation: 'piensa',
+                hint: '¿Qué hace ella sobre sus cachorros?',
+              },
+              { type: 'text', value: ' of her puppies.' },
+            ],
+          },
+        ],
+        allWords: [
+          'stops',
+          'hopes',
+          'move',
+          'forever',
+          'thinks',
+          'moment',
+          'away',
+          'soft',
+          'howl',
+          'eyes',
+        ], // Añadida 'thinks', 'eyes'
+      },
     },
   ],
 }

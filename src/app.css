@@ -568,3 +568,64 @@ html.dark-mode .page-number-top-right {
     text-shadow: 0 0 10px #fff, 0 0 5px #eff1ea, 0 0 3px #ffc800;
   }
 }
+
+/* ... (tus otros estilos) ... */
+
+.next-scene-button-animate {
+  animation: blinkGlowPulse 0.6s 5 alternate; /* 0.6s por ciclo, 5 veces = 3s */
+  border-radius: 5px; /* Asegurar que el brillo siga el borde redondeado */
+}
+
+@keyframes blinkGlowPulse {
+  0% {
+    box-shadow: 0 0 3px rgba(255, 255, 255, 0.7),
+      0 0 6px rgba(255, 255, 255, 0.5), 0 0 9px #28a745, 0 0 12px #28a745;
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 6px rgba(255, 255, 255, 1),
+      0 0 12px rgba(255, 255, 255, 0.7), 0 0 18px #34c759, 0 0 24px #34c759;
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    box-shadow: 0 0 3px rgba(255, 255, 255, 0.7),
+      0 0 6px rgba(255, 255, 255, 0.5), 0 0 9px #28a745, 0 0 12px #28a745;
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+/* ... (estilos existentes) ... */
+
+.app-container-blur {
+  filter: blur(20px);
+  transition: filter 0.3s ease-in-out;
+}
+
+.next-scene-button-animate {
+  animation: blinkGlowPulse 0.6s 5 alternate; /* 0.6s por ciclo, 5 veces = 3s */
+  border-radius: 5px;
+  /* Agrega cualquier otro estilo base que quieras para este botón si es diferente */
+}
+
+@keyframes blinkGlowPulse {
+  0% {
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5), 0 0 10px rgba(76, 175, 80, 0.4),
+      0 0 15px rgba(76, 175, 80, 0.3), 0 0 20px rgba(76, 175, 80, 0.2);
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.7), 0 0 15px rgba(76, 175, 80, 0.6),
+      0 0 20px rgba(76, 175, 80, 0.5), 0 0 25px rgba(76, 175, 80, 0.4);
+    transform: scale(1.03);
+    opacity: 0.9;
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5), 0 0 10px rgba(76, 175, 80, 0.4),
+      0 0 15px rgba(76, 175, 80, 0.3), 0 0 20px rgba(76, 175, 80, 0.2);
+    transform: scale(1);
+    opacity: 1;
+  }
+}
