@@ -18,7 +18,7 @@ function Blank({
   const [{ isOver, canDrop }, drop] = useDrop(() => ({
     accept: ItemTypes.WORD,
     drop: (item) => {
-      onDropBlank(item.word)
+      onDropBlank(item.word, correctWord)
       return { accepted: true, targetId: correctWord, droppedWord: item.word }
     },
     collect: (monitor) => ({
@@ -26,7 +26,6 @@ function Blank({
       canDrop: monitor.canDrop(),
     }),
   }))
-
   return (
     <span
       ref={drop}
@@ -49,6 +48,10 @@ function DragDropSentence({
   onActivityComplete,
   initialWords,
   onWordsChanged,
+  // Nuevas props para el botón de vistazo
+  isShowingTextDuringActivity,
+  onToggleActivityView,
+  isGlanceButtonDisabled,
 }) {
   const [currentSentences, setCurrentSentences] = useState([])
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
@@ -68,41 +71,65 @@ function DragDropSentence({
   }, [activityData])
 
   const handleDropOnBlank = useCallback(
-    (blankCorrectWord, droppedWord) => {
-      if (isInternallyCompleted) return
-
+    (droppedWord, targetBlankCorrectWord) => {
+      /* ... (sin cambios desde la última versión) ... */ if (
+        isInternallyCompleted
+      )
+        return
+      let wordPreviouslyInTargetBlank = null
+      let wordWasMovedFromAnotherBlank = false
       setCurrentSentences((prevSentences) =>
         prevSentences.map((sentence) => ({
           ...sentence,
           parts: sentence.parts.map((part) => {
             if (
               part.type === 'blank' &&
-              part.correctWord === blankCorrectWord
+              part.correctWord === targetBlankCorrectWord
             ) {
+              if (part.currentWord && part.currentWord !== droppedWord) {
+                wordPreviouslyInTargetBlank = part.currentWord
+              }
               return { ...part, currentWord: droppedWord }
+            }
+            if (part.type === 'blank' && part.currentWord === droppedWord) {
+              wordWasMovedFromAnotherBlank = true
+              return { ...part, currentWord: null }
             }
             return part
           }),
         }))
       )
-
-      const newAvailableWords = initialWords.filter((w) => w !== droppedWord)
+      let newAvailableWords = [...initialWords]
+      if (!wordWasMovedFromAnotherBlank) {
+        newAvailableWords = newAvailableWords.filter((w) => w !== droppedWord)
+      }
+      if (
+        wordPreviouslyInTargetBlank &&
+        wordPreviouslyInTargetBlank !== droppedWord
+      ) {
+        if (!newAvailableWords.includes(wordPreviouslyInTargetBlank)) {
+          newAvailableWords.push(wordPreviouslyInTargetBlank)
+        }
+      }
       onWordsChanged(newAvailableWords)
     },
     [initialWords, onWordsChanged, isInternallyCompleted]
   )
-
   const handleClickOnBlank = useCallback(
     (blankCorrectWord, wordCurrentlyInBlank) => {
-      if (isInternallyCompleted || !wordCurrentlyInBlank) return
-
+      /* ... (sin cambios desde la última versión) ... */ if (
+        isInternallyCompleted ||
+        !wordCurrentlyInBlank
+      )
+        return
       setCurrentSentences((prevSentences) =>
         prevSentences.map((sentence) => ({
           ...sentence,
           parts: sentence.parts.map((part) => {
             if (
               part.type === 'blank' &&
-              part.correctWord === blankCorrectWord
+              part.correctWord === blankCorrectWord &&
+              part.currentWord === wordCurrentlyInBlank
             ) {
               return { ...part, currentWord: null }
             }
@@ -110,21 +137,21 @@ function DragDropSentence({
           }),
         }))
       )
-
       const newAvailableWords = [...initialWords]
-      if (!newAvailableWords.includes(wordCurrentlyInBlank)) {
+      if (
+        wordCurrentlyInBlank &&
+        !newAvailableWords.includes(wordCurrentlyInBlank)
+      ) {
         newAvailableWords.push(wordCurrentlyInBlank)
       }
-      onWordsChanged(newAvailableWords.sort(() => Math.random() - 0.5))
+      onWordsChanged(newAvailableWords)
     },
     [initialWords, onWordsChanged, isInternallyCompleted]
   )
-
   const checkAnswers = () => {
-    let allCorrect = true
+    /* ... (sin cambios) ... */ let allCorrect = true
     let firstIncorrectMessage = ''
     let firstIncorrectHint = ''
-
     for (const sentence of currentSentences) {
       for (const part of sentence.parts) {
         if (part.type === 'blank') {
@@ -144,7 +171,6 @@ function DragDropSentence({
       }
       if (!allCorrect) break
     }
-
     if (allCorrect) {
       setIsInternallyCompleted(true)
       onActivityComplete(true)
@@ -154,12 +180,9 @@ function DragDropSentence({
       setShowFeedbackModal(true)
     }
   }
-
-  // CORRECCIÓN: Eliminado el bloque if vacío.
   const getBlankDisplayClass = (part) => {
-    let className = 'blank-spot'
+    /* ... (sin cambios) ... */ let className = 'blank-spot'
     if (isInternallyCompleted) {
-      // Solo aplicar clases de solución si se ha presionado "Comprobar" y hay una palabra
       if (part.currentWord !== null) {
         if (part.currentWord === part.correctWord) {
           className += ' correct-solution'
@@ -167,8 +190,6 @@ function DragDropSentence({
           className += ' incorrect-solution'
         }
       }
-      // Si part.currentWord es null después de comprobar, no se añade clase extra
-      // a menos que quieras una específica como 'unfilled-after-check'.
     }
     return className
   }
@@ -190,9 +211,7 @@ function DragDropSentence({
                 <Blank
                   key={`${sentence.id}-blank-${pIndex}`}
                   currentWord={part.currentWord}
-                  onDropBlank={(droppedWord) =>
-                    handleDropOnBlank(part.correctWord, droppedWord)
-                  }
+                  onDropBlank={handleDropOnBlank}
                   correctWord={part.correctWord}
                   onClickBlank={handleClickOnBlank}
                   computedClassName={getBlankDisplayClass(part)}
@@ -203,11 +222,24 @@ function DragDropSentence({
           })}
         </p>
       ))}
+
+      {/* --- NUEVO CONTENEDOR PARA BOTONES LADO A LADO --- */}
       {!isInternallyCompleted && (
-        <button onClick={checkAnswers} className="check-button">
-          Comprobar
-        </button>
+        <div className="activity-buttons-footer">
+          <button onClick={checkAnswers} className="check-button">
+            Comprobar
+          </button>
+          {/* Botón de Vistazo/Ver Ejercicio ahora aquí */}
+          <button
+            onClick={onToggleActivityView}
+            className="toggle-activity-view-button"
+            disabled={isGlanceButtonDisabled}
+          >
+            {isShowingTextDuringActivity ? 'Ver Ejercicio' : `Ver Texto `}
+          </button>
+        </div>
       )}
+
       {showFeedbackModal && (
         <FeedbackModal
           message={feedbackMessage}

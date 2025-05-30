@@ -1,4 +1,4 @@
-// App.jsx (Versión Completa y Corregida)
+// App.jsx
 import { useEffect, useState, useRef, useMemo } from 'react'
 import Word from './Word'
 import { allChapters } from './data/chapters'
@@ -12,11 +12,10 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import Confetti from 'react-confetti'
 import './app.css'
 
-const MAX_GLANCES_ALLOWED = 2
-const LOCK_DURATION_MS = 1 * 60 * 1000
 const FONT_SIZES = ['1rem', '1.2rem', '1.4rem', '1.6rem', '1.8rem']
 const CONFETTI_DURATION = 6000
 const NEXT_BUTTON_ANIM_DURATION = 3000
+const GLANCE_TIMER_SECONDS = 30
 
 function DraggableWord({ word }) {
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -39,44 +38,43 @@ function DraggableWord({ word }) {
 function App() {
   useEffect(() => {
     localStorage.removeItem('completedActivities')
-    localStorage.removeItem('glanceData')
     localStorage.removeItem('fontSizeIndex')
     localStorage.removeItem('studentName')
     localStorage.removeItem('studentGroup')
-    if (!localStorage.getItem('studentName')) {
-      setShowStudentNameModal(true)
-    } else {
-      setShowStudentNameModal(false)
-    }
+    setChapterIndex(0)
+    setSceneIndex(0)
+    setDarkMode(false)
+    setFontSizeIndex(1)
+    setIsActivityCompleted({})
+    setShowActivity(false)
+    setIsShowingTextDuringActivity(false)
+    setAvailableWords([])
+    setAnimateNextSceneButton(false)
+    setStudentName('')
+    setStudentGroup('')
+    setShowStudentNameModal(true)
+    setShowCongratulatoryModal(false)
+    setCongratulatoryModalDetails(null)
+    setShowConfetti(false)
+    setBlurPage(false)
+    setIsGlanceTimerActive(false)
+    setGlanceTimeRemaining(0)
+    if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
   }, [])
 
   const [chapterIndex, setChapterIndex] = useState(0)
   const [sceneIndex, setSceneIndex] = useState(0)
   const [darkMode, setDarkMode] = useState(false)
-  const [fontSizeIndex, setFontSizeIndex] = useState(
-    () => JSON.parse(localStorage.getItem('fontSizeIndex')) || 1
-  )
-  const [isActivityCompleted, setIsActivityCompleted] = useState(
-    () => JSON.parse(localStorage.getItem('completedActivities')) || {}
-  )
+  const [fontSizeIndex, setFontSizeIndex] = useState(1)
+  const [isActivityCompleted, setIsActivityCompleted] = useState({})
   const [showActivity, setShowActivity] = useState(false)
   const [isShowingTextDuringActivity, setIsShowingTextDuringActivity] =
     useState(false)
-  const [glanceCount, setGlanceCount] = useState(MAX_GLANCES_ALLOWED)
-  const [lockTimestamp, setLockTimestamp] = useState(null)
-  const [remainingLockTime, setRemainingLockTime] = useState(0)
-  const lockTimerRef = useRef(null)
   const [availableWords, setAvailableWords] = useState([])
   const [animateNextSceneButton, setAnimateNextSceneButton] = useState(false)
-  const [studentName, setStudentName] = useState(
-    () => localStorage.getItem('studentName') || ''
-  )
-  const [studentGroup, setStudentGroup] = useState(
-    () => localStorage.getItem('studentGroup') || ''
-  )
-  const [showStudentNameModal, setShowStudentNameModal] = useState(
-    () => !localStorage.getItem('studentName')
-  )
+  const [studentName, setStudentName] = useState('')
+  const [studentGroup, setStudentGroup] = useState('')
+  const [showStudentNameModal, setShowStudentNameModal] = useState(true)
   const [showCongratulatoryModal, setShowCongratulatoryModal] = useState(false)
   const [congratulatoryModalDetails, setCongratulatoryModalDetails] =
     useState(null)
@@ -87,11 +85,9 @@ function App() {
     height: window.innerHeight,
   })
 
-  useEffect(() => {
-    if (!localStorage.getItem('studentName')) {
-      setShowStudentNameModal(true)
-    }
-  }, [])
+  const [glanceTimeRemaining, setGlanceTimeRemaining] = useState(0)
+  const [isGlanceTimerActive, setIsGlanceTimerActive] = useState(false)
+  const glanceTimerRef = useRef(null)
 
   const currentChapter = allChapters[chapterIndex]
   const currentScene = currentChapter?.scenes[sceneIndex]
@@ -99,7 +95,6 @@ function App() {
   const currentActivityId = `${chapterIndex}-${sceneIndex}`
   const activityIsCompletedForCurrentScene =
     !!isActivityCompleted[currentActivityId]
-  const isActivityLockedByGlance = lockTimestamp && lockTimestamp > Date.now()
 
   const handleStudentNameSubmit = (name, group) => {
     setStudentName(name)
@@ -141,19 +136,20 @@ function App() {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
   const shouldShowInteractiveExercise =
     hasActivity &&
     showActivity &&
     !activityIsCompletedForCurrentScene &&
-    !isActivityLockedByGlance &&
-    !isShowingTextDuringActivity
+    !isShowingTextDuringActivity &&
+    !isGlanceTimerActive
 
   useEffect(() => {
     setShowActivity(false)
     setIsShowingTextDuringActivity(false)
-    console.log(
-      `[App.jsx] useEffect [scene change/completion status change] for: ${chapterIndex}-${sceneIndex}. Activity completed: ${activityIsCompletedForCurrentScene}`
-    )
+    setIsGlanceTimerActive(false)
+    setGlanceTimeRemaining(0)
+    if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
     if (
       currentScene &&
       currentScene.activity &&
@@ -166,62 +162,21 @@ function App() {
               part.type === 'blank' &&
               part.correctWord &&
               !acc.includes(part.correctWord)
-            ) {
+            )
               acc.push(part.correctWord)
-            }
           })
           return acc
         },
         []
       )
-      console.log(
-        `[App.jsx] Scene ${chapterIndex}-${sceneIndex} - Derived correctWordsForBank:`,
-        JSON.stringify(correctWordsForBank)
-      )
       if (!activityIsCompletedForCurrentScene) {
         setAvailableWords(shuffleArray(correctWordsForBank))
-        console.log(
-          `[App.jsx] Scene ${chapterIndex}-${sceneIndex} - Initializing bank (activity not completed):`,
-          JSON.stringify(shuffleArray(correctWordsForBank))
-        )
       } else {
         setAvailableWords([])
-        console.log(
-          `[App.jsx] Scene ${chapterIndex}-${sceneIndex} - Initializing bank (activity completed): bank empty.`
-        )
       }
     } else {
       setAvailableWords([])
-      console.log(
-        `[App.jsx] Scene ${chapterIndex}-${sceneIndex} - No activity or sentences, bank empty.`
-      )
     }
-    const storedGlanceDataString = localStorage.getItem('glanceData')
-    let initialGlanceCount = MAX_GLANCES_ALLOWED
-    let initialLockTimestamp = null
-    if (storedGlanceDataString) {
-      const data = JSON.parse(storedGlanceDataString)
-      if (
-        data.currentChapterIndex === chapterIndex &&
-        data.currentSceneIndex === sceneIndex
-      ) {
-        initialGlanceCount =
-          data.count !== undefined ? data.count : MAX_GLANCES_ALLOWED
-        initialLockTimestamp = data.lockUntil
-      } else {
-        localStorage.setItem(
-          'glanceData',
-          JSON.stringify({
-            currentChapterIndex: chapterIndex,
-            currentSceneIndex: sceneIndex,
-            count: MAX_GLANCES_ALLOWED,
-            lockUntil: null,
-          })
-        )
-      }
-    }
-    setGlanceCount(initialGlanceCount)
-    setLockTimestamp(initialLockTimestamp)
     const scrollableTextElement = document.querySelector('.scrollable-text')
     if (scrollableTextElement) scrollableTextElement.scrollTop = 0
   }, [
@@ -231,39 +186,6 @@ function App() {
     activityIsCompletedForCurrentScene,
   ])
 
-  useEffect(() => {
-    if (lockTimerRef.current) clearInterval(lockTimerRef.current)
-    if (isActivityLockedByGlance) {
-      const updateTimer = () => {
-        const now = Date.now()
-        const remaining = lockTimestamp - now
-        if (remaining > 0) setRemainingLockTime(Math.ceil(remaining / 1000))
-        else {
-          setLockTimestamp(null)
-          setRemainingLockTime(0)
-          clearInterval(lockTimerRef.current)
-          lockTimerRef.current = null
-          setGlanceCount(MAX_GLANCES_ALLOWED)
-        }
-      }
-      updateTimer()
-      lockTimerRef.current = setInterval(updateTimer, 1000)
-    } else setRemainingLockTime(0)
-    return () => {
-      if (lockTimerRef.current) clearInterval(lockTimerRef.current)
-    }
-  }, [lockTimestamp, isActivityLockedByGlance, chapterIndex, sceneIndex])
-  useEffect(() => {
-    localStorage.setItem(
-      'glanceData',
-      JSON.stringify({
-        currentChapterIndex: chapterIndex,
-        currentSceneIndex: sceneIndex,
-        count: glanceCount,
-        lockUntil: lockTimestamp,
-      })
-    )
-  }, [chapterIndex, sceneIndex, glanceCount, lockTimestamp])
   useEffect(() => {
     localStorage.setItem(
       'completedActivities',
@@ -323,11 +245,29 @@ function App() {
     speechSynthesis.speak(utter)
     setActiveWord(word)
   }
+  const resetViewAndTimer = () => {
+    setShowActivity(false)
+    setIsShowingTextDuringActivity(false)
+    setIsGlanceTimerActive(false)
+    setGlanceTimeRemaining(0)
+    if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
+    setBlurPage(false)
+    setShowCongratulatoryModal(false)
+  }
   const handleChapterChange = (newIndex) => {
     setChapterIndex(newIndex)
     setSceneIndex(0)
-    setBlurPage(false)
-    setShowCongratulatoryModal(false)
+    resetViewAndTimer()
+  }
+  const handleSceneAdvance = (offset) => {
+    setSceneIndex((prev) => prev + offset)
+    resetViewAndTimer()
+  }
+  const handleGoToLastSceneOfPrevChapter = () => {
+    const prevCh = chapterIndex - 1
+    setChapterIndex(prevCh)
+    setSceneIndex(allChapters[prevCh].scenes.length - 1)
+    resetViewAndTimer()
   }
   const getGlobalSceneNumber = () => {
     if (chapterIndex === 0) return null
@@ -346,13 +286,8 @@ function App() {
     }
     return newArray
   }
-
   const handleWordsInBankChange = (newWordsArrayFromDragDrop) => {
-    console.log(
-      '[App.jsx] handleWordsInBankChange (onWordsChanged from DragDropSentence) called with:',
-      JSON.stringify(newWordsArrayFromDragDrop)
-    )
-    setAvailableWords(newWordsArrayFromDragDrop) // No shuffle here, DragDropSentence controls the exact list
+    setAvailableWords(newWordsArrayFromDragDrop)
   }
 
   const handleActivityComplete = (success) => {
@@ -397,64 +332,36 @@ function App() {
     if (chapterIndex < allChapters.length - 1) {
       setChapterIndex((prev) => prev + 1)
       setSceneIndex(0)
+      resetViewAndTimer()
     }
   }
-  const handleResetActivity = () => {
-    setIsActivityCompleted((prev) => {
-      const newState = { ...prev }
-      delete newState[currentActivityId]
-      return newState
-    })
-    setGlanceCount(MAX_GLANCES_ALLOWED)
-    setLockTimestamp(null)
-    setShowActivity(true)
-    setIsShowingTextDuringActivity(false)
-    if (
-      currentScene &&
-      currentScene.activity &&
-      currentScene.activity.sentences
-    ) {
-      const correctWordsForBank = currentScene.activity.sentences.reduce(
-        (acc, sentence) => {
-          sentence.parts.forEach((part) => {
-            if (
-              part.type === 'blank' &&
-              part.correctWord &&
-              !acc.includes(part.correctWord)
-            )
-              acc.push(part.correctWord)
-          })
-          return acc
-        },
-        []
-      )
-      setAvailableWords(shuffleArray(correctWordsForBank))
-      console.log(
-        '[App.jsx] Actividad Reseteada - Repoblando banco con:',
-        JSON.stringify(correctWordsForBank)
-      )
+
+  useEffect(() => {
+    if (isGlanceTimerActive && glanceTimeRemaining > 0) {
+      glanceTimerRef.current = setInterval(() => {
+        setGlanceTimeRemaining((prevTime) => prevTime - 1)
+      }, 1000)
+    } else if (glanceTimeRemaining === 0 && isGlanceTimerActive) {
+      setIsShowingTextDuringActivity(false)
+      setIsGlanceTimerActive(false)
+      if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
     }
-    setBlurPage(false)
-    setShowConfetti(false)
-    setShowCongratulatoryModal(false)
-  }
+    return () => {
+      if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
+    }
+  }, [isGlanceTimerActive, glanceTimeRemaining])
   const handleToggleActivityView = () => {
+    if (activityIsCompletedForCurrentScene) return
     if (!isShowingTextDuringActivity) {
-      if (glanceCount > 0) {
-        setGlanceCount((prevCount) => {
-          const updatedCount = prevCount - 1
-          if (updatedCount <= 0 && !activityIsCompletedForCurrentScene)
-            setLockTimestamp(Date.now() + LOCK_DURATION_MS)
-          return updatedCount
-        })
-      } else if (
-        !isActivityLockedByGlance &&
-        !activityIsCompletedForCurrentScene
-      ) {
-        setLockTimestamp(Date.now() + LOCK_DURATION_MS)
-      }
+      setIsShowingTextDuringActivity(true)
+      setGlanceTimeRemaining(GLANCE_TIMER_SECONDS)
+      setIsGlanceTimerActive(true)
+    } else {
+      setIsShowingTextDuringActivity(false)
+      setIsGlanceTimerActive(false)
+      setGlanceTimeRemaining(0)
+      if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
     }
-    setIsShowingTextDuringActivity((prev) => !prev)
   }
 
   const isLastSceneInChapter =
@@ -463,39 +370,38 @@ function App() {
     isLastSceneInChapter &&
     chapterIndex < allChapters.length - 1 &&
     (chapterIndex === 0 || chapterProgress === 100)
+
+  // --- Variables para estados de deshabilitación ---
   const pageEffectsActive = blurPage || showCongratulatoryModal
-  const firstSceneLockActive =
-    sceneIndex === 0 && hasActivity && !activityIsCompletedForCurrentScene
-  const activityInterfaceIsActiveAndUnresolved =
-    hasActivity &&
-    showActivity &&
-    !activityIsCompletedForCurrentScene &&
-    !isActivityLockedByGlance
+  const currentSceneRequiresCompletion =
+    hasActivity && !activityIsCompletedForCurrentScene
+
+  // True si la UI de la actividad (ejercicio O texto de vistazo con timer) está activa y no resuelta.
+  const activityInterfaceIsActive =
+    showActivity && hasActivity && !activityIsCompletedForCurrentScene
+
   const chapterSelectorDisabled =
     pageEffectsActive ||
-    isActivityLockedByGlance ||
-    firstSceneLockActive ||
-    activityInterfaceIsActiveAndUnresolved
+    currentSceneRequiresCompletion ||
+    (activityInterfaceIsActive && isGlanceTimerActive)
   const nextSceneButtonDisabled =
-    pageEffectsActive ||
-    isActivityLockedByGlance ||
-    firstSceneLockActive ||
-    (activityInterfaceIsActiveAndUnresolved && !isShowingTextDuringActivity)
+    pageEffectsActive || currentSceneRequiresCompletion
   const prevSceneButtonDisabled =
     pageEffectsActive ||
     (sceneIndex === 0 && chapterIndex === 0) ||
-    firstSceneLockActive
+    currentSceneRequiresCompletion
   const mainControlsDisabled =
     pageEffectsActive ||
-    isActivityLockedByGlance ||
-    firstSceneLockActive ||
-    (activityInterfaceIsActiveAndUnresolved && !isShowingTextDuringActivity)
+    currentSceneRequiresCompletion ||
+    shouldShowInteractiveExercise ||
+    isGlanceTimerActive
   const glanceButtonDisabled =
-    (glanceCount <= 0 && !isShowingTextDuringActivity) ||
     pageEffectsActive ||
-    isActivityLockedByGlance ||
-    firstSceneLockActive
-  const actionButtonsDisabled = pageEffectsActive || isActivityLockedByGlance
+    activityIsCompletedForCurrentScene ||
+    (isShowingTextDuringActivity &&
+      isGlanceTimerActive &&
+      glanceTimeRemaining === 0)
+  const showExerciseButtonDisabled = pageEffectsActive
 
   if (!currentChapter || !currentScene) return <div>Loading...</div>
 
@@ -533,23 +439,21 @@ function App() {
         }}
       >
         <div className="top-button-bar">
-          {' '}
           <div className="left-controls">
-            {' '}
             <button
               onClick={() => setDarkMode(!darkMode)}
               style={{ fontSize: '0.9rem', marginRight: '0.5rem' }}
               disabled={mainControlsDisabled}
             >
               {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-            </button>{' '}
+            </button>
             <button
               onClick={() => setFontSizeIndex((prev) => Math.max(0, prev - 1))}
               style={{ marginRight: '0.25rem' }}
               disabled={fontSizeIndex === 0 || mainControlsDisabled}
             >
               A-
-            </button>{' '}
+            </button>
             <button
               onClick={() =>
                 setFontSizeIndex((prev) =>
@@ -561,48 +465,33 @@ function App() {
               }
             >
               A+
-            </button>{' '}
+            </button>
             <ChapterSelector
               chapters={allChapters}
               chapterIndex={chapterIndex}
               setChapterIndex={handleChapterChange}
               isDisabled={chapterSelectorDisabled}
-            />{' '}
-          </div>{' '}
+            />
+          </div>
           <div className="right-indicators">
-            {' '}
             <div className="nav-buttons-top">
-              {' '}
               <button
                 onClick={() => {
-                  if (sceneIndex > 0) setSceneIndex((prev) => prev - 1)
-                  else if (chapterIndex > 0) {
-                    const prevCh = chapterIndex - 1
-                    setChapterIndex(prevCh)
-                    setSceneIndex(allChapters[prevCh].scenes.length - 1)
-                  }
-                  setShowActivity(false)
-                  setIsShowingTextDuringActivity(false)
-                  setBlurPage(false)
-                  setShowCongratulatoryModal(false)
+                  if (sceneIndex > 0) handleSceneAdvance(-1)
+                  else if (chapterIndex > 0) handleGoToLastSceneOfPrevChapter()
                 }}
                 disabled={prevSceneButtonDisabled}
               >
                 ⬅️ Previous
-              </button>{' '}
+              </button>
               {!isLastSceneInChapter && (
                 <button
                   onClick={() => {
                     if (
                       currentChapter &&
                       sceneIndex < currentChapter.scenes.length - 1
-                    ) {
-                      setSceneIndex((prev) => prev + 1)
-                      setShowActivity(false)
-                      setIsShowingTextDuringActivity(false)
-                      setBlurPage(false)
-                      setShowCongratulatoryModal(false)
-                    }
+                    )
+                      handleSceneAdvance(1)
                   }}
                   className={
                     animateNextSceneButton ? 'next-scene-button-animate' : ''
@@ -612,7 +501,7 @@ function App() {
                   {' '}
                   Next Scene ➡️{' '}
                 </button>
-              )}{' '}
+              )}
               {nextChapterAvailable && (
                 <button
                   onClick={handleProceedToNextChapter}
@@ -620,8 +509,8 @@ function App() {
                 >
                   👉 Next Chapter
                 </button>
-              )}{' '}
-            </div>{' '}
+              )}
+            </div>
             {chapterIndex > 0 && currentChapter && (
               <div className="chapter-progress-container">
                 <span className="chapter-progress-text">
@@ -635,16 +524,15 @@ function App() {
                   ></div>
                 </div>
               </div>
-            )}{' '}
+            )}
             {getGlobalSceneNumber() && (
               <div className="page-number-top-right">
                 Page {getGlobalSceneNumber()}
               </div>
-            )}{' '}
-          </div>{' '}
+            )}
+          </div>
         </div>
         <AnimatePresence mode="wait">
-          {' '}
           <motion.div
             key={`${chapterIndex}-${sceneIndex}-${showActivity}-${isShowingTextDuringActivity}`}
             initial={{ opacity: 0, y: 10 }}
@@ -653,7 +541,6 @@ function App() {
             transition={{ duration: 0.3 }}
             className="scene-and-activity-container"
           >
-            {' '}
             {shouldShowInteractiveExercise ? (
               <div className="scene-layout exercise-fullscreen-layout">
                 {' '}
@@ -670,14 +557,18 @@ function App() {
                   </div>{' '}
                   <div className="content-area-wrapper">
                     <div className="activity-overlay-container">
-                      {' '}
                       <DragDropSentence
                         key={currentActivityId + '-active'}
                         activityData={currentScene.activity}
                         initialWords={availableWords}
                         onWordsChanged={handleWordsInBankChange}
                         onActivityComplete={handleActivityComplete}
-                      />{' '}
+                        isShowingTextDuringActivity={
+                          isShowingTextDuringActivity
+                        } // Prop para DragDropSentence
+                        onToggleActivityView={handleToggleActivityView} // Prop para DragDropSentence
+                        isGlanceButtonDisabled={glanceButtonDisabled} // Prop para DragDropSentence
+                      />
                     </div>
                   </div>{' '}
                 </div>{' '}
@@ -697,22 +588,14 @@ function App() {
                     currentChapter.title || 'Introduction'
                   }`}
                   className={`scene-image ${
-                    showActivity &&
-                    hasActivity &&
-                    !isShowingTextDuringActivity &&
-                    !activityIsCompletedForCurrentScene &&
-                    !isActivityLockedByGlance
+                    activityInterfaceIsActive && !isShowingTextDuringActivity
                       ? 'hidden-for-exercise'
                       : ''
                   }`}
                 />{' '}
                 <div
                   className={`text-container ${
-                    showActivity &&
-                    hasActivity &&
-                    !isShowingTextDuringActivity &&
-                    !activityIsCompletedForCurrentScene &&
-                    !isActivityLockedByGlance
+                    activityInterfaceIsActive && !isShowingTextDuringActivity
                       ? 'full-width-exercise'
                       : ''
                   }`}
@@ -731,12 +614,8 @@ function App() {
                     {' '}
                     <div
                       className={`scrollable-text ${
-                        showActivity &&
-                        hasActivity &&
-                        !activityIsCompletedForCurrentScene &&
-                        !isShowingTextDuringActivity &&
-                        !isActivityLockedByGlance &&
-                        !shouldShowInteractiveExercise
+                        activityInterfaceIsActive &&
+                        !isShowingTextDuringActivity
                           ? 'hidden'
                           : ''
                       }`}
@@ -787,7 +666,7 @@ function App() {
                                 onClick={playSentence}
                                 className="play-button"
                                 disabled={
-                                  pageEffectsActive || isActivityLockedByGlance
+                                  pageEffectsActive || isGlanceTimerActive
                                 }
                               >
                                 🔊
@@ -827,17 +706,22 @@ function App() {
                     {hasActivity &&
                       showActivity &&
                       currentScene.activity &&
-                      (activityIsCompletedForCurrentScene ||
-                        isActivityLockedByGlance) &&
+                      activityIsCompletedForCurrentScene &&
                       !isShowingTextDuringActivity && (
                         <div className="activity-overlay-container">
                           {' '}
                           <DragDropSentence
-                            key={currentActivityId + '-inline-completed-locked'}
+                            key={currentActivityId + '-inline-completed'}
                             activityData={currentScene.activity}
                             initialWords={availableWords}
                             onWordsChanged={handleWordsInBankChange}
                             onActivityComplete={handleActivityComplete}
+                            isShowingTextDuringActivity={
+                              isShowingTextDuringActivity
+                            }
+                            onToggleActivityView={handleToggleActivityView}
+                            isGlanceButtonDisabled={glanceButtonDisabled}
+                            isInternallyCompletedProp={true}
                           />{' '}
                         </div>
                       )}{' '}
@@ -845,80 +729,53 @@ function App() {
                 </div>{' '}
               </div>
             )}{' '}
-          </motion.div>{' '}
+          </motion.div>
         </AnimatePresence>
+
         {hasActivity &&
           !showActivity &&
-          !isActivityLockedByGlance &&
-          (activityIsCompletedForCurrentScene ? (
-            <button
-              onClick={handleResetActivity}
-              className="show-activity-button"
-              disabled={actionButtonsDisabled}
-            >
-              Reintentar Ejercicio
-            </button>
-          ) : (
+          !activityIsCompletedForCurrentScene && (
             <button
               onClick={() => {
                 setShowActivity(true)
                 setIsShowingTextDuringActivity(false)
               }}
               className="show-activity-button"
-              disabled={actionButtonsDisabled}
+              disabled={showExerciseButtonDisabled}
             >
               Show Exercise
             </button>
-          ))}
+          )}
+        {hasActivity && !showActivity && activityIsCompletedForCurrentScene && (
+          <div className="activity-completed-indicator">
+            <span role="img" aria-label="Completed">
+              ✅
+            </span>{' '}
+            Actividad Completada
+          </div>
+        )}
+
         {hasActivity && showActivity && (
           <div className="activity-status-section">
-            {' '}
             {activityIsCompletedForCurrentScene ? (
               <div>
                 <p
                   style={{
                     color: 'var(--blank-correct-color)',
                     fontWeight: 'bold',
-                    display: 'inline-block',
-                    marginRight: '1rem',
                   }}
                 >
                   ¡Ejercicio completado!
                 </p>
-                <button
-                  onClick={handleResetActivity}
-                  className="reset-activity-button"
-                  disabled={actionButtonsDisabled}
-                >
-                  Reiniciar Ejercicio
-                </button>
               </div>
-            ) : isActivityLockedByGlance ? (
-              <p className="lock-message">
-                Actividad bloqueada. Espera{' '}
-                {Math.floor(remainingLockTime / 60)
-                  .toString()
-                  .padStart(2, '0')}
-                :{(remainingLockTime % 60).toString().padStart(2, '0')} para
-                reintentar.
+            ) : isGlanceTimerActive && isShowingTextDuringActivity ? (
+              <p className="glance-timer-display">
+                Volviendo al ejercicio en: {glanceTimeRemaining}s
               </p>
-            ) : (
-              <>
-                <button
-                  onClick={handleToggleActivityView}
-                  className="toggle-activity-view-button"
-                  disabled={glanceButtonDisabled}
-                >
-                  {isShowingTextDuringActivity
-                    ? 'Ver Ejercicio'
-                    : `Ver Texto (Te quedan ${
-                        glanceCount > 0 ? glanceCount : 0
-                      } vistazos)`}
-                </button>
-              </>
-            )}
+            ) : null}
           </div>
         )}
+
         {shouldShowInteractiveExercise && currentScene.activity && (
           <div
             className={`fixed-word-bank-container ${

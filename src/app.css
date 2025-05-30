@@ -47,26 +47,23 @@ html {
   --blank-hover-bg-color: #f0f0f0;
   --blank-correct-color: green;
   --blank-incorrect-color: red;
-  --word-bank-bg: #f9f9f9; /* Color de fondo para el banco de palabras fijo */
-  --word-bank-border: #ccc; /* Borde para el banco de palabras fijo */
-  --draggable-word-bg: #e6f0ff; /* Color para las palabras arrastrables individuales */
+  --word-bank-bg: #f9f9f9;
+  --word-bank-border: #ccc;
+  --draggable-word-bg: #e6f0ff;
   --draggable-word-border: #cce0ff;
   --draggable-word-hover-bg: #d0e0ff;
   --progress-bar-outer-bg: #e0e0e0;
   --progress-bar-inner-bg: #4caf50;
   --select-arrow-color: #000;
+  --text-color-muted: #999; /* Añadida para placeholder del modal */
 
-  /* Altura aproximada de la top-button-bar */
-  --top-bar-height: 60px; /* min-height + padding-top/bottom */
-  /* Altura aproximada del fixed-word-bank-container */
-  --fixed-word-bank-height: 80px; /* padding + altura del contenido */
+  --top-bar-height: 60px;
+  --fixed-word-bank-height: 80px;
 }
 
 html.dark-mode {
   --background-color: #1e1e1e;
   --text-color: #f0f0f0;
-  --button-default-bg: transparent;
-  --button-default-text: var(--text-color);
   --button-default-border: #555;
   --button-default-hover-bg: #2a2a2a;
   --play-button-bg: #333;
@@ -99,6 +96,7 @@ html.dark-mode {
   --progress-bar-outer-bg: #333;
   --progress-bar-inner-bg: #66bb6a;
   --select-arrow-color: #f0f0f0;
+  --text-color-muted: #777; /* Añadida para placeholder del modal en dark mode */
 }
 
 /* --- Clases de utilidad --- */
@@ -110,13 +108,19 @@ html.dark-mode {
 .app-container {
   padding: 2rem;
   font-family: Georgia, serif;
-  height: 100vh; /* Ocupa el 100% de la altura del viewport */
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: var(--background-color);
   color: var(--text-color);
   transition: background-color 0.3s, color 0.3s;
-  overflow: hidden; /* OCULTAR EL SCROLLBAR GLOBAL DEL BODY/HTML */
+  overflow: hidden;
+}
+
+.app-container-blur {
+  /* Estilo para el efecto de desenfoque */
+  filter: blur(25px);
+  transition: filter 0.5s ease-in-out;
 }
 
 .top-button-bar {
@@ -127,7 +131,7 @@ html.dark-mode {
   width: 100%;
   padding-bottom: 1rem;
   padding-top: 10px;
-  min-height: 60px; /* Altura mínima aproximada de la barra superior */
+  min-height: var(--top-bar-height);
 }
 
 .left-controls {
@@ -171,48 +175,44 @@ html.dark-mode {
   margin-left: auto;
 }
 
-/* Contenedor de los botones de navegación en la parte superior */
 .nav-buttons-top {
   display: flex;
   gap: 1rem;
   align-items: center;
 }
 
-/* Contenedor flexible para toda la sección de contenido de la escena/actividad */
 .scene-and-activity-container {
-  flex-grow: 1; /* Ocupa todo el espacio vertical restante del app-container */
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; /* Permitir scroll vertical solo dentro de este contenedor */
-  overflow-x: hidden; /* Ocultar scroll horizontal */
-  padding-bottom: 80px; /* Espacio para el fixed-word-bank-container */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: var(--fixed-word-bank-height); /* Usa la variable CSS */
 }
 
-/* Contenedor del scene-layout (imagen + text-container) */
 .scene-layout {
   display: flex;
   align-items: flex-start;
   margin-top: 2rem;
-  flex-grow: 1; /* Esto le permite ocupar el espacio restante en .scene-and-activity-container */
-  height: auto; /* Permitir que la altura se ajuste al contenido, o flex-grow la fuerce */
-  overflow-y: hidden; /* No scroll aquí, el padre lo gestiona */
+  flex-grow: 1;
+  height: auto;
+  overflow-y: hidden;
   position: relative;
 }
 
-/* Layout cuando el ejercicio toma la pantalla completa (sin imagen) */
 .scene-layout.exercise-fullscreen-layout {
-  flex-direction: column; /* Cambia a columna para que text-container ocupe todo el ancho */
-  align-items: stretch; /* Estira el text-container */
+  flex-direction: column;
+  align-items: stretch;
   padding-right: 0 !important;
   padding-left: 0 !important;
-  height: 100%; /* Aseguramos que ocupe el 100% de la altura de su padre (.scene-and-activity-container) */
+  height: 100%;
 }
 
 .scene-image {
   width: 33%;
-  height: 90vh; /* REGRESADO A SU TAMAÑO ORIGINAL: 90% del viewport height */
-  max-height: none; /* ELIMINA EL LÍMITE DE ALTURA */
-  object-fit: cover; /* Mantiene la proporción y cubre el área */
+  height: 90vh;
+  max-height: none;
+  object-fit: cover;
   border-radius: 8px;
   margin-right: 2rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -220,115 +220,174 @@ html.dark-mode {
     margin-right 0.3s ease-in-out;
 }
 
-/* Ocultar la imagen con opacidad y colapsar su espacio */
 .scene-image.hidden-for-exercise {
   opacity: 0;
-  width: 0; /* Colapsa el ancho para que el text-container ocupe todo el espacio */
-  margin-right: 0; /* Elimina el margen derecho */
+  width: 0;
+  margin-right: 0;
   pointer-events: none;
   user-select: none;
 }
 
 .text-container {
-  flex: 1; /* El área de texto ocupa el resto del espacio */
+  flex: 1;
   padding: 25px;
-  position: relative; /* Para posicionar el contenido de la actividad */
+  position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%; /* Asegura que ocupe el 100% de la altura de su padre (.scene-layout) */
-  box-sizing: border-box; /* Asegura que el padding no desborde el 100% de altura */
+  height: 100%;
+  box-sizing: border-box;
 }
 
-/* Clase para el text-container cuando el ejercicio es a pantalla completa */
 .text-container.full-width-exercise {
-  flex: 1; /* Asegura que ocupe todo el ancho disponible en scene-layout */
-  padding-left: 50px; /* Padding extra para que el contenido no esté pegado al borde */
+  padding-left: 50px;
   padding-right: 50px;
   transition: padding-left 0.3s ease-in-out, padding-right 0.3s ease-in-out;
-  height: 100%; /* Asegura que se estire al 100% cuando es full-width-exercise */
-  /* CAMBIO CLAVE: min-height para que la parte del ejercicio no colapse */
-  /* Este min-height se aplica a text-container.full-width-exercise para asegurar que tenga suficiente espacio */
-  min-height: calc(
-    100% - 1rem - 40px
-  ); /* Ajusta si es necesario, 100% - margen_bottom_titulo - altura_titulo_aprox */
+  min-height: calc(100% - 1rem - 40px); /* Ajusta si es necesario */
 }
 
-/* Título principal del libro (solo en la introducción) */
 .main-book-title {
   margin: 0 auto 1rem auto;
   text-align: center;
   color: var(--text-color);
   font-size: 2.5rem;
   font-weight: bold;
-  min-height: 40px; /* Altura mínima para el título */
+  min-height: 40px;
 }
 
-/* Título del capítulo (aparece en lugar del título del libro en otros capítulos) */
 .chapter-title-main {
   text-align: center;
   margin: 0 auto 1rem auto;
   color: var(--text-color);
   font-size: 2rem;
   font-weight: bold;
-  min-height: 30px; /* Altura mínima para el título del capítulo */
+  min-height: 30px;
 }
 
-/* Nuevo contenedor para el área de contenido principal (texto o ejercicio) */
 .content-area-wrapper {
-  position: relative; /* Base para el posicionamiento absoluto del ejercicio */
-  flex-grow: 1; /* Ocupa el espacio restante en la columna */
-  overflow-y: auto; /* Permitir overflow vertical aquí si el contenido del texto/ejercicio es largo */
-  overflow-x: hidden; /* Ocultar horizontal */
-  /* CAMBIO CLAVE: Altura calculada con la altura de los elementos encima */
-  height: calc(
-    100% - 70px
-  ); /* Aproximación de Altura total del título + su margen inferior */
-  /* Este calc es crucial y lo que nos dio 0px en la depuración anterior */
-  /* Asegura que este div tenga una altura real para que activity-overlay-container la herede */
+  position: relative;
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: calc(100% - 70px); /* Aproximación, ajustar si los títulos cambian */
 }
 
-/* Contenedor del texto de la historia */
 .scrollable-text {
-  height: 100%; /* Ocupa la altura del content-area-wrapper */
-  max-height: unset; /* Quita cualquier límite de altura */
-  overflow-y: auto; /* Aquí sí permitimos scroll si el texto es largo */
+  height: 100%;
+  max-height: unset;
+  overflow-y: auto;
   padding-right: 1rem;
   line-height: 1.6;
   flex-grow: 1;
   transition: opacity 0.3s ease-in-out;
 }
 
-/* La clase 'hidden' para ocultar elementos */
-.hidden {
-  display: none !important;
-}
-
-/* Contenedor del ejercicio que se superpone al texto */
 .activity-overlay-container {
-  position: absolute; /* Superposición */
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%; /* Ocupa el 100% de la altura del content-area-wrapper */
+  height: 100%;
   background-color: var(--background-color);
-  padding: 0; /* padding se maneja internamente en DragDropSentence.css */
+  padding: 0;
   box-sizing: border-box;
-  overflow-y: auto; /* Permitir scroll dentro del ejercicio si el contenido es largo */
-  z-index: 2; /* Asegura que esté sobre el texto, pero debajo de los modales */
+  overflow-y: auto;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   transition: opacity 0.3s ease-in-out;
 }
 
-/* Estilos para el contenedor del ejercicio (el que envuelve a DragDropSentence) */
 .activity-container {
-  /* Este div está dentro de activity-overlay-container */
-  flex-grow: 1; /* Permite que el contenido del ejercicio ocupe el espacio disponible */
+  flex-grow: 1;
 }
 
-/* --- Palabras arrastrables fijas en la parte inferior de la ventana --- */
+/* --- Estilos para Modales (General y Específicos) --- */
+/* Estos son estilos base que podrían aplicar a .feedback-modal-box también, si comparten estructura de .modal-box */
+.student-name-modal,
+.chapter-completion-modal {
+  max-width: 500px;
+  /* Hereda estilos de .modal-box si se aplica esa clase también, o definirlos aquí */
+}
+
+.student-name-modal h2,
+.chapter-completion-modal h2 {
+  /* Estilos comunes para títulos de estos modales */
+  text-align: center;
+  margin-top: 0;
+  color: var(--text-color);
+}
+
+.student-name-modal p,
+.chapter-completion-modal p {
+  /* Estilos comunes para párrafos de estos modales */
+  margin-bottom: 15px;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.student-name-modal {
+  /* Estilos específicos para el modal de nombre */
+  text-align: left;
+}
+
+.student-name-modal .form-group {
+  margin-bottom: 15px;
+}
+
+.student-name-modal label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.student-name-modal input[type='text'] {
+  width: calc(100% - 20px);
+  padding: 10px;
+  border: 1px solid var(--modal-border, #ccc);
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.student-name-modal input[type='text']::placeholder {
+  color: var(--text-color-muted, #999);
+}
+
+.chapter-completion-modal {
+  /* Estilos específicos para el modal de finalización */
+  text-align: center;
+}
+
+.chapter-completion-modal p strong {
+  color: var(--blank-correct-color);
+}
+
+/* Botones para los nuevos modales */
+.modal-submit-button,
+.modal-close-button {
+  display: block;
+  width: 50%;
+  padding: 12px 20px;
+  margin: 20px auto 0 auto;
+  background-color: var(--toggle-activity-view-button-bg, #007bff);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.modal-submit-button:hover,
+.modal-close-button:hover {
+  background-color: var(--toggle-activity-view-button-hover-bg, #0056b3);
+}
+
+/* --- Palabras arrastrables fijas --- */
 .fixed-word-bank-container {
-  position: fixed; /* Fijo en la ventana del navegador */
+  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -336,7 +395,7 @@ html.dark-mode {
   background-color: var(--word-bank-bg);
   border-top: 1px solid var(--word-bank-border);
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 100; /* Asegura que esté SIEMPRE encima de todo */
+  z-index: 100;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -369,7 +428,7 @@ html.dark-mode {
 }
 
 .draggable-word-fixed.is-dragging {
-  opacity: 0; /* Hacerlo invisible al arrastrar */
+  opacity: 0;
 }
 
 /* --- Estilos de Reproducción de Oraciones --- */
@@ -402,14 +461,13 @@ html.dark-mode {
 
 /* --- Estilos de Navegación (botones inferiores, si los hay) --- */
 .nav-buttons {
-  /* Este div puede que ya no sea necesario si todos los botones están arriba */
   margin-top: 2rem;
   display: flex;
   gap: 1rem;
   justify-content: center;
 }
 
-/* Estilos de botones generales que ya existían y se comparten */
+/* Estilos de botones generales */
 button {
   padding: 0.5rem 1rem;
   border: 1px solid var(--button-default-border);
@@ -445,6 +503,11 @@ button:disabled {
   border: none;
   font-size: 1.1rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  /* Nuevos estilos para centrarlo si es necesario */
+  display: block; /* O inline-block si prefieres */
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content; /* Para que se ajuste al texto */
 }
 
 .show-activity-button:hover:not(:disabled) {
@@ -471,7 +534,7 @@ button:disabled {
   color: var(--reset-activity-button-text);
   padding: 10px 20px;
   border: none;
-  font-size: 1.1rem; /* Tamaño de fuente un poco más grande */
+  font-size: 1.1rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
@@ -496,11 +559,27 @@ button:disabled {
   background-color: var(--error-background);
 }
 
-.glance-count-message {
-  font-size: 1rem;
+/* .glance-count-message ya no se usa, fue combinado en el botón */
+
+.activity-completed-indicator {
+  /* Estilo para el nuevo indicador */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 25px;
+  margin: 1.5rem auto;
+  background-color: var(--blank-correct-color);
+  color: white;
+  border-radius: 5px;
   font-weight: bold;
-  margin-bottom: 0.5rem;
-  color: var(--text-color);
+  font-size: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: fit-content;
+}
+
+.activity-completed-indicator span[role='img'] {
+  margin-right: 8px;
+  font-size: 1.2rem;
 }
 
 /* --- Estilos para Indicadores de Progreso y Número de Página --- */
@@ -550,14 +629,21 @@ html.dark-mode .page-number-top-right {
   color: var(--text-color);
 }
 
-/* --- Efecto Glow (si se usa) --- */
+/* --- Efecto Glow --- */
 .glow {
-  color: black;
+  color: black; /* Considera usar var(--text-color) o un color específico para el glow que contraste bien en ambos temas */
   animation: glow 20s ease-in-out infinite alternate;
-  text-shadow: 0 0 10px #fff, 0 0 5px #eff1ea, 0 0 3px #ffc800;
+  /* Ajustar text-shadow para mejor visibilidad en tema oscuro si es necesario */
+}
+
+html.dark-mode .glow {
+  color: #fff; /* O un color brillante específico para dark mode */
+  text-shadow: 0 0 10px #00c6ff, 0 0 20px #00c6ff, 0 0 30px #00c6ff,
+    0 0 40px #0072ff; /* Ejemplo de glow azul para dark mode */
 }
 
 @keyframes glow {
+  /* Este keyframe es para el modo claro por defecto */
   0% {
     text-shadow: 0 0 10px #fff, 0 0 5px #eff1ea, 0 0 3px #ffc800;
   }
@@ -569,39 +655,13 @@ html.dark-mode .page-number-top-right {
   }
 }
 
-/* ... (tus otros estilos) ... */
+/* Si quieres un @keyframes glow diferente para dark-mode, necesitarías cambiar la animación dinámicamente o usar variables CSS dentro del text-shadow */
 
+/* --- Animación Botón Next Scene --- */
+/* Asegúrate de que solo haya una definición de esta clase y keyframes */
 .next-scene-button-animate {
-  animation: blinkGlowPulse 0.6s 5 alternate; /* 0.6s por ciclo, 5 veces = 3s */
-  border-radius: 5px; /* Asegurar que el brillo siga el borde redondeado */
-}
-
-@keyframes blinkGlowPulse {
-  0% {
-    box-shadow: 0 0 3px rgba(255, 255, 255, 0.7),
-      0 0 6px rgba(255, 255, 255, 0.5), 0 0 9px #28a745, 0 0 12px #28a745;
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    box-shadow: 0 0 6px rgba(255, 255, 255, 1),
-      0 0 12px rgba(255, 255, 255, 0.7), 0 0 18px #34c759, 0 0 24px #34c759;
-    transform: scale(1.05);
-    opacity: 0.8;
-  }
-  100% {
-    box-shadow: 0 0 3px rgba(255, 255, 255, 0.7),
-      0 0 6px rgba(255, 255, 255, 0.5), 0 0 9px #28a745, 0 0 12px #28a745;
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-/* ... (estilos existentes) ... */
-
-.next-scene-button-animate {
-  animation: blinkGlowPulse 0.6s 5 alternate; /* 0.6s por ciclo, 5 veces = 3s */
+  animation: blinkGlowPulse 0.6s 5 alternate;
   border-radius: 5px;
-  /* Agrega cualquier otro estilo base que quieras para este botón si es diferente */
 }
 
 @keyframes blinkGlowPulse {
@@ -628,104 +688,18 @@ html.dark-mode .page-number-top-right {
 /* src/app.css */
 /* ... (tus estilos existentes) ... */
 
-/* Estilos para StudentNameModal y ChapterCompletionModal */
-.student-name-modal,
-.chapter-completion-modal {
-  text-align: left; /* Alineación más formal para estos modales */
-  max-width: 500px; /* Un poco más ancho si es necesario */
+.activity-buttons-footer {
+  display: flex;
+  justify-content: center; /* O 'space-around' o 'space-between' según prefieras */
+  align-items: center;
+  gap: 1rem; /* Espacio entre los botones */
+  margin-top: 2rem; /* Espacio arriba de los botones */
 }
 
-.student-name-modal h2,
-.chapter-completion-modal h2 {
-  text-align: center;
-  margin-top: 0;
-  color: var(--text-color); /* Usa tus variables de tema */
-}
-
-.student-name-modal p,
-.chapter-completion-modal p {
-  margin-bottom: 15px;
-  line-height: 1.6;
-  color: var(--text-color);
-}
-
-.student-name-modal .form-group {
-  margin-bottom: 15px;
-}
-
-.student-name-modal label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: var(--text-color);
-}
-
-.student-name-modal input[type='text'] {
-  width: calc(100% - 20px); /* Ajustar para padding */
-  padding: 10px;
-  border: 1px solid var(--modal-border, #ccc);
-  border-radius: 4px;
-  font-size: 1rem;
-  background-color: var(--background-color); /* Para tema oscuro */
-  color: var(--text-color); /* Para tema oscuro */
-}
-
-.student-name-modal input[type='text']::placeholder {
-  color: var(--text-color-muted, #999); /* Color de placeholder adaptable */
-}
-
-.modal-submit-button,
-.modal-close-button {
-  display: block;
-  width: 50%;
-  padding: 12px 20px;
-  margin: 20px auto 0 auto;
-  background-color: var(
-    --toggle-activity-view-button-bg,
-    #007bff
-  ); /* Reutiliza un color de botón primario */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.modal-submit-button:hover,
-.modal-close-button:hover {
-  background-color: var(--toggle-activity-view-button-hover-bg, #0056b3);
-}
-
-.chapter-completion-modal p strong {
-  color: var(--blank-correct-color); /* Reutilizar color de éxito */
-}
-
-/* src/app.css */
-/* ... (tus estilos existentes) ... */
-
-.app-container-blur {
-  filter: blur(25px); /* Ajusta el valor para más o menos desenfoque */
-  transition: filter 0.5s ease-in-out;
-}
-
-/* (Asegúrate que .chapter-completion-modal y .modal-submit-button estén estilizados, como en el ejemplo anterior) */
-.chapter-completion-modal {
-  text-align: center; /* Centrar texto en este modal específico */
-  max-width: 500px;
-}
-
-.chapter-completion-modal h2 {
-  margin-top: 0;
-  color: var(--text-color);
-}
-
-.chapter-completion-modal p {
-  margin-bottom: 15px;
-  line-height: 1.6;
-  color: var(--text-color);
-}
-
-.chapter-completion-modal p strong {
-  color: var(--blank-correct-color);
+/* Ajustes opcionales para los botones si es necesario para el layout lado a lado */
+.activity-buttons-footer .check-button,
+.activity-buttons-footer .toggle-activity-view-button {
+  margin: 0; /* Quitar márgenes automáticos si los tenían para centrado individual */
+  /* width: auto; /* O un ancho fijo si lo prefieres */
+  padding: 10px 20px; /* Ejemplo de padding */
 }
