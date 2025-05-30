@@ -4,9 +4,7 @@ import { useDrop } from 'react-dnd'
 import FeedbackModal from './FeedbackModal'
 import './DragDropSentence.css'
 
-const ItemTypes = {
-  WORD: 'word',
-}
+const ItemTypes = { WORD: 'word' }
 
 function Blank({
   currentWord,
@@ -38,7 +36,8 @@ function Blank({
       }}
       onClick={() => onClickBlank(correctWord, currentWord)}
     >
-      {currentWord || '______'}
+      {' '}
+      {currentWord || '______'}{' '}
     </span>
   )
 }
@@ -46,9 +45,8 @@ function Blank({
 function DragDropSentence({
   activityData,
   onActivityComplete,
-  initialWords,
-  onWordsChanged,
-  // Nuevas props para el botón de vistazo
+  initialWords, // Prop crucial: representa el estado actual del banco de palabras desde App.jsx
+  onWordsChanged, // Prop para notificar a App.jsx los cambios en el banco
   isShowingTextDuringActivity,
   onToggleActivityView,
   isGlanceButtonDisabled,
@@ -59,25 +57,35 @@ function DragDropSentence({
   const [feedbackHint, setFeedbackHint] = useState('')
   const [isInternallyCompleted, setIsInternallyCompleted] = useState(false)
 
-  useEffect(() => {
-    const initialSentenceStates = activityData.sentences.map((sentence) => ({
-      ...sentence,
-      parts: sentence.parts.map((part) =>
-        part.type === 'blank' ? { ...part, currentWord: null } : part
-      ),
-    }))
-    setCurrentSentences(initialSentenceStates)
+  const resetInternalState = useCallback(() => {
+    if (activityData && activityData.sentences) {
+      const initialSentenceStates = activityData.sentences.map((sentence) => ({
+        ...sentence,
+        parts: sentence.parts.map((part) =>
+          part.type === 'blank' ? { ...part, currentWord: null } : part
+        ),
+      }))
+      setCurrentSentences(initialSentenceStates)
+    } else {
+      setCurrentSentences([])
+    }
     setIsInternallyCompleted(false)
   }, [activityData])
 
+  useEffect(() => {
+    // Este console.log ya no usa 'initialWords'
+    console.log(
+      '[DragDropSentence.jsx] activityData o resetInternalState cambió. Reseteando estado interno de las oraciones.'
+    )
+    resetInternalState()
+  }, [activityData, resetInternalState]) // Dependencias correctas
+
   const handleDropOnBlank = useCallback(
     (droppedWord, targetBlankCorrectWord) => {
-      /* ... (sin cambios desde la última versión) ... */ if (
-        isInternallyCompleted
-      )
-        return
-      let wordPreviouslyInTargetBlank = null
-      let wordWasMovedFromAnotherBlank = false
+      if (isInternallyCompleted) return
+
+      let wordMovedFromOtherBlank = false
+
       setCurrentSentences((prevSentences) =>
         prevSentences.map((sentence) => ({
           ...sentence,
@@ -86,42 +94,42 @@ function DragDropSentence({
               part.type === 'blank' &&
               part.correctWord === targetBlankCorrectWord
             ) {
-              if (part.currentWord && part.currentWord !== droppedWord) {
-                wordPreviouslyInTargetBlank = part.currentWord
-              }
+              // La palabra que estaba antes aquí (part.currentWord) se sobrescribe.
+              // No se añade de nuevo al banco desde esta acción.
               return { ...part, currentWord: droppedWord }
             }
             if (part.type === 'blank' && part.currentWord === droppedWord) {
-              wordWasMovedFromAnotherBlank = true
+              // Si la palabra soltada se tomó de OTRO blank, vaciar ese otro blank.
+              wordMovedFromOtherBlank = true
               return { ...part, currentWord: null }
             }
             return part
           }),
         }))
       )
-      let newAvailableWords = [...initialWords]
-      if (!wordWasMovedFromAnotherBlank) {
+
+      let newAvailableWords = [...initialWords] // Usar una copia del banco actual
+      if (!wordMovedFromOtherBlank && initialWords.includes(droppedWord)) {
+        // Si la palabra vino del banco (estaba en initialWords) Y no se movió entre blanks,
+        // entonces se elimina del banco.
         newAvailableWords = newAvailableWords.filter((w) => w !== droppedWord)
+        console.log(
+          `[DragDropSentence.jsx] Palabra '${droppedWord}' usada desde el banco y ELIMINADA. Banco ahora: ${JSON.stringify(
+            newAvailableWords
+          )}`
+        )
       }
-      if (
-        wordPreviouslyInTargetBlank &&
-        wordPreviouslyInTargetBlank !== droppedWord
-      ) {
-        if (!newAvailableWords.includes(wordPreviouslyInTargetBlank)) {
-          newAvailableWords.push(wordPreviouslyInTargetBlank)
-        }
-      }
+      // Las palabras reemplazadas en un blank NO regresan al banco automáticamente desde esta función.
+
       onWordsChanged(newAvailableWords)
     },
     [initialWords, onWordsChanged, isInternallyCompleted]
   )
+
   const handleClickOnBlank = useCallback(
     (blankCorrectWord, wordCurrentlyInBlank) => {
-      /* ... (sin cambios desde la última versión) ... */ if (
-        isInternallyCompleted ||
-        !wordCurrentlyInBlank
-      )
-        return
+      if (isInternallyCompleted || !wordCurrentlyInBlank) return
+
       setCurrentSentences((prevSentences) =>
         prevSentences.map((sentence) => ({
           ...sentence,
@@ -137,19 +145,26 @@ function DragDropSentence({
           }),
         }))
       )
-      const newAvailableWords = [...initialWords]
+
+      let newAvailableWords = [...initialWords] // Usar una copia del banco actual
       if (
         wordCurrentlyInBlank &&
         !newAvailableWords.includes(wordCurrentlyInBlank)
       ) {
-        newAvailableWords.push(wordCurrentlyInBlank)
+        newAvailableWords.push(wordCurrentlyInBlank) // Palabra regresa al banco
       }
+      console.log(
+        `[DragDropSentence.jsx] Palabra '${wordCurrentlyInBlank}' devuelta al banco desde un blank. Banco ahora: ${JSON.stringify(
+          newAvailableWords
+        )}`
+      )
       onWordsChanged(newAvailableWords)
     },
     [initialWords, onWordsChanged, isInternallyCompleted]
   )
+
   const checkAnswers = () => {
-    /* ... (sin cambios) ... */ let allCorrect = true
+    let allCorrect = true
     let firstIncorrectMessage = ''
     let firstIncorrectHint = ''
     for (const sentence of currentSentences) {
@@ -163,7 +178,7 @@ function DragDropSentence({
           }
           if (part.currentWord !== part.correctWord) {
             allCorrect = false
-            firstIncorrectMessage = `La palabra "${part.currentWord}" no es correcta en el espacio para "${part.translation}".`
+            firstIncorrectMessage = `La palabra "${part.currentWord}" no es correcta para "${part.translation}".`
             firstIncorrectHint = part.hint || `Intenta con otra palabra.`
             break
           }
@@ -173,15 +188,15 @@ function DragDropSentence({
     }
     if (allCorrect) {
       setIsInternallyCompleted(true)
-      onActivityComplete(true)
+      onActivityComplete(true) // Llamar a onActivityComplete
     } else {
-      setFeedbackMessage(firstIncorrectMessage)
-      setFeedbackHint(firstIncorrectHint)
+      setFeedbackMessage(firstIncorrectMessage) // Usar setFeedbackMessage
+      setFeedbackHint(firstIncorrectHint) // Usar setFeedbackHint
       setShowFeedbackModal(true)
     }
   }
   const getBlankDisplayClass = (part) => {
-    /* ... (sin cambios) ... */ let className = 'blank-spot'
+    let className = 'blank-spot'
     if (isInternallyCompleted) {
       if (part.currentWord !== null) {
         if (part.currentWord === part.correctWord) {
@@ -199,6 +214,7 @@ function DragDropSentence({
       <h3>{activityData.instructions}</h3>
       {currentSentences.map((sentence) => (
         <p key={sentence.id} className="sentence-line">
+          {' '}
           {sentence.parts.map((part, pIndex) => {
             if (part.type === 'text' || part.type === '.') {
               return (
@@ -219,27 +235,30 @@ function DragDropSentence({
               )
             }
             return null
-          })}
+          })}{' '}
         </p>
       ))}
-
-      {/* --- NUEVO CONTENEDOR PARA BOTONES LADO A LADO --- */}
       {!isInternallyCompleted && (
-        <div className="activity-buttons-footer">
-          <button onClick={checkAnswers} className="check-button">
-            Comprobar
-          </button>
-          {/* Botón de Vistazo/Ver Ejercicio ahora aquí */}
+        <div className="exercise-action-buttons">
+          {' '}
+          <button
+            onClick={checkAnswers}
+            className="check-button"
+            disabled={isShowingTextDuringActivity || isGlanceButtonDisabled}
+          >
+            {' '}
+            Comprobar{' '}
+          </button>{' '}
           <button
             onClick={onToggleActivityView}
             className="toggle-activity-view-button"
             disabled={isGlanceButtonDisabled}
           >
-            {isShowingTextDuringActivity ? 'Ver Ejercicio' : `Ver Texto `}
-          </button>
+            {' '}
+            {isShowingTextDuringActivity ? 'Ver Ejercicio' : 'Ver Texto'}{' '}
+          </button>{' '}
         </div>
       )}
-
       {showFeedbackModal && (
         <FeedbackModal
           message={feedbackMessage}

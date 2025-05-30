@@ -1,4 +1,4 @@
-/* app.css */
+/* app.css - Versión Limpia y Actualizada */
 
 /* --- Reset básico y box-sizing --- */
 *,
@@ -11,30 +11,37 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: #f0f0f0; /* Fallback */
+  font-family: Georgia, serif;
+  background-color: var(--background-color); /* Usar variable para tema */
+  color: var(--text-color); /* Usar variable para tema */
   height: 100%;
   width: 100%;
-  overflow: hidden; /* OCULTAR EL SCROLLBAR GLOBAL DEL BODY/HTML */
+  overflow: hidden;
 }
 
-/* --- Variables CSS para un tema claro y oscuro --- */
+/* --- Variables CSS --- */
 html {
   --background-color: #fffbe6;
   --text-color: #333;
   --button-default-bg: transparent;
   --button-default-text: var(--text-color);
   --button-default-border: var(--text-color);
-  --button-default-hover-bg: rgba(0, 0, 0, 0.1);
+  --button-default-hover-bg: rgba(0, 0, 0, 0.05);
+  --button-primary-bg: #007bff; /* Botón primario (ej. Comprobar) */
+  --button-primary-text: white;
+  --button-primary-hover-bg: #0056b3;
+
   --play-button-bg: #f8f8f8;
   --play-button-border: #ccc;
-  --play-button-hover-bg: #e6f0ff;
+  --play-button-hover-bg: #e9e9e9;
+
   --show-activity-button-bg: #28a745;
   --show-activity-button-hover-bg: #218838;
-  --toggle-activity-view-button-bg: #007bff;
-  --toggle-activity-view-button-hover-bg: #0056b3;
-  --reset-activity-button-bg: #ffc107;
-  --reset-activity-button-text: #333;
-  --reset-activity-button-hover-bg: #e0a800;
+
+  --toggle-activity-view-button-bg: #6c757d; /* Un gris para el botón secundario "Ver Texto" */
+  --toggle-activity-view-button-text: white;
+  --toggle-activity-view-button-hover-bg: #5a6268;
+
   --error-message-color: #a94442;
   --error-background: #fcebeb;
   --error-border: #e0b4b4;
@@ -42,6 +49,7 @@ html {
   --modal-bg: #fff;
   --modal-text: #000;
   --modal-border: #ccc;
+  --text-color-muted: #999;
   --blank-border-color: #999;
   --blank-bg-color: #e0e0e0;
   --blank-hover-bg-color: #f0f0f0;
@@ -55,10 +63,9 @@ html {
   --progress-bar-outer-bg: #e0e0e0;
   --progress-bar-inner-bg: #4caf50;
   --select-arrow-color: #000;
-  --text-color-muted: #999; /* Añadida para placeholder del modal */
 
   --top-bar-height: 60px;
-  --fixed-word-bank-height: 80px;
+  --word-bank-container-height: 60px; /* Ajustado para una fila de palabras y sin botones aquí */
 }
 
 html.dark-mode {
@@ -66,16 +73,17 @@ html.dark-mode {
   --text-color: #f0f0f0;
   --button-default-border: #555;
   --button-default-hover-bg: #2a2a2a;
+  --button-primary-bg: #0056b3;
+  --button-primary-hover-bg: #003e82;
+
   --play-button-bg: #333;
   --play-button-border: #555;
   --play-button-hover-bg: #444;
   --show-activity-button-bg: #4caf50;
   --show-activity-button-hover-bg: #45a049;
-  --toggle-activity-view-button-bg: #0056b3;
-  --toggle-activity-view-button-hover-bg: #003e82;
-  --reset-activity-button-bg: #d1c41f;
-  --reset-activity-button-text: #1e1e1e;
-  --reset-activity-button-hover-bg: #b7a91a;
+  --toggle-activity-view-button-bg: #5a6268;
+  --toggle-activity-view-button-hover-bg: #495057;
+
   --error-message-color: #f1a9a9;
   --error-background: #3b2a2a;
   --error-border: #5a3e3e;
@@ -83,12 +91,13 @@ html.dark-mode {
   --modal-bg: #2a2a2a;
   --modal-text: #f0f0f0;
   --modal-border: #555;
+  --text-color-muted: #777;
   --blank-border-color: #777;
   --blank-bg-color: #2a2a2a;
   --blank-hover-bg-color: #333;
   --blank-correct-color: #66ff66;
   --blank-incorrect-color: #ff6666;
-  --word-bank-bg: #333;
+  --word-bank-bg: #282828;
   --word-bank-border: #555;
   --draggable-word-bg: #444;
   --draggable-word-border: #666;
@@ -96,7 +105,6 @@ html.dark-mode {
   --progress-bar-outer-bg: #333;
   --progress-bar-inner-bg: #66bb6a;
   --select-arrow-color: #f0f0f0;
-  --text-color-muted: #777; /* Añadida para placeholder del modal en dark mode */
 }
 
 /* --- Clases de utilidad --- */
@@ -106,55 +114,42 @@ html.dark-mode {
 
 /* --- Estilos de Layout y Contenedores Principales --- */
 .app-container {
-  padding: 2rem;
-  font-family: Georgia, serif;
+  padding: 1rem;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--background-color);
-  color: var(--text-color);
   transition: background-color 0.3s, color 0.3s;
   overflow: hidden;
 }
-
 .app-container-blur {
-  /* Estilo para el efecto de desenfoque */
-  filter: blur(25px);
+  filter: blur(5px);
   transition: filter 0.5s ease-in-out;
 }
 
 .top-button-bar {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  position: relative;
+  gap: 1rem;
   width: 100%;
-  padding-bottom: 1rem;
-  padding-top: 10px;
+  padding: 5px 0;
   min-height: var(--top-bar-height);
+  flex-shrink: 0;
 }
-
 .left-controls {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin-right: auto;
 }
-
 .left-controls button,
 .left-controls select {
-  padding: 0.5em 1em;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
+  padding: 0.4em 0.8em;
+  height: 36px;
+  font-size: 0.85rem;
   border-radius: 5px;
-  font-size: 0.9rem;
   transition: background-color 0.2s, color 0.2s, border-color 0.2s,
     transform 0.1s;
 }
-
 .left-controls select {
   appearance: none;
   background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="292.4" height="292.4"><path fill="var(--select-arrow-color)" d="M287 69.9H5.4c-7.3 0-11 8.9-6 14.2l140.7 140.8c2.8 2.8 7.7 2.8 10.5 0l140.7-140.8c5-5.3 1.3-14.2-6-14.2z"/></svg>');
@@ -165,19 +160,17 @@ html.dark-mode {
   border: 1px solid var(--button-default-border);
   background-color: var(--button-default-bg);
   color: var(--button-default-text);
-  margin-left: 1rem;
+  margin-left: 0.5rem;
 }
-
 .right-indicators {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   margin-left: auto;
 }
-
 .nav-buttons-top {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   align-items: center;
 }
 
@@ -185,41 +178,34 @@ html.dark-mode {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-bottom: var(--fixed-word-bank-height); /* Usa la variable CSS */
+  overflow: hidden;
+  margin-bottom: var(--word-bank-container-height);
 }
 
 .scene-layout {
   display: flex;
-  align-items: flex-start;
-  margin-top: 2rem;
-  flex-grow: 1;
-  height: auto;
-  overflow-y: hidden;
-  position: relative;
-}
-
-.scene-layout.exercise-fullscreen-layout {
-  flex-direction: column;
   align-items: stretch;
-  padding-right: 0 !important;
-  padding-left: 0 !important;
+  margin-top: 1rem;
+  flex-grow: 1;
   height: 100%;
+  overflow: hidden;
+}
+.scene-layout.exercise-fullscreen-layout {
+  margin-top: 0;
+  padding: 0 !important;
 }
 
 .scene-image {
   width: 33%;
-  height: 90vh;
-  max-height: none;
+  height: 100%;
   object-fit: cover;
   border-radius: 8px;
-  margin-right: 2rem;
+  margin-right: 1.5rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transition: opacity 0.3s ease-in-out, width 0.3s ease-in-out,
     margin-right 0.3s ease-in-out;
+  flex-shrink: 0;
 }
-
 .scene-image.hidden-for-exercise {
   opacity: 0;
   width: 0;
@@ -230,117 +216,106 @@ html.dark-mode {
 
 .text-container {
   flex: 1;
-  padding: 25px;
-  position: relative;
+  padding: 0 15px;
   display: flex;
   flex-direction: column;
   height: 100%;
-  box-sizing: border-box;
+  overflow: hidden;
 }
-
 .text-container.full-width-exercise {
-  padding-left: 50px;
-  padding-right: 50px;
-  transition: padding-left 0.3s ease-in-out, padding-right 0.3s ease-in-out;
-  min-height: calc(100% - 1rem - 40px); /* Ajusta si es necesario */
-}
+  padding: 0 15px;
+} /* Unificado para el ejercicio */
 
-.main-book-title {
-  margin: 0 auto 1rem auto;
-  text-align: center;
-  color: var(--text-color);
-  font-size: 2.5rem;
-  font-weight: bold;
-  min-height: 40px;
-}
-
+.main-book-title,
 .chapter-title-main {
+  margin: 0 auto 0.5rem auto;
   text-align: center;
-  margin: 0 auto 1rem auto;
   color: var(--text-color);
-  font-size: 2rem;
   font-weight: bold;
-  min-height: 30px;
+  flex-shrink: 0;
+  padding-top: 10px;
+}
+.main-book-title {
+  font-size: 2.2rem;
+}
+.chapter-title-main {
+  font-size: 1.8rem;
 }
 
 .content-area-wrapper {
-  position: relative;
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  height: calc(100% - 70px); /* Aproximación, ajustar si los títulos cambian */
-}
-
-.scrollable-text {
   height: 100%;
-  max-height: unset;
+}
+.scrollable-text {
+  flex-grow: 1;
   overflow-y: auto;
   padding-right: 1rem;
   line-height: 1.6;
-  flex-grow: 1;
-  transition: opacity 0.3s ease-in-out;
 }
 
+/* Contenedor del ejercicio DENTRO de .content-area-wrapper */
 .activity-overlay-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  flex-grow: 1;
   background-color: var(--background-color);
-  padding: 0;
-  box-sizing: border-box;
-  overflow-y: auto;
-  z-index: 2;
+  padding: 15px;
   display: flex;
   flex-direction: column;
-  transition: opacity 0.3s ease-in-out;
+  height: 100%;
+  overflow: auto; /* Permitir scroll si el contenido del ejercicio es muy largo */
 }
-
-.activity-container {
+.drag-drop-activity-content {
+  display: flex;
+  flex-direction: column;
   flex-grow: 1;
+  /* height: 100%; No es necesario si el padre es flex y este es flex-grow */
+}
+.drag-drop-activity-content h3 {
+  flex-shrink: 0;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+.drag-drop-activity-content > p.sentence-line {
+  /* Estilos para las oraciones del ejercicio */
+  margin-bottom: 0.8rem; /* Espacio entre oraciones */
+  line-height: 1.8; /* Mayor interlineado para los blanks */
+  flex-shrink: 0;
+  font-size: 1.3rem;
 }
 
-/* --- Estilos para Modales (General y Específicos) --- */
-/* Estos son estilos base que podrían aplicar a .feedback-modal-box también, si comparten estructura de .modal-box */
+/* --- Estilos para Modales --- */
 .student-name-modal,
 .chapter-completion-modal {
   max-width: 500px;
-  /* Hereda estilos de .modal-box si se aplica esa clase también, o definirlos aquí */
 }
-
 .student-name-modal h2,
 .chapter-completion-modal h2 {
-  /* Estilos comunes para títulos de estos modales */
   text-align: center;
   margin-top: 0;
   color: var(--text-color);
 }
-
 .student-name-modal p,
 .chapter-completion-modal p {
-  /* Estilos comunes para párrafos de estos modales */
   margin-bottom: 15px;
   line-height: 1.6;
   color: var(--text-color);
 }
-
 .student-name-modal {
-  /* Estilos específicos para el modal de nombre */
   text-align: left;
 }
-
 .student-name-modal .form-group {
   margin-bottom: 15px;
 }
-
 .student-name-modal label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
   color: var(--text-color);
 }
-
 .student-name-modal input[type='text'] {
   width: calc(100% - 20px);
   padding: 10px;
@@ -350,87 +325,213 @@ html.dark-mode {
   background-color: var(--background-color);
   color: var(--text-color);
 }
-
 .student-name-modal input[type='text']::placeholder {
   color: var(--text-color-muted, #999);
 }
-
 .chapter-completion-modal {
-  /* Estilos específicos para el modal de finalización */
   text-align: center;
 }
-
 .chapter-completion-modal p strong {
   color: var(--blank-correct-color);
 }
-
-/* Botones para los nuevos modales */
 .modal-submit-button,
 .modal-close-button {
   display: block;
-  width: 50%;
-  padding: 12px 20px;
+  width: auto;
+  min-width: 150px;
+  padding: 10px 20px;
   margin: 20px auto 0 auto;
-  background-color: var(--toggle-activity-view-button-bg, #007bff);
-  color: white;
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
   border: none;
   border-radius: 5px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 .modal-submit-button:hover,
 .modal-close-button:hover {
-  background-color: var(--toggle-activity-view-button-hover-bg, #0056b3);
+  background-color: var(--button-primary-hover-bg);
 }
 
-/* --- Palabras arrastrables fijas --- */
+/* --- Banco de Palabras Fijo --- */
 .fixed-word-bank-container {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  padding: 15px;
   background-color: var(--word-bank-bg);
   border-top: 1px solid var(--word-bank-border);
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: 100;
+  padding: 10px;
+  height: var(--word-bank-container-height);
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
-  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  align-items: center;
 }
-
 .fixed-word-bank-container.hidden {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
 
+.word-options-area {
+  /* Contenedor de las palabras dentro del banco */
+  display: flex;
+  flex-direction: row; /* PALABRAS EN HORIZONTAL */
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 8px;
+  width: 100%;
+  max-width: 95%;
+  overflow-y: auto;
+  max-height: calc(
+    var(--word-bank-container-height) - 20px
+  ); /* Altura para las palabras */
+}
 .draggable-word-fixed {
+  display: inline-block;
   background-color: var(--draggable-word-bg);
   border: 1px solid var(--draggable-word-border);
-  padding: 8px 15px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 16px;
   cursor: grab;
   font-weight: bold;
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
   user-select: none;
   flex-shrink: 0;
   color: var(--text-color);
+  margin: 2px;
 }
-
 .draggable-word-fixed:hover {
   background-color: var(--draggable-word-hover-bg);
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }
-
 .draggable-word-fixed.is-dragging {
   opacity: 0;
 }
 
+/* --- Botones de Acción del Ejercicio (DENTRO de DragDropSentence) --- */
+.exercise-action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1rem; /* Espacio arriba de los botones */
+  margin-top: auto; /* Empuja los botones hacia abajo dentro de .drag-drop-activity-content */
+  flex-shrink: 0; /* Para que no se encojan */
+}
+.exercise-action-buttons .check-button,
+.exercise-action-buttons .toggle-activity-view-button {
+  margin: 0;
+  padding: 0.6em 1.2em;
+  font-size: 0.95rem;
+  border: 1px solid var(--button-default-border);
+  background-color: var(--button-default-bg);
+  color: var(--button-default-text);
+  min-width: 120px;
+  text-align: center;
+  border-radius: 5px; /* Asegurar que tengan el mismo borde que otros botones */
+}
+.exercise-action-buttons .check-button:hover:not(:disabled),
+.exercise-action-buttons .toggle-activity-view-button:hover:not(:disabled) {
+  background-color: var(--button-default-hover-bg);
+}
+.exercise-action-buttons .check-button {
+  /* Estilo más prominente para Comprobar */
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border-color: var(--button-primary-bg);
+}
+.exercise-action-buttons .check-button:hover:not(:disabled) {
+  background-color: var(--button-primary-hover-bg);
+}
+.exercise-action-buttons .toggle-activity-view-button {
+  /* Estilo para Ver Texto */
+  background-color: var(--toggle-activity-view-button-bg);
+  color: white; /* Asumiendo que el fondo de toggle es oscuro */
+  border-color: var(--toggle-activity-view-button-bg);
+}
+.exercise-action-buttons .toggle-activity-view-button:hover:not(:disabled) {
+  background-color: var(--toggle-activity-view-button-hover-bg);
+}
+
+/* --- Estilos de Botones Generales y Específicos (revisados) --- */
+button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--button-default-border);
+  border-radius: 5px;
+  background-color: var(--button-default-bg);
+  color: var(--button-default-text);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+    transform 0.1s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+button:hover:not(:disabled) {
+  background-color: var(--button-default-hover-bg);
+  transform: translateY(-1px);
+}
+button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.show-activity-button {
+  background-color: var(--show-activity-button-bg);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  font-size: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  display: block;
+  margin: 1rem auto;
+  width: fit-content;
+}
+.show-activity-button:hover:not(:disabled) {
+  background-color: var(--show-activity-button-hover-bg);
+}
+
+/* --- Estilos para la Sección de Estado de la Actividad (en App.jsx) --- */
+.activity-status-section {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  min-height: 25px;
+}
+.glance-timer-display {
+  font-weight: bold;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  padding: 5px;
+}
+.activity-completed-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  margin: 1rem auto;
+  background-color: var(--blank-correct-color);
+  color: white;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: fit-content;
+}
+.activity-completed-indicator span[role='img'] {
+  margin-right: 8px;
+  font-size: 1.1rem;
+}
+
+/* ... (Estilos de .sentence-wrapper, .play-button, .progress-bar, .page-number, .glow, .next-scene-button-animate y sus keyframes como estaban en la última versión, ya que parecían correctos) ... */
 /* --- Estilos de Reproducción de Oraciones --- */
 .sentence-wrapper {
   display: inline-flex;
@@ -439,7 +540,6 @@ html.dark-mode {
   margin-right: 0.5rem;
   margin-bottom: 0.5rem;
 }
-
 .play-button {
   font-size: 0.75rem;
   padding: 0.2rem 0.35rem;
@@ -453,133 +553,9 @@ html.dark-mode {
   color: var(--text-color);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
-
 .play-button:hover {
   background-color: var(--play-button-hover-bg);
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
-}
-
-/* --- Estilos de Navegación (botones inferiores, si los hay) --- */
-.nav-buttons {
-  margin-top: 2rem;
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-/* Estilos de botones generales */
-button {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--button-default-border);
-  border-radius: 5px;
-  background-color: var(--button-default-bg);
-  color: var(--button-default-text);
-  cursor: pointer;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s,
-    transform 0.1s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-button:hover:not(:disabled) {
-  background-color: var(--button-default-hover-bg);
-  transform: translateY(-1px);
-}
-
-button:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.show-activity-button {
-  background-color: var(--show-activity-button-bg);
-  color: white;
-  padding: 12px 25px;
-  border: none;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  /* Nuevos estilos para centrarlo si es necesario */
-  display: block; /* O inline-block si prefieres */
-  margin-left: auto;
-  margin-right: auto;
-  width: fit-content; /* Para que se ajuste al texto */
-}
-
-.show-activity-button:hover:not(:disabled) {
-  background-color: var(--show-activity-button-hover-bg);
-}
-
-.toggle-activity-view-button {
-  background-color: var(--toggle-activity-view-button-bg);
-  color: white;
-  padding: 12px 25px;
-  border: none;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  display: block;
-  margin: 1rem auto;
-}
-
-.toggle-activity-view-button:hover:not(:disabled) {
-  background-color: var(--toggle-activity-view-button-hover-bg);
-}
-
-.reset-activity-button {
-  background-color: var(--reset-activity-button-bg);
-  color: var(--reset-activity-button-text);
-  padding: 10px 20px;
-  border: none;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.reset-activity-button:hover:not(:disabled) {
-  background-color: var(--reset-activity-button-hover-bg);
-}
-
-/* --- Estilos para la Sección de Estado de la Actividad --- */
-.activity-status-section {
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.lock-message {
-  color: var(--error-message-color);
-  font-weight: bold;
-  font-size: 1.1rem;
-  padding: 0.5rem;
-  border: 1px solid var(--error-border);
-  border-radius: 5px;
-  background-color: var(--error-background);
-}
-
-/* .glance-count-message ya no se usa, fue combinado en el botón */
-
-.activity-completed-indicator {
-  /* Estilo para el nuevo indicador */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 25px;
-  margin: 1.5rem auto;
-  background-color: var(--blank-correct-color);
-  color: white;
-  border-radius: 5px;
-  font-weight: bold;
-  font-size: 1rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  width: fit-content;
-}
-
-.activity-completed-indicator span[role='img'] {
-  margin-right: 8px;
-  font-size: 1.2rem;
 }
 
 /* --- Estilos para Indicadores de Progreso y Número de Página --- */
@@ -590,14 +566,12 @@ button:disabled {
   gap: 0.2rem;
   padding-right: 0.5rem;
 }
-
 .chapter-progress-text {
   font-size: 0.9rem;
   font-weight: bold;
   color: var(--text-color);
   white-space: nowrap;
 }
-
 .progress-bar-outer {
   width: 120px;
   height: 8px;
@@ -606,14 +580,12 @@ button:disabled {
   overflow: hidden;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
-
 .progress-bar-inner {
   height: 100%;
   background-color: var(--progress-bar-inner-bg);
   border-radius: 4px;
   transition: width 0.5s ease-out;
 }
-
 .page-number-top-right {
   font-weight: bold;
   color: var(--text-color);
@@ -623,27 +595,22 @@ button:disabled {
   border-radius: 5px;
   margin-top: 5px;
 }
-
 html.dark-mode .page-number-top-right {
   background-color: rgba(0, 0, 0, 0.7);
   color: var(--text-color);
 }
 
-/* --- Efecto Glow --- */
+/* --- Efecto Glow y Animación Botón Next Scene --- */
 .glow {
-  color: black; /* Considera usar var(--text-color) o un color específico para el glow que contraste bien en ambos temas */
-  animation: glow 20s ease-in-out infinite alternate;
-  /* Ajustar text-shadow para mejor visibilidad en tema oscuro si es necesario */
+  color: var(--text-color);
+  animation: glow-animation 20s ease-in-out infinite alternate;
 }
-
 html.dark-mode .glow {
-  color: #fff; /* O un color brillante específico para dark mode */
+  color: #fff;
   text-shadow: 0 0 10px #00c6ff, 0 0 20px #00c6ff, 0 0 30px #00c6ff,
-    0 0 40px #0072ff; /* Ejemplo de glow azul para dark mode */
+    0 0 40px #0072ff;
 }
-
-@keyframes glow {
-  /* Este keyframe es para el modo claro por defecto */
+@keyframes glow-animation {
   0% {
     text-shadow: 0 0 10px #fff, 0 0 5px #eff1ea, 0 0 3px #ffc800;
   }
@@ -654,16 +621,10 @@ html.dark-mode .glow {
     text-shadow: 0 0 10px #fff, 0 0 5px #eff1ea, 0 0 3px #ffc800;
   }
 }
-
-/* Si quieres un @keyframes glow diferente para dark-mode, necesitarías cambiar la animación dinámicamente o usar variables CSS dentro del text-shadow */
-
-/* --- Animación Botón Next Scene --- */
-/* Asegúrate de que solo haya una definición de esta clase y keyframes */
 .next-scene-button-animate {
   animation: blinkGlowPulse 0.6s 5 alternate;
   border-radius: 5px;
 }
-
 @keyframes blinkGlowPulse {
   0% {
     box-shadow: 0 0 5px rgba(76, 175, 80, 0.5), 0 0 10px rgba(76, 175, 80, 0.4),
@@ -684,22 +645,59 @@ html.dark-mode .glow {
     opacity: 1;
   }
 }
-
-/* src/app.css */
+/* app.css */
 /* ... (tus estilos existentes) ... */
 
-.activity-buttons-footer {
-  display: flex;
-  justify-content: center; /* O 'space-around' o 'space-between' según prefieras */
-  align-items: center;
-  gap: 1rem; /* Espacio entre los botones */
-  margin-top: 2rem; /* Espacio arriba de los botones */
+.fixed-word-bank-container {
+  /* ... (como estaba) ... */
 }
 
-/* Ajustes opcionales para los botones si es necesario para el layout lado a lado */
-.activity-buttons-footer .check-button,
-.activity-buttons-footer .toggle-activity-view-button {
-  margin: 0; /* Quitar márgenes automáticos si los tenían para centrado individual */
-  /* width: auto; /* O un ancho fijo si lo prefieres */
-  padding: 10px 20px; /* Ejemplo de padding */
+.word-options-area {
+  display: flex;
+  flex-direction: row; /* Asegura horizontalidad */
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 8px;
+  width: 100%;
+  max-width: 95%;
+  overflow-y: auto;
+  max-height: calc(var(--word-bank-container-height) - 20px);
+}
+
+.draggable-word-fixed {
+  display: inline-block;
+  background-color: var(--draggable-word-bg);
+  border: 1px solid var(--draggable-word-border);
+  padding: 6px 12px;
+  border-radius: 16px;
+  cursor: grab;
+  font-weight: bold;
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease;
+  user-select: none;
+  flex-shrink: 0;
+  color: var(--text-color);
+  margin: 2px;
+}
+.draggable-word-fixed:hover {
+  background-color: var(--draggable-word-hover-bg);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+}
+.draggable-word-fixed.is-dragging {
+  opacity: 0;
+}
+
+/* NUEVO ESTILO para palabras usadas en el banco */
+.draggable-word-fixed.used-in-bank {
+  background-color: #d4edda; /* Un verde claro */
+  border-color: #c3e6cb;
+  color: #155724; /* Texto oscuro para contraste */
+  cursor: default; /* Opcional: cambiar cursor si ya no es arrastrable */
+}
+
+html.dark-mode .draggable-word-fixed.used-in-bank {
+  background-color: #2e7d32; /* Un verde más oscuro para tema oscuro */
+  border-color: #1b5e20;
+  color: #c8e6c9; /* Texto claro */
 }

@@ -7,7 +7,7 @@ import DragDropSentence from './components/DragDropSentence'
 import StudentNameModal from './components/StudentNameModal'
 import ChapterCompletionModal from './components/ChapterCompletionModal'
 import { AnimatePresence, motion } from 'framer-motion' // eslint-disable-line no-unused-vars
-import { DndProvider, useDrag } from 'react-dnd'
+import { DndProvider, useDrag } from 'react-dnd' // <--- useDrag está aquí
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import Confetti from 'react-confetti'
 import './app.css'
@@ -17,7 +17,7 @@ const CONFETTI_DURATION = 6000
 const NEXT_BUTTON_ANIM_DURATION = 3000
 const GLANCE_TIMER_SECONDS = 30
 
-function DraggableWord({ word }) {
+function DraggableWord({ word, isUsed }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'word',
     item: { word },
@@ -26,7 +26,9 @@ function DraggableWord({ word }) {
   return (
     <span
       ref={drag}
-      className={`draggable-word-fixed ${isDragging ? 'is-dragging' : ''}`}
+      className={`draggable-word-fixed ${isDragging ? 'is-dragging' : ''} ${
+        isUsed ? 'used-in-bank' : ''
+      }`}
       style={{ opacity: isDragging ? 0.4 : 1 }}
     >
       {' '}
@@ -41,6 +43,7 @@ function App() {
     localStorage.removeItem('fontSizeIndex')
     localStorage.removeItem('studentName')
     localStorage.removeItem('studentGroup')
+    localStorage.removeItem('chaptersStartTime')
     setChapterIndex(0)
     setSceneIndex(0)
     setDarkMode(false)
@@ -60,6 +63,8 @@ function App() {
     setIsGlanceTimerActive(false)
     setGlanceTimeRemaining(0)
     if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
+    setChaptersStartTime({})
+    setPlacedWords(new Set())
   }, [])
 
   const [chapterIndex, setChapterIndex] = useState(0)
@@ -71,6 +76,7 @@ function App() {
   const [isShowingTextDuringActivity, setIsShowingTextDuringActivity] =
     useState(false)
   const [availableWords, setAvailableWords] = useState([])
+  const [placedWords, setPlacedWords] = useState(new Set())
   const [animateNextSceneButton, setAnimateNextSceneButton] = useState(false)
   const [studentName, setStudentName] = useState('')
   const [studentGroup, setStudentGroup] = useState('')
@@ -84,10 +90,10 @@ function App() {
     width: window.innerWidth,
     height: window.innerHeight,
   })
-
   const [glanceTimeRemaining, setGlanceTimeRemaining] = useState(0)
   const [isGlanceTimerActive, setIsGlanceTimerActive] = useState(false)
   const glanceTimerRef = useRef(null)
+  const [chaptersStartTime, setChaptersStartTime] = useState({})
 
   const currentChapter = allChapters[chapterIndex]
   const currentScene = currentChapter?.scenes[sceneIndex]
@@ -102,7 +108,22 @@ function App() {
     localStorage.setItem('studentName', name)
     localStorage.setItem('studentGroup', group)
     setShowStudentNameModal(false)
+    if (chapterIndex > 0 && !chaptersStartTime[chapterIndex]) {
+      setChaptersStartTime((prev) => ({ ...prev, [chapterIndex]: Date.now() }))
+    }
   }
+  useEffect(() => {
+    if (
+      chapterIndex > 0 &&
+      !showStudentNameModal &&
+      !chaptersStartTime[chapterIndex]
+    ) {
+      setChaptersStartTime((prev) => ({ ...prev, [chapterIndex]: Date.now() }))
+    }
+  }, [chapterIndex, showStudentNameModal, chaptersStartTime])
+  useEffect(() => {
+    localStorage.setItem('chaptersStartTime', JSON.stringify(chaptersStartTime))
+  }, [chaptersStartTime])
   const completedScenesInCurrentChapter = useMemo(() => {
     if (!currentChapter) return 0
     return currentChapter.scenes.filter((scene, index) => {
@@ -137,12 +158,13 @@ function App() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const shouldShowInteractiveExercise =
+  // Esta variable determina si se muestra la interfaz del ejercicio interactivo
+  const interactiveExerciseIsVisible =
     hasActivity &&
     showActivity &&
     !activityIsCompletedForCurrentScene &&
-    !isShowingTextDuringActivity &&
-    !isGlanceTimerActive
+    !isGlanceTimerActive &&
+    !isShowingTextDuringActivity
 
   useEffect(() => {
     setShowActivity(false)
@@ -171,11 +193,14 @@ function App() {
       )
       if (!activityIsCompletedForCurrentScene) {
         setAvailableWords(shuffleArray(correctWordsForBank))
+        setPlacedWords(new Set()) // Limpiar palabras colocadas al iniciar/resetear actividad
       } else {
-        setAvailableWords([])
+        setAvailableWords(shuffleArray(correctWordsForBank)) // Mostrar todas las palabras en el banco
+        setPlacedWords(new Set(correctWordsForBank)) // Marcar todas como usadas si la actividad está completa
       }
     } else {
       setAvailableWords([])
+      setPlacedWords(new Set())
     }
     const scrollableTextElement = document.querySelector('.scrollable-text')
     if (scrollableTextElement) scrollableTextElement.scrollTop = 0
@@ -286,8 +311,9 @@ function App() {
     }
     return newArray
   }
-  const handleWordsInBankChange = (newWordsArrayFromDragDrop) => {
-    setAvailableWords(newWordsArrayFromDragDrop)
+
+  const handleBlanksStateChange = (wordsCurrentlyInBlanksSet) => {
+    setPlacedWords(new Set(wordsCurrentlyInBlanksSet))
   }
 
   const handleActivityComplete = (success) => {
@@ -297,6 +323,11 @@ function App() {
       const isLastSceneOfChapter =
         currentChapter && sceneIndex === currentChapter.scenes.length - 1
       if (hasActivity && isLastSceneOfChapter && chapterIndex > 0) {
+        let durationMinutes = 0
+        if (chaptersStartTime[chapterIndex]) {
+          const durationMs = Date.now() - chaptersStartTime[chapterIndex]
+          durationMinutes = Math.round(durationMs / (1000 * 60))
+        }
         setBlurPage(true)
         setShowConfetti(true)
         setCongratulatoryModalDetails({
@@ -305,6 +336,7 @@ function App() {
           studentName: studentName,
           studentGroup: studentGroup,
           completionTimestamp: new Date().toISOString(),
+          durationMinutes: durationMinutes,
         })
         setTimeout(() => {
           setShowConfetti(false)
@@ -351,7 +383,8 @@ function App() {
     }
   }, [isGlanceTimerActive, glanceTimeRemaining])
   const handleToggleActivityView = () => {
-    if (activityIsCompletedForCurrentScene) return
+    if (activityIsCompletedForCurrentScene && !isShowingTextDuringActivity)
+      return
     if (!isShowingTextDuringActivity) {
       setIsShowingTextDuringActivity(true)
       setGlanceTimeRemaining(GLANCE_TIMER_SECONDS)
@@ -373,28 +406,22 @@ function App() {
 
   // --- Variables para estados de deshabilitación ---
   const pageEffectsActive = blurPage || showCongratulatoryModal
-  const currentSceneRequiresCompletion =
+  const currentSceneActivityIsPending =
     hasActivity && !activityIsCompletedForCurrentScene
-
-  // True si la UI de la actividad (ejercicio O texto de vistazo con timer) está activa y no resuelta.
   const activityInterfaceIsActive =
-    showActivity && hasActivity && !activityIsCompletedForCurrentScene
+    showActivity && hasActivity && !activityIsCompletedForCurrentScene // Definida y usada consistentemente
 
   const chapterSelectorDisabled =
     pageEffectsActive ||
-    currentSceneRequiresCompletion ||
+    currentSceneActivityIsPending ||
     (activityInterfaceIsActive && isGlanceTimerActive)
   const nextSceneButtonDisabled =
-    pageEffectsActive || currentSceneRequiresCompletion
+    pageEffectsActive || currentSceneActivityIsPending
   const prevSceneButtonDisabled =
     pageEffectsActive ||
     (sceneIndex === 0 && chapterIndex === 0) ||
-    currentSceneRequiresCompletion
-  const mainControlsDisabled =
-    pageEffectsActive ||
-    currentSceneRequiresCompletion ||
-    shouldShowInteractiveExercise ||
-    isGlanceTimerActive
+    currentSceneActivityIsPending
+  const mainControlsDisabled = pageEffectsActive
   const glanceButtonDisabled =
     pageEffectsActive ||
     activityIsCompletedForCurrentScene ||
@@ -439,21 +466,23 @@ function App() {
         }}
       >
         <div className="top-button-bar">
+          {' '}
           <div className="left-controls">
+            {' '}
             <button
               onClick={() => setDarkMode(!darkMode)}
               style={{ fontSize: '0.9rem', marginRight: '0.5rem' }}
               disabled={mainControlsDisabled}
             >
               {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-            </button>
+            </button>{' '}
             <button
               onClick={() => setFontSizeIndex((prev) => Math.max(0, prev - 1))}
               style={{ marginRight: '0.25rem' }}
               disabled={fontSizeIndex === 0 || mainControlsDisabled}
             >
               A-
-            </button>
+            </button>{' '}
             <button
               onClick={() =>
                 setFontSizeIndex((prev) =>
@@ -465,16 +494,18 @@ function App() {
               }
             >
               A+
-            </button>
+            </button>{' '}
             <ChapterSelector
               chapters={allChapters}
               chapterIndex={chapterIndex}
               setChapterIndex={handleChapterChange}
               isDisabled={chapterSelectorDisabled}
-            />
-          </div>
+            />{' '}
+          </div>{' '}
           <div className="right-indicators">
+            {' '}
             <div className="nav-buttons-top">
+              {' '}
               <button
                 onClick={() => {
                   if (sceneIndex > 0) handleSceneAdvance(-1)
@@ -483,7 +514,7 @@ function App() {
                 disabled={prevSceneButtonDisabled}
               >
                 ⬅️ Previous
-              </button>
+              </button>{' '}
               {!isLastSceneInChapter && (
                 <button
                   onClick={() => {
@@ -501,7 +532,7 @@ function App() {
                   {' '}
                   Next Scene ➡️{' '}
                 </button>
-              )}
+              )}{' '}
               {nextChapterAvailable && (
                 <button
                   onClick={handleProceedToNextChapter}
@@ -509,8 +540,8 @@ function App() {
                 >
                   👉 Next Chapter
                 </button>
-              )}
-            </div>
+              )}{' '}
+            </div>{' '}
             {chapterIndex > 0 && currentChapter && (
               <div className="chapter-progress-container">
                 <span className="chapter-progress-text">
@@ -524,15 +555,16 @@ function App() {
                   ></div>
                 </div>
               </div>
-            )}
+            )}{' '}
             {getGlobalSceneNumber() && (
               <div className="page-number-top-right">
                 Page {getGlobalSceneNumber()}
               </div>
-            )}
-          </div>
+            )}{' '}
+          </div>{' '}
         </div>
         <AnimatePresence mode="wait">
+          {' '}
           <motion.div
             key={`${chapterIndex}-${sceneIndex}-${showActivity}-${isShowingTextDuringActivity}`}
             initial={{ opacity: 0, y: 10 }}
@@ -541,11 +573,9 @@ function App() {
             transition={{ duration: 0.3 }}
             className="scene-and-activity-container"
           >
-            {shouldShowInteractiveExercise ? (
+            {interactiveExerciseIsVisible ? ( // Usando interactiveExerciseIsVisible
               <div className="scene-layout exercise-fullscreen-layout">
-                {' '}
                 <div className="text-container full-width-exercise">
-                  {' '}
                   <div style={{ marginBottom: '1rem' }}>
                     {chapterIndex === 0 ? (
                       <h1 className="main-book-title hidden">Luna's journey</h1>
@@ -554,24 +584,24 @@ function App() {
                         {currentChapter.title}
                       </h2>
                     )}
-                  </div>{' '}
+                  </div>
                   <div className="content-area-wrapper">
                     <div className="activity-overlay-container">
                       <DragDropSentence
                         key={currentActivityId + '-active'}
                         activityData={currentScene.activity}
-                        initialWords={availableWords}
-                        onWordsChanged={handleWordsInBankChange}
+                        initialWords={availableWords} // Para el banco de palabras que siempre muestra todas las opciones
+                        onBlanksStateChange={handleBlanksStateChange} // Para que App sepa qué palabras están en los blanks
                         onActivityComplete={handleActivityComplete}
                         isShowingTextDuringActivity={
                           isShowingTextDuringActivity
-                        } // Prop para DragDropSentence
-                        onToggleActivityView={handleToggleActivityView} // Prop para DragDropSentence
-                        isGlanceButtonDisabled={glanceButtonDisabled} // Prop para DragDropSentence
+                        }
+                        onToggleActivityView={handleToggleActivityView}
+                        isGlanceButtonDisabled={glanceButtonDisabled}
                       />
                     </div>
-                  </div>{' '}
-                </div>{' '}
+                  </div>
+                </div>
               </div>
             ) : (
               <div
@@ -703,6 +733,7 @@ function App() {
                         })
                       })()}{' '}
                     </div>{' '}
+                    {/* Mostrar DragDropSentence si está completada Y NO estamos en modo vistazo de texto */}{' '}
                     {hasActivity &&
                       showActivity &&
                       currentScene.activity &&
@@ -713,22 +744,22 @@ function App() {
                           <DragDropSentence
                             key={currentActivityId + '-inline-completed'}
                             activityData={currentScene.activity}
-                            initialWords={availableWords}
-                            onWordsChanged={handleWordsInBankChange}
+                            initialWords={[]}
+                            onBlanksStateChange={() => {}}
                             onActivityComplete={handleActivityComplete}
+                            isInternallyCompletedProp={true}
                             isShowingTextDuringActivity={
                               isShowingTextDuringActivity
                             }
                             onToggleActivityView={handleToggleActivityView}
                             isGlanceButtonDisabled={glanceButtonDisabled}
-                            isInternallyCompletedProp={true}
                           />{' '}
                         </div>
                       )}{' '}
                   </div>{' '}
                 </div>{' '}
               </div>
-            )}{' '}
+            )}
           </motion.div>
         </AnimatePresence>
 
@@ -770,21 +801,29 @@ function App() {
               </div>
             ) : isGlanceTimerActive && isShowingTextDuringActivity ? (
               <p className="glance-timer-display">
-                Volviendo al ejercicio en: {glanceTimeRemaining}s
+                {' '}
+                Volviendo al ejercicio en: {glanceTimeRemaining}s{' '}
               </p>
             ) : null}
           </div>
         )}
 
-        {shouldShowInteractiveExercise && currentScene.activity && (
+        {interactiveExerciseIsVisible && currentScene.activity && (
           <div
             className={`fixed-word-bank-container ${
               !availableWords.length ? 'hidden' : ''
             }`}
           >
-            {availableWords.map((word, index) => (
-              <DraggableWord key={`${word}-${index}-bank`} word={word} />
-            ))}
+            <div className="word-options-area">
+              {availableWords.map((word, index) => (
+                <DraggableWord
+                  key={`${word}-${index}-bank`}
+                  word={word}
+                  isUsed={placedWords.has(word)}
+                />
+              ))}
+            </div>
+            {/* Los botones de Comprobar y Ver Texto se renderizan dentro de DragDropSentence (arriba) */}
           </div>
         )}
       </div>

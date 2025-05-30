@@ -118,18 +118,7 @@ export const chapter1Data = {
             ],
           },
         ],
-        allWords: [
-          'cold',
-          'strong',
-          'stray',
-          'round',
-          'bright',
-          'high',
-          'dark',
-          'tired',
-          'messy',
-          'sky',
-        ], // Añadida 'bright', 'high', 'sky'
+        allWords: ['cold', 'strong', 'stray', 'round', 'bright'], // Añadida 'bright', 'high', 'sky'
       },
     },
     {
@@ -249,18 +238,7 @@ export const chapter1Data = {
             ],
           },
         ],
-        allWords: [
-          'finds',
-          'soft',
-          'born',
-          'licks',
-          'orange',
-          'box',
-          'deeply',
-          'ready',
-          'cardboard',
-          'love',
-        ], // Añadida 'orange', 'cardboard', 'love'
+        allWords: ['finds', 'soft', 'born', 'licks', 'orange'], // Añadida 'orange', 'cardboard', 'love'
       },
     },
     {
@@ -379,18 +357,7 @@ export const chapter1Data = {
             ],
           },
         ],
-        allWords: [
-          'hungry',
-          'weak',
-          'food',
-          'sour',
-          'trash',
-          'milk',
-          'tummy',
-          'alley',
-          'fast',
-          'puddle',
-        ], // Añadida 'trash', 'puddle'
+        allWords: ['hungry', 'weak', 'food', 'sour', 'trash'], // Añadida 'trash', 'puddle'
       },
     },
     {
@@ -494,18 +461,7 @@ export const chapter1Data = {
             ],
           },
         ],
-        allWords: [
-          'babies',
-          'fast',
-          'hits',
-          'hurts',
-          'still',
-          'back',
-          'street',
-          'road',
-          'falls',
-          'car',
-        ], // Añadida 'still', 'falls', 'car'
+        allWords: ['babies', 'fast', 'hits', 'hurts', 'still'], // Añadida 'still', 'falls', 'car'
       },
     },
     {
@@ -612,18 +568,7 @@ export const chapter1Data = {
             ],
           },
         ],
-        allWords: [
-          'stops',
-          'hopes',
-          'move',
-          'forever',
-          'thinks',
-          'moment',
-          'away',
-          'soft',
-          'howl',
-          'eyes',
-        ], // Añadida 'thinks', 'eyes'
+        allWords: ['stops', 'hopes', 'move', 'forever', 'thinks'], // Añadida 'thinks', 'eyes'
       },
     },
   ],

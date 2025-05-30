@@ -1,16 +1,18 @@
 // src/components/ChapterCompletionModal.jsx
 import React from 'react'
 
-function ChapterCompletionModal({
-  details,
-  onClose,
-  onProceed,
-  isLastChapterInBook,
-}) {
+// Eliminada la prop 'onClose' de los parámetros
+function ChapterCompletionModal({ details, onProceed, isLastChapterInBook }) {
   if (!details) return null
 
-  const { chapterTitle, studentName, studentGroup, completionTimestamp } =
-    details
+  const {
+    chapterNumber,
+    chapterTitle,
+    studentName,
+    studentGroup,
+    completionTimestamp,
+    durationMinutes,
+  } = details
 
   const formattedDate = completionTimestamp
     ? new Date(completionTimestamp).toLocaleDateString('en-US', {
@@ -27,18 +29,16 @@ function ChapterCompletionModal({
       })
     : ''
 
+  // La función onProceed (que es handleProceedToNextChapter o handleCloseCongratulatoryModal en App.jsx)
+  // ya se encarga de cerrar el modal.
   const handleProceed = () => {
     if (onProceed) {
       onProceed()
-    } else {
-      onClose() // Fallback si no hay acción de "proceed"
     }
   }
 
   return (
     <div className="modal-overlay" style={{ zIndex: 1050 }}>
-      {' '}
-      {/* Asegurar que esté sobre el blur */}
       <div className="modal-box chapter-completion-modal">
         <h2>Congratulations, {studentName}!</h2>
         {studentGroup && (
@@ -55,12 +55,18 @@ function ChapterCompletionModal({
         <p>
           You have successfully completed{' '}
           <strong>
-            Chapter {details.chapterNumber}: {chapterTitle}
+            Chapter {chapterNumber}: {chapterTitle}
           </strong>
           <br />
           on <strong>{formattedDate}</strong> at{' '}
           <strong>{formattedTime}</strong>.
         </p>
+        {durationMinutes !== undefined && (
+          <p>
+            Time taken for this chapter:{' '}
+            <strong>{durationMinutes} minutes</strong>.
+          </p>
+        )}
         <p>Excellent work, keep it up!</p>
         <button onClick={handleProceed} className="modal-submit-button">
           {isLastChapterInBook ? 'Finish Book' : 'Continue to Next Chapter'}
