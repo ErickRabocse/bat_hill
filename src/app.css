@@ -598,11 +598,6 @@ html.dark-mode .page-number-top-right {
 }
 /* ... (estilos existentes) ... */
 
-.app-container-blur {
-  filter: blur(20px);
-  transition: filter 0.3s ease-in-out;
-}
-
 .next-scene-button-animate {
   animation: blinkGlowPulse 0.6s 5 alternate; /* 0.6s por ciclo, 5 veces = 3s */
   border-radius: 5px;
@@ -628,4 +623,109 @@ html.dark-mode .page-number-top-right {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* src/app.css */
+/* ... (tus estilos existentes) ... */
+
+/* Estilos para StudentNameModal y ChapterCompletionModal */
+.student-name-modal,
+.chapter-completion-modal {
+  text-align: left; /* Alineación más formal para estos modales */
+  max-width: 500px; /* Un poco más ancho si es necesario */
+}
+
+.student-name-modal h2,
+.chapter-completion-modal h2 {
+  text-align: center;
+  margin-top: 0;
+  color: var(--text-color); /* Usa tus variables de tema */
+}
+
+.student-name-modal p,
+.chapter-completion-modal p {
+  margin-bottom: 15px;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.student-name-modal .form-group {
+  margin-bottom: 15px;
+}
+
+.student-name-modal label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.student-name-modal input[type='text'] {
+  width: calc(100% - 20px); /* Ajustar para padding */
+  padding: 10px;
+  border: 1px solid var(--modal-border, #ccc);
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: var(--background-color); /* Para tema oscuro */
+  color: var(--text-color); /* Para tema oscuro */
+}
+
+.student-name-modal input[type='text']::placeholder {
+  color: var(--text-color-muted, #999); /* Color de placeholder adaptable */
+}
+
+.modal-submit-button,
+.modal-close-button {
+  display: block;
+  width: 50%;
+  padding: 12px 20px;
+  margin: 20px auto 0 auto;
+  background-color: var(
+    --toggle-activity-view-button-bg,
+    #007bff
+  ); /* Reutiliza un color de botón primario */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.modal-submit-button:hover,
+.modal-close-button:hover {
+  background-color: var(--toggle-activity-view-button-hover-bg, #0056b3);
+}
+
+.chapter-completion-modal p strong {
+  color: var(--blank-correct-color); /* Reutilizar color de éxito */
+}
+
+/* src/app.css */
+/* ... (tus estilos existentes) ... */
+
+.app-container-blur {
+  filter: blur(25px); /* Ajusta el valor para más o menos desenfoque */
+  transition: filter 0.5s ease-in-out;
+}
+
+/* (Asegúrate que .chapter-completion-modal y .modal-submit-button estén estilizados, como en el ejemplo anterior) */
+.chapter-completion-modal {
+  text-align: center; /* Centrar texto en este modal específico */
+  max-width: 500px;
+}
+
+.chapter-completion-modal h2 {
+  margin-top: 0;
+  color: var(--text-color);
+}
+
+.chapter-completion-modal p {
+  margin-bottom: 15px;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.chapter-completion-modal p strong {
+  color: var(--blank-correct-color);
 }
