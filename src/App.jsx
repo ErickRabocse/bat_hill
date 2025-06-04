@@ -1,18 +1,19 @@
 // App.jsx
-import { useEffect, useState, useRef, useMemo } from 'react'
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import Word from './Word'
 import { allChapters } from './data/chapters'
 import ChapterSelector from './components/ChapterSelector'
 import DragDropSentence from './components/DragDropSentence'
 import StudentNameModal from './components/StudentNameModal'
 import ChapterCompletionModal from './components/ChapterCompletionModal'
-import { AnimatePresence, motion } from 'framer-motion' // eslint-disable-line no-unused-vars
-import { DndProvider, useDrag } from 'react-dnd' // <--- useDrag está aquí
+import { AnimatePresence } from 'framer-motion'
+import { DndProvider, useDrag } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import Confetti from 'react-confetti'
 import './app.css'
 
-const FONT_SIZES = ['1rem', '1.2rem', '1.4rem', '1.6rem', '1.8rem']
+const FONT_SIZES = ['1.2rem', '1.4rem', '1.6rem']
+const DEFAULT_FONT_SIZE_INDEX = 1
 const CONFETTI_DURATION = 6000
 const NEXT_BUTTON_ANIM_DURATION = 3000
 const GLANCE_TIMER_SECONDS = 30
@@ -47,7 +48,7 @@ function App() {
     setChapterIndex(0)
     setSceneIndex(0)
     setDarkMode(false)
-    setFontSizeIndex(1)
+    setFontSizeIndex(DEFAULT_FONT_SIZE_INDEX)
     setIsActivityCompleted({})
     setShowActivity(false)
     setIsShowingTextDuringActivity(false)
@@ -70,7 +71,7 @@ function App() {
   const [chapterIndex, setChapterIndex] = useState(0)
   const [sceneIndex, setSceneIndex] = useState(0)
   const [darkMode, setDarkMode] = useState(false)
-  const [fontSizeIndex, setFontSizeIndex] = useState(1)
+  const [fontSizeIndex, setFontSizeIndex] = useState(DEFAULT_FONT_SIZE_INDEX)
   const [isActivityCompleted, setIsActivityCompleted] = useState({})
   const [showActivity, setShowActivity] = useState(false)
   const [isShowingTextDuringActivity, setIsShowingTextDuringActivity] =
@@ -93,6 +94,7 @@ function App() {
   const [glanceTimeRemaining, setGlanceTimeRemaining] = useState(0)
   const [isGlanceTimerActive, setIsGlanceTimerActive] = useState(false)
   const glanceTimerRef = useRef(null)
+  const dragDropSentenceRef = useRef(null)
   const [chaptersStartTime, setChaptersStartTime] = useState({})
 
   const currentChapter = allChapters[chapterIndex]
@@ -102,11 +104,11 @@ function App() {
   const activityIsCompletedForCurrentScene =
     !!isActivityCompleted[currentActivityId]
 
-  const handleStudentNameSubmit = (name, group) => {
-    setStudentName(name)
-    setStudentGroup(group)
-    localStorage.setItem('studentName', name)
-    localStorage.setItem('studentGroup', group)
+  const handleStudentNameSubmit = (nameFromModal, groupFromModal) => {
+    setStudentName(nameFromModal)
+    setStudentGroup(groupFromModal)
+    localStorage.setItem('studentName', nameFromModal)
+    localStorage.setItem('studentGroup', groupFromModal)
     setShowStudentNameModal(false)
     if (chapterIndex > 0 && !chaptersStartTime[chapterIndex]) {
       setChaptersStartTime((prev) => ({ ...prev, [chapterIndex]: Date.now() }))
@@ -158,24 +160,23 @@ function App() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Esta variable determina si se muestra la interfaz del ejercicio interactivo
-  const interactiveExerciseIsVisible =
-    hasActivity &&
-    showActivity &&
-    !activityIsCompletedForCurrentScene &&
-    !isGlanceTimerActive &&
-    !isShowingTextDuringActivity
+  // Define si la interfaz de actividad (sidebar + área de ejercicio/texto de vistazo) está activa
+  const activityModeIsActive =
+    showActivity && hasActivity && !activityIsCompletedForCurrentScene
 
   useEffect(() => {
-    setShowActivity(false)
+    // Al cambiar de escena, reseteamos la vista de texto/vistazo y el timer.
+    // setShowActivity(false) se maneja en resetViewAndTimer, que es llamado por navegación.
     setIsShowingTextDuringActivity(false)
     setIsGlanceTimerActive(false)
     setGlanceTimeRemaining(0)
     if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
+
     if (
       currentScene &&
       currentScene.activity &&
-      currentScene.activity.sentences
+      currentScene.activity.sentences &&
+      Array.isArray(currentScene.activity.sentences)
     ) {
       const correctWordsForBank = currentScene.activity.sentences.reduce(
         (acc, sentence) => {
@@ -191,12 +192,11 @@ function App() {
         },
         []
       )
-      if (!activityIsCompletedForCurrentScene) {
-        setAvailableWords(shuffleArray(correctWordsForBank))
-        setPlacedWords(new Set()) // Limpiar palabras colocadas al iniciar/resetear actividad
+      setAvailableWords(shuffleArray(correctWordsForBank))
+      if (activityIsCompletedForCurrentScene) {
+        setPlacedWords(new Set(correctWordsForBank))
       } else {
-        setAvailableWords(shuffleArray(correctWordsForBank)) // Mostrar todas las palabras en el banco
-        setPlacedWords(new Set(correctWordsForBank)) // Marcar todas como usadas si la actividad está completa
+        setPlacedWords(new Set())
       }
     } else {
       setAvailableWords([])
@@ -204,11 +204,16 @@ function App() {
     }
     const scrollableTextElement = document.querySelector('.scrollable-text')
     if (scrollableTextElement) scrollableTextElement.scrollTop = 0
+    if (!showActivity && dragDropSentenceRef.current?.resetActivityState) {
+      // Solo resetear si no estamos mostrando la actividad
+      dragDropSentenceRef.current.resetActivityState()
+    }
   }, [
     chapterIndex,
     sceneIndex,
     currentScene,
     activityIsCompletedForCurrentScene,
+    showActivity,
   ])
 
   useEffect(() => {
@@ -260,15 +265,16 @@ function App() {
         speechSynthesis.onvoiceschanged = null
     }
   }, [])
-  const speakWord = (word) => {
+
+  const speakWord = (wordToSpeak) => {
     if (speechSynthesis.speaking) speechSynthesis.cancel()
-    const utter = new SpeechSynthesisUtterance(word)
+    const utter = new SpeechSynthesisUtterance(wordToSpeak)
     utter.lang = 'en-US'
     if (preferredVoice) utter.voice = preferredVoice
     utter.onend = () => setActiveWord(null)
     utteranceRef.current = utter
     speechSynthesis.speak(utter)
-    setActiveWord(word)
+    setActiveWord(wordToSpeak)
   }
   const resetViewAndTimer = () => {
     setShowActivity(false)
@@ -278,7 +284,9 @@ function App() {
     if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
     setBlurPage(false)
     setShowCongratulatoryModal(false)
+    dragDropSentenceRef.current?.resetActivityState()
   }
+
   const handleChapterChange = (newIndex) => {
     setChapterIndex(newIndex)
     setSceneIndex(0)
@@ -302,24 +310,27 @@ function App() {
     }
     return page + sceneIndex + 1
   }
-  const shuffleArray = (array) => {
-    if (!array) return []
-    const newArray = [...array]
+
+  const shuffleArray = (inputArray) => {
+    if (!inputArray) return []
+    const newArray = [...inputArray]
     for (let i = newArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
       ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
     }
     return newArray
   }
-
-  const handleBlanksStateChange = (wordsCurrentlyInBlanksSet) => {
+  const handleBlanksStateChange = useCallback((wordsCurrentlyInBlanksSet) => {
     setPlacedWords(new Set(wordsCurrentlyInBlanksSet))
-  }
+  }, [])
 
-  const handleActivityComplete = (success) => {
-    if (success) {
+  const handleActivityComplete = (activitySuccess) => {
+    if (activitySuccess) {
       setIsActivityCompleted((prev) => ({ ...prev, [currentActivityId]: true }))
       setIsShowingTextDuringActivity(true)
+      setIsGlanceTimerActive(false)
+      if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
+      setGlanceTimeRemaining(0)
       const isLastSceneOfChapter =
         currentChapter && sceneIndex === currentChapter.scenes.length - 1
       if (hasActivity && isLastSceneOfChapter && chapterIndex > 0) {
@@ -382,9 +393,15 @@ function App() {
       if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
     }
   }, [isGlanceTimerActive, glanceTimeRemaining])
+
   const handleToggleActivityView = () => {
-    if (activityIsCompletedForCurrentScene && !isShowingTextDuringActivity)
+    // Si la actividad está completa Y estamos mostrando el ejercicio (no el texto de vistazo),
+    // y el usuario hace clic en "Ver Texto", lo llevamos a la vista de lectura normal.
+    if (activityIsCompletedForCurrentScene && !isShowingTextDuringActivity) {
+      setShowActivity(false) // Esto hará que activityModeIsActive sea false
       return
+    }
+    // Lógica normal de vistazo
     if (!isShowingTextDuringActivity) {
       setIsShowingTextDuringActivity(true)
       setGlanceTimeRemaining(GLANCE_TIMER_SECONDS)
@@ -403,18 +420,14 @@ function App() {
     isLastSceneInChapter &&
     chapterIndex < allChapters.length - 1 &&
     (chapterIndex === 0 || chapterProgress === 100)
-
-  // --- Variables para estados de deshabilitación ---
   const pageEffectsActive = blurPage || showCongratulatoryModal
   const currentSceneActivityIsPending =
     hasActivity && !activityIsCompletedForCurrentScene
-  const activityInterfaceIsActive =
-    showActivity && hasActivity && !activityIsCompletedForCurrentScene // Definida y usada consistentemente
 
   const chapterSelectorDisabled =
     pageEffectsActive ||
     currentSceneActivityIsPending ||
-    (activityInterfaceIsActive && isGlanceTimerActive)
+    (activityModeIsActive && isGlanceTimerActive)
   const nextSceneButtonDisabled =
     pageEffectsActive || currentSceneActivityIsPending
   const prevSceneButtonDisabled =
@@ -429,8 +442,306 @@ function App() {
       isGlanceTimerActive &&
       glanceTimeRemaining === 0)
   const showExerciseButtonDisabled = pageEffectsActive
+  const checkButtonDisabledInSidebar =
+    pageEffectsActive ||
+    (isShowingTextDuringActivity && isGlanceTimerActive) ||
+    activityIsCompletedForCurrentScene
 
-  if (!currentChapter || !currentScene) return <div>Loading...</div>
+  if (!currentChapter || !currentScene) {
+    return <div>Cargando...</div>
+  }
+
+  let mainContentToRender
+
+  if (
+    activityModeIsActive &&
+    isShowingTextDuringActivity &&
+    isGlanceTimerActive
+  ) {
+    // MODO VISTAZO DE TEXTO: Muestra el layout de lectura normal (imagen + texto)
+    mainContentToRender = (
+      <div className={`reading-view-layout glance-mode`}>
+        <img
+          src={currentScene.image}
+          alt={`Scene ${sceneIndex + 1} from Chapter ${
+            currentChapter.title || 'Introduction'
+          }`}
+          className="scene-image"
+        />
+        <div className="text-container">
+          <div style={{ marginBottom: '1rem' }}>
+            {chapterIndex === 0 ? (
+              <h1 className="main-book-title">{allChapters[0].title}</h1>
+            ) : (
+              <h2 className="chapter-title-main">{currentChapter.title}</h2>
+            )}
+          </div>
+          <div className="content-area-wrapper">
+            <div className="scrollable-text">
+              {(() => {
+                const sentences = []
+                let currentSentenceWords = []
+                ;(currentScene?.text || []).forEach((item, idx) => {
+                  currentSentenceWords.push({ ...item, globalArrIndex: idx })
+                  if (
+                    ['.', '!', '?'].includes(item.word) ||
+                    idx === (currentScene.text?.length || 0) - 1
+                  ) {
+                    if (currentSentenceWords.length > 0) {
+                      sentences.push(currentSentenceWords)
+                    }
+                    currentSentenceWords = []
+                  }
+                })
+                if (currentSentenceWords.length > 0) {
+                  sentences.push(currentSentenceWords)
+                }
+                return sentences.map((sentenceData, sIndex) => {
+                  const sentenceText = sentenceData
+                    .map((item) => item.word)
+                    .join(' ')
+                    .replace(/\s+([.,!?])/g, '$1')
+                  const playSentence = () => {
+                    if (speechSynthesis.speaking) {
+                      speechSynthesis.cancel()
+                    }
+                    const utter = new SpeechSynthesisUtterance(sentenceText)
+                    utter.lang = 'en-US'
+                    const voiceToUse = preferredVoice
+                    if (voiceToUse) utter.voice = voiceToUse
+                    utter.onend = () => setActiveWord(null)
+                    speechSynthesis.speak(utter)
+                  }
+                  return (
+                    <span key={sIndex} className="sentence-wrapper">
+                      <button
+                        onClick={playSentence}
+                        className="play-button"
+                        disabled={pageEffectsActive}
+                      >
+                        🔊
+                      </button>
+                      {sentenceData.map(
+                        ({ word: textWord, translation, globalArrIndex }) => {
+                          const isPunctuation = [
+                            '.',
+                            ',',
+                            '!',
+                            '?',
+                            '...',
+                          ].includes(textWord)
+                          return (
+                            <span key={`${globalArrIndex}-${textWord}`}>
+                              {isPunctuation ? (
+                                textWord
+                              ) : (
+                                <Word
+                                  text={textWord}
+                                  translation={translation}
+                                  activeWord={activeWord}
+                                  setActiveWord={setActiveWord}
+                                  onSpeak={speakWord}
+                                  fontSize={currentFontSize}
+                                />
+                              )}
+                            </span>
+                          )
+                        }
+                      )}
+                    </span>
+                  )
+                })
+              })()}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  } else if (activityModeIsActive && !isShowingTextDuringActivity) {
+    // MODO EJERCICIO INTERACTIVO (dos columnas: sidebar + DragDropSentence)
+    mainContentToRender = (
+      <div className="exercise-fullscreen-layout">
+        <div className="exercise-sidebar-left">
+          <h3>
+            {currentScene.activity?.instructions ||
+              'Instrucciones no disponibles.'}
+          </h3>
+          <div className="sidebar-word-bank">
+            <div className="word-options-area-sidebar">
+              {availableWords.map((word, index) => (
+                <DraggableWord
+                  key={`${word}-${index}-bank`}
+                  word={word}
+                  isUsed={placedWords.has(word)}
+                />
+              ))}
+            </div>
+          </div>
+          {!activityIsCompletedForCurrentScene && (
+            <div className="activity-action-buttons-sidebar">
+              <button
+                onClick={() =>
+                  dragDropSentenceRef.current?.triggerCheckAnswers()
+                }
+                className="check-button"
+                disabled={checkButtonDisabledInSidebar}
+              >
+                Comprobar
+              </button>
+              <button
+                onClick={handleToggleActivityView}
+                className="toggle-activity-view-button"
+                disabled={glanceButtonDisabled}
+              >
+                Ver Texto
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="exercise-main-area-right">
+          {currentScene.activity &&
+          currentScene.activity.sentences &&
+          currentScene.activity.sentences.length > 0 ? (
+            <DragDropSentence
+              ref={dragDropSentenceRef}
+              key={currentActivityId + '-active-main'}
+              activityData={currentScene.activity}
+              onBlanksStateChange={handleBlanksStateChange}
+              onActivityComplete={handleActivityComplete}
+              isInternallyCompletedProp={activityIsCompletedForCurrentScene}
+            />
+          ) : (
+            <div
+              style={{
+                padding: '20px',
+                textAlign: 'center',
+                color: 'var(--text-color)',
+              }}
+            >
+              Error: No se pueden cargar las oraciones del ejercicio.
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  } else {
+    // VISTA DE LECTURA NORMAL o EJERCICIO COMPLETADO (mostrando texto)
+    mainContentToRender = (
+      <div className={`reading-view-layout`}>
+        <img
+          src={currentScene.image}
+          alt={`Scene ${sceneIndex + 1} from Chapter ${
+            currentChapter.title || 'Introduction'
+          }`}
+          className={`scene-image`}
+        />
+        <div className={`text-container`}>
+          <div style={{ marginBottom: '1rem' }}>
+            {chapterIndex === 0 ? (
+              <h1 className="main-book-title">{allChapters[0].title}</h1>
+            ) : (
+              <h2 className="chapter-title-main">{currentChapter.title}</h2>
+            )}
+          </div>
+          <div className="content-area-wrapper">
+            <div className={`scrollable-text`}>
+              {(() => {
+                const sentences = []
+                let currentSentenceWords = []
+                ;(currentScene?.text || []).forEach((item, idx) => {
+                  currentSentenceWords.push({ ...item, globalArrIndex: idx })
+                  if (
+                    ['.', '!', '?'].includes(item.word) ||
+                    idx === (currentScene.text?.length || 0) - 1
+                  ) {
+                    if (currentSentenceWords.length > 0) {
+                      sentences.push(currentSentenceWords)
+                    }
+                    currentSentenceWords = []
+                  }
+                })
+                if (currentSentenceWords.length > 0) {
+                  sentences.push(currentSentenceWords)
+                }
+                return sentences.map((sentenceData, sIndex) => {
+                  const sentenceText = sentenceData
+                    .map((item) => item.word)
+                    .join(' ')
+                    .replace(/\s+([.,!?])/g, '$1')
+                  const playSentence = () => {
+                    if (speechSynthesis.speaking) {
+                      speechSynthesis.cancel()
+                    }
+                    const utter = new SpeechSynthesisUtterance(sentenceText)
+                    utter.lang = 'en-US'
+                    const voiceToUse = preferredVoice
+                    if (voiceToUse) utter.voice = voiceToUse
+                    utter.onend = () => setActiveWord(null)
+                    speechSynthesis.speak(utter)
+                  }
+                  return (
+                    <span key={sIndex} className="sentence-wrapper">
+                      <button
+                        onClick={playSentence}
+                        className="play-button"
+                        disabled={pageEffectsActive}
+                      >
+                        🔊
+                      </button>
+                      {sentenceData.map(
+                        ({ word: textWord, translation, globalArrIndex }) => {
+                          const isPunctuation = [
+                            '.',
+                            ',',
+                            '!',
+                            '?',
+                            '...',
+                          ].includes(textWord)
+                          return (
+                            <span key={`${globalArrIndex}-${textWord}`}>
+                              {isPunctuation ? (
+                                textWord
+                              ) : (
+                                <Word
+                                  text={textWord}
+                                  translation={translation}
+                                  activeWord={activeWord}
+                                  setActiveWord={setActiveWord}
+                                  onSpeak={speakWord}
+                                  fontSize={currentFontSize}
+                                />
+                              )}
+                            </span>
+                          )
+                        }
+                      )}
+                    </span>
+                  )
+                })
+              })()}
+            </div>
+            {hasActivity &&
+              showActivity &&
+              activityIsCompletedForCurrentScene && (
+                <div
+                  className="activity-status-section"
+                  style={{ marginTop: '1rem' }}
+                >
+                  <p
+                    style={{
+                      color: 'var(--blank-correct-color)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    ¡Ejercicio completado!
+                  </p>
+                </div>
+              )}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -444,8 +755,11 @@ function App() {
       {showCongratulatoryModal && congratulatoryModalDetails && (
         <ChapterCompletionModal
           details={congratulatoryModalDetails}
-          onClose={handleCloseCongratulatoryModal}
-          onProceed={handleProceedToNextChapter}
+          onProceed={
+            isLastSceneInChapter && chapterIndex === allChapters.length - 1
+              ? handleCloseCongratulatoryModal
+              : handleProceedToNextChapter
+          }
           isLastChapterInBook={chapterIndex === allChapters.length - 1}
         />
       )}
@@ -466,7 +780,6 @@ function App() {
         }}
       >
         <div className="top-button-bar">
-          {' '}
           <div className="left-controls">
             {' '}
             <button
@@ -501,7 +814,7 @@ function App() {
               setChapterIndex={handleChapterChange}
               isDisabled={chapterSelectorDisabled}
             />{' '}
-          </div>{' '}
+          </div>
           <div className="right-indicators">
             {' '}
             <div className="nav-buttons-top">
@@ -545,7 +858,7 @@ function App() {
             {chapterIndex > 0 && currentChapter && (
               <div className="chapter-progress-container">
                 <span className="chapter-progress-text">
-                  Chapter {chapterIndex}: {completedScenesInCurrentChapter}/
+                  Capítulo {chapterIndex}: {completedScenesInCurrentChapter}/
                   {currentChapter.scenes.length}
                 </span>
                 <div className="progress-bar-outer">
@@ -558,209 +871,18 @@ function App() {
             )}{' '}
             {getGlobalSceneNumber() && (
               <div className="page-number-top-right">
-                Page {getGlobalSceneNumber()}
+                Página {getGlobalSceneNumber()}
               </div>
             )}{' '}
-          </div>{' '}
+          </div>
         </div>
         <AnimatePresence mode="wait">
-          {' '}
-          <motion.div
-            key={`${chapterIndex}-${sceneIndex}-${showActivity}-${isShowingTextDuringActivity}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
+          <div
+            key={`${chapterIndex}-${sceneIndex}-${showActivity}-${isShowingTextDuringActivity}-${isGlanceTimerActive}`}
             className="scene-and-activity-container"
           >
-            {interactiveExerciseIsVisible ? ( // Usando interactiveExerciseIsVisible
-              <div className="scene-layout exercise-fullscreen-layout">
-                <div className="text-container full-width-exercise">
-                  <div style={{ marginBottom: '1rem' }}>
-                    {chapterIndex === 0 ? (
-                      <h1 className="main-book-title hidden">Luna's journey</h1>
-                    ) : (
-                      <h2 className="chapter-title-main hidden">
-                        {currentChapter.title}
-                      </h2>
-                    )}
-                  </div>
-                  <div className="content-area-wrapper">
-                    <div className="activity-overlay-container">
-                      <DragDropSentence
-                        key={currentActivityId + '-active'}
-                        activityData={currentScene.activity}
-                        initialWords={availableWords} // Para el banco de palabras que siempre muestra todas las opciones
-                        onBlanksStateChange={handleBlanksStateChange} // Para que App sepa qué palabras están en los blanks
-                        onActivityComplete={handleActivityComplete}
-                        isShowingTextDuringActivity={
-                          isShowingTextDuringActivity
-                        }
-                        onToggleActivityView={handleToggleActivityView}
-                        isGlanceButtonDisabled={glanceButtonDisabled}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div
-                className={`scene-layout ${
-                  showActivity && hasActivity
-                    ? 'exercise-mode-text-visible'
-                    : ''
-                }`}
-              >
-                {' '}
-                <img
-                  src={currentScene.image}
-                  alt={`Scene ${sceneIndex + 1} from Chapter ${
-                    currentChapter.title || 'Introduction'
-                  }`}
-                  className={`scene-image ${
-                    activityInterfaceIsActive && !isShowingTextDuringActivity
-                      ? 'hidden-for-exercise'
-                      : ''
-                  }`}
-                />{' '}
-                <div
-                  className={`text-container ${
-                    activityInterfaceIsActive && !isShowingTextDuringActivity
-                      ? 'full-width-exercise'
-                      : ''
-                  }`}
-                >
-                  {' '}
-                  <div style={{ marginBottom: '1rem' }}>
-                    {chapterIndex === 0 ? (
-                      <h1 className="main-book-title">Luna's journey</h1>
-                    ) : (
-                      <h2 className="chapter-title-main">
-                        {currentChapter.title}
-                      </h2>
-                    )}
-                  </div>{' '}
-                  <div className="content-area-wrapper">
-                    {' '}
-                    <div
-                      className={`scrollable-text ${
-                        activityInterfaceIsActive &&
-                        !isShowingTextDuringActivity
-                          ? 'hidden'
-                          : ''
-                      }`}
-                    >
-                      {' '}
-                      {(() => {
-                        const sentences = []
-                        let currentSentenceWords = []
-                        currentScene.text.forEach((item, idx) => {
-                          currentSentenceWords.push({
-                            ...item,
-                            globalArrIndex: idx,
-                          })
-                          if (
-                            ['.', '!', '?'].includes(item.word) ||
-                            idx === currentScene.text.length - 1
-                          ) {
-                            if (currentSentenceWords.length > 0) {
-                              sentences.push(currentSentenceWords)
-                            }
-                            currentSentenceWords = []
-                          }
-                        })
-                        if (currentSentenceWords.length > 0) {
-                          sentences.push(currentSentenceWords)
-                        }
-                        return sentences.map((sentenceData, sIndex) => {
-                          const sentenceText = sentenceData
-                            .map((item) => item.word)
-                            .join(' ')
-                            .replace(/\s+([.,!?])/g, '$1')
-                          const playSentence = () => {
-                            if (speechSynthesis.speaking) {
-                              speechSynthesis.cancel()
-                            }
-                            const utter = new SpeechSynthesisUtterance(
-                              sentenceText
-                            )
-                            utter.lang = 'en-US'
-                            const voiceToUse = preferredVoice
-                            if (voiceToUse) utter.voice = voiceToUse
-                            utter.onend = () => setActiveWord(null)
-                            speechSynthesis.speak(utter)
-                          }
-                          return (
-                            <span key={sIndex} className="sentence-wrapper">
-                              <button
-                                onClick={playSentence}
-                                className="play-button"
-                                disabled={
-                                  pageEffectsActive || isGlanceTimerActive
-                                }
-                              >
-                                🔊
-                              </button>
-                              {sentenceData.map(
-                                ({ word, translation, globalArrIndex }) => {
-                                  const isPunctuation = [
-                                    '.',
-                                    ',',
-                                    '!',
-                                    '?',
-                                    '...',
-                                  ].includes(word)
-                                  return (
-                                    <span key={`${globalArrIndex}-${word}`}>
-                                      {isPunctuation ? (
-                                        word
-                                      ) : (
-                                        <Word
-                                          text={word}
-                                          translation={translation}
-                                          activeWord={activeWord}
-                                          setActiveWord={setActiveWord}
-                                          onSpeak={speakWord}
-                                          fontSize={currentFontSize}
-                                        />
-                                      )}
-                                    </span>
-                                  )
-                                }
-                              )}
-                            </span>
-                          )
-                        })
-                      })()}{' '}
-                    </div>{' '}
-                    {/* Mostrar DragDropSentence si está completada Y NO estamos en modo vistazo de texto */}{' '}
-                    {hasActivity &&
-                      showActivity &&
-                      currentScene.activity &&
-                      activityIsCompletedForCurrentScene &&
-                      !isShowingTextDuringActivity && (
-                        <div className="activity-overlay-container">
-                          {' '}
-                          <DragDropSentence
-                            key={currentActivityId + '-inline-completed'}
-                            activityData={currentScene.activity}
-                            initialWords={[]}
-                            onBlanksStateChange={() => {}}
-                            onActivityComplete={handleActivityComplete}
-                            isInternallyCompletedProp={true}
-                            isShowingTextDuringActivity={
-                              isShowingTextDuringActivity
-                            }
-                            onToggleActivityView={handleToggleActivityView}
-                            isGlanceButtonDisabled={glanceButtonDisabled}
-                          />{' '}
-                        </div>
-                      )}{' '}
-                  </div>{' '}
-                </div>{' '}
-              </div>
-            )}
-          </motion.div>
+            {mainContentToRender}
+          </div>
         </AnimatePresence>
 
         {hasActivity &&
@@ -786,9 +908,36 @@ function App() {
           </div>
         )}
 
-        {hasActivity && showActivity && (
-          <div className="activity-status-section">
-            {activityIsCompletedForCurrentScene ? (
+        {/* Temporizador de vistazo global (si está activo y estamos en modo vistazo de pantalla completa) */}
+        {isGlanceTimerActive &&
+          isShowingTextDuringActivity &&
+          activityModeIsActive && (
+            <div
+              className="activity-status-section"
+              style={{
+                position: 'fixed',
+                bottom: '10px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 1001,
+                background: 'var(--sidebar-bg)',
+                padding: '5px 10px',
+                borderRadius: '5px',
+                boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+              }}
+            >
+              <p className="glance-timer-display">
+                {' '}
+                Volviendo al ejercicio en: {glanceTimeRemaining}s{' '}
+              </p>
+            </div>
+          )}
+        {/* Mensaje de "Ejercicio completado" si no estamos en modo vistazo y la actividad está completa */}
+        {/* {showActivity &&
+          hasActivity &&
+          activityIsCompletedForCurrentScene &&
+          !isShowingTextDuringActivity && (
+            <div className="activity-status-section">
               <div>
                 <p
                   style={{
@@ -799,33 +948,8 @@ function App() {
                   ¡Ejercicio completado!
                 </p>
               </div>
-            ) : isGlanceTimerActive && isShowingTextDuringActivity ? (
-              <p className="glance-timer-display">
-                {' '}
-                Volviendo al ejercicio en: {glanceTimeRemaining}s{' '}
-              </p>
-            ) : null}
-          </div>
-        )}
-
-        {interactiveExerciseIsVisible && currentScene.activity && (
-          <div
-            className={`fixed-word-bank-container ${
-              !availableWords.length ? 'hidden' : ''
-            }`}
-          >
-            <div className="word-options-area">
-              {availableWords.map((word, index) => (
-                <DraggableWord
-                  key={`${word}-${index}-bank`}
-                  word={word}
-                  isUsed={placedWords.has(word)}
-                />
-              ))}
             </div>
-            {/* Los botones de Comprobar y Ver Texto se renderizan dentro de DragDropSentence (arriba) */}
-          </div>
-        )}
+          )} */}
       </div>
     </DndProvider>
   )
