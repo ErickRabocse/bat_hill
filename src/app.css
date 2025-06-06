@@ -66,6 +66,8 @@ html {
   --select-arrow-color: #000;
 
   --top-bar-height: 60px;
+  /* Dentro de html { ... } */
+  --word-active-color: rgb(184, 20, 20); /* Para el modo claro */
 }
 
 html.dark-mode {
@@ -104,6 +106,8 @@ html.dark-mode {
   --progress-bar-outer-bg: #333;
   --progress-bar-inner-bg: #66bb6a;
   --select-arrow-color: #f0f0f0;
+  /* Dentro de html.dark-mode { ... } */
+  --word-active-color: #ff5e57; /* Un rojo más brillante y legible para el modo oscuro */
 }
 
 /* --- Clases de utilidad --- */

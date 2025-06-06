@@ -30,9 +30,16 @@ function Word({
 
   const handleClick = (e) => {
     e.stopPropagation()
-    const newActive = isActive ? null : text
-    setActiveWord(newActive)
     onSpeak(text)
+  }
+
+  // En Word.jsx, después de la función handleClick
+  const handleMouseEnter = () => {
+    setActiveWord(text) // Muestra el tooltip al pasar el mouse por encima
+  }
+
+  const handleMouseLeave = () => {
+    setActiveWord(null) // Oculta el tooltip al quitar el mouse
   }
 
   return (
@@ -44,9 +51,11 @@ function Word({
         cursor: 'pointer',
         fontSize: fontSize || '1.2rem',
         lineHeight: '2.5',
-        ...(isActive ? { color: 'darkred', fontWeight: 'bold' } : {}),
+        ...(isActive ? { color: 'var(--word-active-color)' } : {}),
       }}
       onClick={handleClick}
+      onMouseEnter={handleMouseEnter} // <-- AÑADE ESTA LÍNEA
+      onMouseLeave={handleMouseLeave} // <-- AÑADE ESTA LÍNEA
     >
       {text}
       {isActive && <div style={tooltipStyle}>{translation}</div>}
