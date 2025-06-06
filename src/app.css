@@ -682,3 +682,8 @@ html.dark-mode .page-number-top-right {
     transform: scale(1); /* Vuelve a su tamaño normal */
   }
 }
+/* Estilo para las oraciones ya leídas */
+.read-sentence {
+  color: var(--word-active-color);
+  transition: color 0.3s ease-in-out;
+}

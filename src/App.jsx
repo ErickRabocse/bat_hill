@@ -18,7 +18,7 @@ const FONT_SIZES = ['1.2rem', '1.4rem', '1.6rem']
 const DEFAULT_FONT_SIZE_INDEX = 1
 const EFFECT_DURATION = 6000
 const NEXT_BUTTON_ANIM_DURATION = 3000
-const GLANCE_TIMER_SECONDS = 30
+const GLANCE_TIMER_SECONDS = 15
 
 function DraggableWord({ word, isUsed }) {
   // useDrag ya se importa globalmente para App, no necesita reimportarse aquí si DraggableWord está en App.jsx
@@ -71,6 +71,7 @@ function App() {
     setChaptersStartTime({})
     setPlacedWords(new Set())
     setPlayingSentenceId(null) // <-- AÑADE ESTA LÍNEA
+    setIsScenePlaying(false) // <-- AÑADE ESTA LÍNEA
   }, [])
 
   const [chapterIndex, setChapterIndex] = useState(0)
@@ -108,6 +109,10 @@ function App() {
     !!isActivityCompleted[currentActivityId]
   // En App.jsx
   const [playingSentenceId, setPlayingSentenceId] = useState(null)
+  // En App.jsx
+  const [isScenePlaying, setIsScenePlaying] = useState(false)
+  const [readSentenceIndices, setReadSentenceIndices] = useState(new Set()) // <-- AÑADE ESTA LÍNEA
+  //...
 
   const handleStudentNameSubmit = (nameFromModal, groupFromModal) => {
     setStudentName(nameFromModal)
@@ -227,54 +232,38 @@ function App() {
 
   const currentFontSize = FONT_SIZES[fontSizeIndex]
   const [activeWord, setActiveWord] = useState(null)
-  // Reemplaza tu función speakWord con esta
-  const speakWord = async (wordToSpeak) => {
+  const speakWord = (wordToSpeak) => {
+    // Si el navegador está hablando, lo detenemos para empezar de nuevo.
     if (speechSynthesis.speaking) {
       speechSynthesis.cancel()
     }
 
-    const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY
-    const VOICE_ID = '21m00Tcm4TlvDq8ikWAM' // Esta es la voz de "Rachel", puedes cambiarla
+    // Creamos un nuevo objeto de "enunciado" con la palabra que queremos decir.
+    const utterance = new SpeechSynthesisUtterance(wordToSpeak)
 
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'xi-api-key': ELEVENLABS_API_KEY,
-      },
-      body: JSON.stringify({
-        text: wordToSpeak,
-        model_id: 'eleven_multilingual_v2', // Modelo recomendado para múltiples idiomas
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
-        },
-      }),
+    // Le indicamos al navegador que el texto está en inglés (Estados Unidos).
+    // Esto es clave para que la pronunciación sea correcta.
+    utterance.lang = 'en-US'
+    utterance.rate = 0.6 // <-- AÑADE ESTA LÍNEA
+
+    // Cuando el navegador comience a hablar, actualizamos el estado para resaltar la palabra.
+    utterance.onstart = () => {
+      setActiveWord(wordToSpeak)
     }
 
-    try {
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
-        options
-      )
-      if (!response.ok) {
-        throw new Error('La respuesta de la API de ElevenLabs no fue exitosa.')
-      }
-      const audioBlob = await response.blob()
-      const audioUrl = URL.createObjectURL(audioBlob)
-      const audio = new Audio(audioUrl)
-
-      setActiveWord(wordToSpeak) // Marcar la palabra como activa
-      audio.play()
-
-      audio.onended = () => {
-        setActiveWord(null) // Desmarcar la palabra cuando termine de sonar
-      }
-    } catch (error) {
-      console.error('Error al llamar a la API de ElevenLabs:', error)
+    // Cuando termine de hablar, quitamos el resaltado.
+    utterance.onend = () => {
+      setActiveWord(null)
     }
+
+    // Le damos la orden al navegador para que hable.
+    setTimeout(() => {
+      speechSynthesis.speak(utterance)
+    }, 150)
   }
   const resetViewAndTimer = () => {
+    setReadSentenceIndices(new Set())
+    speechSynthesis.cancel()
     setShowActivity(false)
     setIsShowingTextDuringActivity(false)
     setIsGlanceTimerActive(false)
@@ -284,58 +273,93 @@ function App() {
     setShowCongratulatoryModal(false)
     dragDropSentenceRef.current?.resetActivityState()
   }
-  // En App.jsx, junto a tus otras funciones
-  const speakSentence = async (sentenceId, sentenceText) => {
-    // 1. Evita múltiples clics si ya se está reproduciendo algo
-    if (playingSentenceId !== null) {
-      console.log('Ya se está reproduciendo una oración. Por favor, espera.')
-      return
+  const speakSentence = (sentenceId, sentenceText) => {
+    // Si ya se está reproduciendo algo, evitamos empezar una nueva reproducción.
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel()
     }
 
-    try {
-      // 2. Establece el estado de "cargando/reproduciendo" para deshabilitar los botones
+    // Creamos el enunciado con el texto completo de la oración.
+    const utterance = new SpeechSynthesisUtterance(sentenceText)
+    utterance.lang = 'en-US' // Aseguramos la pronunciación en inglés.
+    utterance.rate = 0.6 // <-- AÑADE ESTA LÍNEA
+
+    // Cuando empiece, actualizamos el estado para saber qué oración se está reproduciendo.
+    utterance.onstart = () => {
       setPlayingSentenceId(sentenceId)
+    }
 
-      const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY
-      const VOICE_ID = '21m00Tcm4TlvDq8ikWAM' // Voz de "Rachel"
-
-      const options = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': ELEVENLABS_API_KEY,
-        },
-        body: JSON.stringify({
-          text: sentenceText,
-          model_id: 'eleven_multilingual_v2',
-        }),
-      }
-
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
-        options
-      )
-      if (!response.ok) {
-        throw new Error('La respuesta de la API de ElevenLabs no fue exitosa.')
-      }
-
-      const audioBlob = await response.blob()
-      const audioUrl = URL.createObjectURL(audioBlob)
-      const audio = new Audio(audioUrl)
-
-      // 3. Reproduce el audio y espera a que termine
-      await new Promise((resolve) => {
-        audio.onended = resolve
-        audio.play()
-      })
-    } catch (error) {
-      console.error('Error al reproducir la oración con ElevenLabs:', error)
-    } finally {
-      // 4. Libera el estado de "reproduciendo" para volver a habilitar los botones
+    // Al terminar, reseteamos el estado para poder reproducir otra.
+    utterance.onend = () => {
       setPlayingSentenceId(null)
     }
+
+    // Le damos la orden al navegador para que hable.
+    setTimeout(() => {
+      speechSynthesis.speak(utterance)
+    }, 150)
   }
 
+  const playFullScene = () => {
+    if (isScenePlaying || !currentScene || !currentScene.text) return
+    if (speechSynthesis.speaking) speechSynthesis.cancel()
+
+    // 1. Obtenemos un array con el texto de cada oración.
+    const sentencesText = currentScene.text
+      .reduce((acc, item) => {
+        if (
+          !acc.length ||
+          ['.', '!', '?'].includes(acc[acc.length - 1].slice(-1))
+        ) {
+          acc.push(item.word)
+        } else {
+          acc[acc.length - 1] += ' ' + item.word
+        }
+        return acc
+      }, [])
+      .map((sentence) => sentence.replace(/\s+([.,!?])/g, '$1'))
+
+    if (sentencesText.length === 0) return
+
+    setIsScenePlaying(true)
+    setReadSentenceIndices(new Set()) // Limpiamos resaltados anteriores
+
+    // 2. Creamos una función que sabe cómo reproducir la "siguiente" oración en la cola.
+    // VERSIÓN CORREGIDA DE playNextSentence
+    const playNextSentence = (sentenceIndex) => {
+      // Si ya no hay más oraciones, terminamos.
+      if (sentenceIndex >= sentencesText.length) {
+        setIsScenePlaying(false)
+        setTimeout(() => {
+          setReadSentenceIndices(new Set())
+        }, 1000)
+        return
+      }
+
+      // Resaltamos la oración que vamos a leer.
+      setReadSentenceIndices((prev) => new Set(prev).add(sentenceIndex))
+
+      const utterance = new SpeechSynthesisUtterance(
+        sentencesText[sentenceIndex]
+      )
+      utterance.lang = 'en-US'
+      utterance.rate = 0.65
+
+      // Cuando la oración termine, llamamos a esta misma función
+      // para la siguiente oración.
+      utterance.onend = () => {
+        playNextSentence(sentenceIndex + 1)
+      }
+
+      // Introducimos la pausa y nos aseguramos de que SOLO aquí se llame a speak.
+      setTimeout(() => {
+        speechSynthesis.speak(utterance)
+      }, 150)
+    }
+
+    // 4. Empezamos la cadena llamando a la primera oración (índice 0).
+    playNextSentence(0)
+  }
   const handleChapterChange = (newIndex) => {
     setChapterIndex(newIndex)
     setSceneIndex(0)
@@ -554,12 +578,19 @@ function App() {
                   // Busca esta función dentro de tu JSX y reemplázala
 
                   return (
-                    <span key={sIndex} className="sentence-wrapper">
+                    <span
+                      key={sIndex}
+                      className={`sentence-wrapper ${
+                        readSentenceIndices.has(sIndex) ? 'read-sentence' : ''
+                      }`}
+                    >
                       {' '}
                       <button
                         onClick={() => speakSentence(sIndex, sentenceText)}
                         className="play-button"
-                        disabled={pageEffectsActive}
+                        disabled={
+                          pageEffectsActive || playingSentenceId !== null
+                        }
                       >
                         {' '}
                         🔊{' '}
@@ -737,7 +768,12 @@ function App() {
                     .replace(/\s+([.,!?])/g, '$1')
                   // Busca esta función dentro de tu JSX y reemplázala
                   return (
-                    <span key={sIndex} className="sentence-wrapper">
+                    <span
+                      key={sIndex}
+                      className={`sentence-wrapper ${
+                        readSentenceIndices.has(sIndex) ? 'read-sentence' : ''
+                      }`}
+                    >
                       {' '}
                       <button
                         onClick={() => speakSentence(sIndex, sentenceText)}
@@ -882,6 +918,12 @@ function App() {
               setChapterIndex={handleChapterChange}
               isDisabled={chapterSelectorDisabled}
             />{' '}
+            <button
+              onClick={playFullScene}
+              disabled={mainControlsDisabled || isScenePlaying}
+            >
+              {isScenePlaying ? 'Reproduciendo...' : 'Play Scene'}
+            </button>
           </div>
           <div className="right-indicators">
             {' '}
