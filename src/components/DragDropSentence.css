@@ -26,10 +26,11 @@
 
 .sentence-line {
   margin-bottom: 15px;
-  line-height: 0; /* Menos espacio entre líneas */
+  line-height: 1.2; /* Menos espacio entre líneas */
   display: flex; /* Para alinear el texto y los blanks */
   flex-wrap: wrap; /* Permitir que las oraciones se envuelvan */
   align-items: center;
+  font-size: 1.3rem; /* <-- AÑADE ESTA LÍNEA */
 }
 
 .blank-spot {

@@ -224,50 +224,52 @@ function App() {
 
   const currentFontSize = FONT_SIZES[fontSizeIndex]
   const [activeWord, setActiveWord] = useState(null)
-  const utteranceRef = useRef(null)
-  const voicesLoaded = useRef(false)
-  const [preferredVoice, setPreferredVoice] = useState(null)
-  const getPreferredVoiceInternal = (voicesToSearch) =>
-    voicesToSearch.find(
-      (v) =>
-        v.lang === 'en-US' &&
-        (v.name.includes('Google US English') ||
-          v.name.includes('Microsoft Zira') ||
-          v.name.includes('Microsoft Jenny') ||
-          v.name.includes('Microsoft Aria') ||
-          v.name.includes('Samantha') ||
-          v.name.includes('Google UK English Female'))
-    ) ||
-    voicesToSearch.find((v) => v.lang === 'en-US') ||
-    null
-  useEffect(() => {
-    const loadVoices = () => {
-      const allVoices = speechSynthesis.getVoices()
-      if (allVoices.length > 0 || voicesLoaded.current) {
-        setPreferredVoice(getPreferredVoiceInternal(allVoices))
-        voicesLoaded.current = true
-        if (speechSynthesis.onvoiceschanged === loadVoices)
-          speechSynthesis.onvoiceschanged = null
-      }
+  // Reemplaza tu función speakWord con esta
+  const speakWord = async (wordToSpeak) => {
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel()
     }
-    loadVoices()
-    if (speechSynthesis.onvoiceschanged !== undefined && !voicesLoaded.current)
-      speechSynthesis.onvoiceschanged = loadVoices
-    return () => {
-      if (speechSynthesis.onvoiceschanged === loadVoices)
-        speechSynthesis.onvoiceschanged = null
-    }
-  }, [])
 
-  const speakWord = (wordToSpeak) => {
-    if (speechSynthesis.speaking) speechSynthesis.cancel()
-    const utter = new SpeechSynthesisUtterance(wordToSpeak)
-    utter.lang = 'en-US'
-    if (preferredVoice) utter.voice = preferredVoice
-    utter.onend = () => setActiveWord(null)
-    utteranceRef.current = utter
-    speechSynthesis.speak(utter)
-    setActiveWord(wordToSpeak)
+    const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY
+    const VOICE_ID = '21m00Tcm4TlvDq8ikWAM' // Esta es la voz de "Rachel", puedes cambiarla
+
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'xi-api-key': ELEVENLABS_API_KEY,
+      },
+      body: JSON.stringify({
+        text: wordToSpeak,
+        model_id: 'eleven_multilingual_v2', // Modelo recomendado para múltiples idiomas
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+        },
+      }),
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
+        options
+      )
+      if (!response.ok) {
+        throw new Error('La respuesta de la API de ElevenLabs no fue exitosa.')
+      }
+      const audioBlob = await response.blob()
+      const audioUrl = URL.createObjectURL(audioBlob)
+      const audio = new Audio(audioUrl)
+
+      setActiveWord(wordToSpeak) // Marcar la palabra como activa
+      audio.play()
+
+      audio.onended = () => {
+        setActiveWord(null) // Desmarcar la palabra cuando termine de sonar
+      }
+    } catch (error) {
+      console.error('Error al llamar a la API de ElevenLabs:', error)
+    }
   }
   const resetViewAndTimer = () => {
     setShowActivity(false)
@@ -495,16 +497,48 @@ function App() {
                     .map((item) => item.word)
                     .join(' ')
                     .replace(/\s+([.,!?])/g, '$1')
-                  const playSentence = () => {
-                    if (speechSynthesis.speaking) {
-                      speechSynthesis.cancel()
+                  // Busca esta función dentro de tu JSX y reemplázala
+                  const playSentence = async () => {
+                    // Usaremos la misma lógica que en speakWord para llamar a la API
+                    const ELEVENLABS_API_KEY = import.meta.env
+                      .VITE_ELEVENLABS_API_KEY
+                    const VOICE_ID = '21m00Tcm4TlvDq8ikWAM' // "Rachel", la misma voz para consistencia
+
+                    // Detener cualquier audio que se esté reproduciendo actualmente
+                    // (Esta es una buena práctica, aunque la API de ElevenLabs no lo requiere como speechSynthesis)
+
+                    const options = {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'xi-api-key': ELEVENLABS_API_KEY,
+                      },
+                      body: JSON.stringify({
+                        text: sentenceText, // Usamos sentenceText que ya contiene la oración completa
+                        model_id: 'eleven_multilingual_v2',
+                      }),
                     }
-                    const utter = new SpeechSynthesisUtterance(sentenceText)
-                    utter.lang = 'en-US'
-                    const voiceToUse = preferredVoice
-                    if (voiceToUse) utter.voice = voiceToUse
-                    utter.onend = () => setActiveWord(null)
-                    speechSynthesis.speak(utter)
+
+                    try {
+                      const response = await fetch(
+                        `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
+                        options
+                      )
+                      if (!response.ok) {
+                        throw new Error(
+                          'La respuesta de la API de ElevenLabs no fue exitosa.'
+                        )
+                      }
+                      const audioBlob = await response.blob()
+                      const audioUrl = URL.createObjectURL(audioBlob)
+                      const audio = new Audio(audioUrl)
+                      audio.play()
+                    } catch (error) {
+                      console.error(
+                        'Error al llamar a la API de ElevenLabs para la oración:',
+                        error
+                      )
+                    }
                   }
                   return (
                     <span key={sIndex} className="sentence-wrapper">
@@ -688,16 +722,48 @@ function App() {
                     .map((item) => item.word)
                     .join(' ')
                     .replace(/\s+([.,!?])/g, '$1')
-                  const playSentence = () => {
-                    if (speechSynthesis.speaking) {
-                      speechSynthesis.cancel()
+                  // Busca esta función dentro de tu JSX y reemplázala
+                  const playSentence = async () => {
+                    // Usaremos la misma lógica que en speakWord para llamar a la API
+                    const ELEVENLABS_API_KEY = import.meta.env
+                      .VITE_ELEVENLABS_API_KEY
+                    const VOICE_ID = '21m00Tcm4TlvDq8ikWAM' // "Rachel", la misma voz para consistencia
+
+                    // Detener cualquier audio que se esté reproduciendo actualmente
+                    // (Esta es una buena práctica, aunque la API de ElevenLabs no lo requiere como speechSynthesis)
+
+                    const options = {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'xi-api-key': ELEVENLABS_API_KEY,
+                      },
+                      body: JSON.stringify({
+                        text: sentenceText, // Usamos sentenceText que ya contiene la oración completa
+                        model_id: 'eleven_multilingual_v2',
+                      }),
                     }
-                    const utter = new SpeechSynthesisUtterance(sentenceText)
-                    utter.lang = 'en-US'
-                    const voiceToUse = preferredVoice
-                    if (voiceToUse) utter.voice = voiceToUse
-                    utter.onend = () => setActiveWord(null)
-                    speechSynthesis.speak(utter)
+
+                    try {
+                      const response = await fetch(
+                        `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
+                        options
+                      )
+                      if (!response.ok) {
+                        throw new Error(
+                          'La respuesta de la API de ElevenLabs no fue exitosa.'
+                        )
+                      }
+                      const audioBlob = await response.blob()
+                      const audioUrl = URL.createObjectURL(audioBlob)
+                      const audio = new Audio(audioUrl)
+                      audio.play()
+                    } catch (error) {
+                      console.error(
+                        'Error al llamar a la API de ElevenLabs para la oración:',
+                        error
+                      )
+                    }
                   }
                   return (
                     <span key={sIndex} className="sentence-wrapper">
