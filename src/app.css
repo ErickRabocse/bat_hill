@@ -121,7 +121,7 @@ html.dark-mode {
   overflow: hidden;
 }
 .app-container-blur {
-  filter: blur(5px);
+  filter: blur(25px);
   transition: filter 0.5s ease-in-out;
 }
 .top-button-bar {
@@ -637,4 +637,43 @@ html.dark-mode .page-number-top-right {
   }
 }
 
-/* ELIMINADOS los estilos de depuración con bordes de colores */
+/* Estilos para el texto de finalización sobre el efecto de partículas */
+.completion-text-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1041; /* Ligeramente por encima de las estrellas (1040), pero por debajo de futuros modales */
+  pointer-events: none; /* Para que la capa no bloquee clics */
+}
+
+.completion-text-word {
+  font-family: 'Georgia', serif;
+  font-size: 6rem;
+  font-weight: bold;
+  color: rgba(255, 255, 220, 0.9); /* Un color blanco-amarillento */
+  text-shadow: 0 0 10px #fff, 0 0 20px #f7d76a, 0 0 35px #f48c06; /* Sombra de texto para el brillo */
+  opacity: 0; /* Comienza invisible */
+  animation: fadeInAndPulse 4s ease-in-out 1 forwards;
+}
+
+@keyframes fadeInAndPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(
+      1.05
+    ); /* Ligeramente más grande en la mitad de la animación */
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1); /* Vuelve a su tamaño normal */
+  }
+}

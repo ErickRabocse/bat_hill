@@ -22,9 +22,6 @@ function Blank({
   const [{ isOver, canDrop }, drop] = useDrop(() => ({
     accept: ItemTypes.WORD,
     drop: (item) => {
-      console.log(
-        `[BlankComponent] Palabra '${item.word}' SOLTADA sobre blank con correctWord: '${correctWord}'`
-      )
       onDropBlank(item.word, correctWord)
       return { accepted: true, targetId: correctWord, droppedWord: item.word }
     },
@@ -76,7 +73,7 @@ const DragDropSentence = forwardRef(
     // En DragDropSentence.jsx
 
     const notifyBlanksChange = useCallback(
-      (sentencesToReport, actionContext = '') => {
+      (sentencesToReport = '') => {
         if (onBlanksStateChange) {
           const wordsInBlanks = new Set()
           ;(sentencesToReport || []).forEach((sentence) => {
@@ -86,10 +83,7 @@ const DragDropSentence = forwardRef(
               }
             })
           })
-          console.log(
-            `[DragDropSentence.jsx] ${actionContext} - Notificando a App.jsx. Palabras en blanks:`,
-            Array.from(wordsInBlanks)
-          )
+
           onBlanksStateChange(wordsInBlanks)
         }
       },
@@ -159,11 +153,6 @@ const DragDropSentence = forwardRef(
     const handleClickOnBlank = useCallback(
       (blankCorrectWordParam, wordCurrentlyInBlankParam) => {
         if (isInternallyCompleted || !wordCurrentlyInBlankParam) return
-
-        console.log(
-          `[DragDropSentence.jsx] handleClickOnBlank - Palabra a quitar: '${wordCurrentlyInBlankParam}' del blank con correctWord: '${blankCorrectWordParam}'`
-        )
-
         let newSentencesState
         setCurrentSentences((prevSentences) => {
           newSentencesState = prevSentences.map((sentence) => ({

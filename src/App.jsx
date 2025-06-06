@@ -7,18 +7,21 @@ import DragDropSentence from './components/DragDropSentence'
 import StudentNameModal from './components/StudentNameModal'
 import ChapterCompletionModal from './components/ChapterCompletionModal'
 import { AnimatePresence } from 'framer-motion'
+// --- IMPORTACIONES CORREGIDAS ---
 import { DndProvider, useDrag } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import Confetti from 'react-confetti'
+
+import StarEffect from './components/StarEffect'
 import './app.css'
 
 const FONT_SIZES = ['1.2rem', '1.4rem', '1.6rem']
 const DEFAULT_FONT_SIZE_INDEX = 1
-const CONFETTI_DURATION = 6000
+const EFFECT_DURATION = 6000
 const NEXT_BUTTON_ANIM_DURATION = 3000
 const GLANCE_TIMER_SECONDS = 30
 
 function DraggableWord({ word, isUsed }) {
+  // useDrag ya se importa globalmente para App, no necesita reimportarse aquí si DraggableWord está en App.jsx
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'word',
     item: { word },
@@ -59,7 +62,8 @@ function App() {
     setShowStudentNameModal(true)
     setShowCongratulatoryModal(false)
     setCongratulatoryModalDetails(null)
-    setShowConfetti(false)
+    // Aquí es donde va la nueva línea, junto a los otros resets
+    setShowStarEffect(false)
     setBlurPage(false)
     setIsGlanceTimerActive(false)
     setGlanceTimeRemaining(0)
@@ -85,12 +89,10 @@ function App() {
   const [showCongratulatoryModal, setShowCongratulatoryModal] = useState(false)
   const [congratulatoryModalDetails, setCongratulatoryModalDetails] =
     useState(null)
-  const [showConfetti, setShowConfetti] = useState(false)
   const [blurPage, setBlurPage] = useState(false)
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  })
+  const [showStarEffect, setShowStarEffect] = useState(false)
+  // 'windowSize' y 'setWindowSize' se usan si Confetti se usa con width/height dinámicos
+
   const [glanceTimeRemaining, setGlanceTimeRemaining] = useState(0)
   const [isGlanceTimerActive, setIsGlanceTimerActive] = useState(false)
   const glanceTimerRef = useRef(null)
@@ -128,8 +130,8 @@ function App() {
   }, [chaptersStartTime])
   const completedScenesInCurrentChapter = useMemo(() => {
     if (!currentChapter) return 0
-    return currentChapter.scenes.filter((scene, index) => {
-      const activityId = `${chapterIndex}-${index}`
+    return currentChapter.scenes.filter((scene, idx) => {
+      const activityId = `${chapterIndex}-${idx}`
       if (
         chapterIndex === 0 &&
         currentChapter.scenes.length === 1 &&
@@ -153,25 +155,17 @@ function App() {
       (completedScenesInCurrentChapter / currentChapter.scenes.length) * 100
     return Math.min(100, progress)
   }, [currentChapter, chapterIndex, completedScenesInCurrentChapter])
-  useEffect(() => {
-    const handleResize = () =>
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight })
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
 
-  // Define si la interfaz de actividad (sidebar + área de ejercicio/texto de vistazo) está activa
-  const activityModeIsActive =
+  // useEffect para windowSize y setWindowSize
+
+  const showTwoColumnExerciseLayout =
     showActivity && hasActivity && !activityIsCompletedForCurrentScene
 
   useEffect(() => {
-    // Al cambiar de escena, reseteamos la vista de texto/vistazo y el timer.
-    // setShowActivity(false) se maneja en resetViewAndTimer, que es llamado por navegación.
     setIsShowingTextDuringActivity(false)
     setIsGlanceTimerActive(false)
     setGlanceTimeRemaining(0)
     if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
-
     if (
       currentScene &&
       currentScene.activity &&
@@ -205,7 +199,6 @@ function App() {
     const scrollableTextElement = document.querySelector('.scrollable-text')
     if (scrollableTextElement) scrollableTextElement.scrollTop = 0
     if (!showActivity && dragDropSentenceRef.current?.resetActivityState) {
-      // Solo resetear si no estamos mostrando la actividad
       dragDropSentenceRef.current.resetActivityState()
     }
   }, [
@@ -327,20 +320,21 @@ function App() {
   const handleActivityComplete = (activitySuccess) => {
     if (activitySuccess) {
       setIsActivityCompleted((prev) => ({ ...prev, [currentActivityId]: true }))
-      setIsShowingTextDuringActivity(true)
+      setIsShowingTextDuringActivity(false)
+      setShowActivity(true)
       setIsGlanceTimerActive(false)
       if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
       setGlanceTimeRemaining(0)
       const isLastSceneOfChapter =
         currentChapter && sceneIndex === currentChapter.scenes.length - 1
-      if (hasActivity && isLastSceneOfChapter && chapterIndex > 0) {
+      if (hasActivity && isLastSceneOfChapter && chapterIndex >= 0) {
         let durationMinutes = 0
         if (chaptersStartTime[chapterIndex]) {
           const durationMs = Date.now() - chaptersStartTime[chapterIndex]
           durationMinutes = Math.round(durationMs / (1000 * 60))
         }
         setBlurPage(true)
-        setShowConfetti(true)
+        setShowStarEffect(true)
         setCongratulatoryModalDetails({
           chapterNumber: chapterIndex,
           chapterTitle: currentChapter.title,
@@ -350,9 +344,9 @@ function App() {
           durationMinutes: durationMinutes,
         })
         setTimeout(() => {
-          setShowConfetti(false)
+          setShowStarEffect(false)
           setShowCongratulatoryModal(true)
-        }, CONFETTI_DURATION)
+        }, EFFECT_DURATION)
       } else if (
         currentChapter &&
         sceneIndex < currentChapter.scenes.length - 1
@@ -393,15 +387,11 @@ function App() {
       if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
     }
   }, [isGlanceTimerActive, glanceTimeRemaining])
-
   const handleToggleActivityView = () => {
-    // Si la actividad está completa Y estamos mostrando el ejercicio (no el texto de vistazo),
-    // y el usuario hace clic en "Ver Texto", lo llevamos a la vista de lectura normal.
     if (activityIsCompletedForCurrentScene && !isShowingTextDuringActivity) {
-      setShowActivity(false) // Esto hará que activityModeIsActive sea false
+      setShowActivity(false)
       return
     }
-    // Lógica normal de vistazo
     if (!isShowingTextDuringActivity) {
       setIsShowingTextDuringActivity(true)
       setGlanceTimeRemaining(GLANCE_TIMER_SECONDS)
@@ -423,6 +413,8 @@ function App() {
   const pageEffectsActive = blurPage || showCongratulatoryModal
   const currentSceneActivityIsPending =
     hasActivity && !activityIsCompletedForCurrentScene
+  const activityModeIsActive =
+    showActivity && hasActivity && !activityIsCompletedForCurrentScene
 
   const chapterSelectorDisabled =
     pageEffectsActive ||
@@ -452,32 +444,34 @@ function App() {
   }
 
   let mainContentToRender
-
   if (
     activityModeIsActive &&
     isShowingTextDuringActivity &&
     isGlanceTimerActive
   ) {
-    // MODO VISTAZO DE TEXTO: Muestra el layout de lectura normal (imagen + texto)
     mainContentToRender = (
       <div className={`reading-view-layout glance-mode`}>
+        {' '}
         <img
           src={currentScene.image}
           alt={`Scene ${sceneIndex + 1} from Chapter ${
             currentChapter.title || 'Introduction'
           }`}
           className="scene-image"
-        />
+        />{' '}
         <div className="text-container">
+          {' '}
           <div style={{ marginBottom: '1rem' }}>
             {chapterIndex === 0 ? (
               <h1 className="main-book-title">{allChapters[0].title}</h1>
             ) : (
               <h2 className="chapter-title-main">{currentChapter.title}</h2>
             )}
-          </div>
+          </div>{' '}
           <div className="content-area-wrapper">
+            {' '}
             <div className="scrollable-text">
+              {' '}
               {(() => {
                 const sentences = []
                 let currentSentenceWords = []
@@ -514,15 +508,21 @@ function App() {
                   }
                   return (
                     <span key={sIndex} className="sentence-wrapper">
+                      {' '}
                       <button
                         onClick={playSentence}
                         className="play-button"
                         disabled={pageEffectsActive}
                       >
-                        🔊
-                      </button>
+                        {' '}
+                        🔊{' '}
+                      </button>{' '}
                       {sentenceData.map(
-                        ({ word: textWord, translation, globalArrIndex }) => {
+                        ({
+                          word: textWord,
+                          translation,
+                          globalArrIndex: GAI,
+                        }) => {
                           const isPunctuation = [
                             '.',
                             ',',
@@ -531,7 +531,8 @@ function App() {
                             '...',
                           ].includes(textWord)
                           return (
-                            <span key={`${globalArrIndex}-${textWord}`}>
+                            <span key={`${GAI}-${textWord}`}>
+                              {' '}
                               {isPunctuation ? (
                                 textWord
                               ) : (
@@ -543,42 +544,48 @@ function App() {
                                   onSpeak={speakWord}
                                   fontSize={currentFontSize}
                                 />
-                              )}
+                              )}{' '}
                             </span>
                           )
                         }
-                      )}
+                      )}{' '}
                     </span>
                   )
                 })
-              })()}
-            </div>
-          </div>
-        </div>
+              })()}{' '}
+            </div>{' '}
+          </div>{' '}
+        </div>{' '}
       </div>
     )
-  } else if (activityModeIsActive && !isShowingTextDuringActivity) {
-    // MODO EJERCICIO INTERACTIVO (dos columnas: sidebar + DragDropSentence)
+  } else if (showTwoColumnExerciseLayout) {
+    // Usando showTwoColumnExerciseLayout aquí
     mainContentToRender = (
       <div className="exercise-fullscreen-layout">
+        {' '}
         <div className="exercise-sidebar-left">
+          {' '}
           <h3>
+            {' '}
             {currentScene.activity?.instructions ||
-              'Instrucciones no disponibles.'}
-          </h3>
+              'Instrucciones no disponibles.'}{' '}
+          </h3>{' '}
           <div className="sidebar-word-bank">
+            {' '}
             <div className="word-options-area-sidebar">
+              {' '}
               {availableWords.map((word, index) => (
                 <DraggableWord
                   key={`${word}-${index}-bank`}
                   word={word}
                   isUsed={placedWords.has(word)}
                 />
-              ))}
-            </div>
-          </div>
+              ))}{' '}
+            </div>{' '}
+          </div>{' '}
           {!activityIsCompletedForCurrentScene && (
             <div className="activity-action-buttons-sidebar">
+              {' '}
               <button
                 onClick={() =>
                   dragDropSentenceRef.current?.triggerCheckAnswers()
@@ -586,19 +593,28 @@ function App() {
                 className="check-button"
                 disabled={checkButtonDisabledInSidebar}
               >
-                Comprobar
-              </button>
+                {' '}
+                Comprobar{' '}
+              </button>{' '}
               <button
                 onClick={handleToggleActivityView}
                 className="toggle-activity-view-button"
                 disabled={glanceButtonDisabled}
               >
-                Ver Texto
-              </button>
+                {' '}
+                Ver Texto{' '}
+              </button>{' '}
             </div>
-          )}
-        </div>
+          )}{' '}
+          {isGlanceTimerActive && isShowingTextDuringActivity && (
+            <p className="glance-timer-display">
+              {' '}
+              Volviendo al ejercicio en: {glanceTimeRemaining}s{' '}
+            </p>
+          )}{' '}
+        </div>{' '}
         <div className="exercise-main-area-right">
+          {' '}
           {currentScene.activity &&
           currentScene.activity.sentences &&
           currentScene.activity.sentences.length > 0 ? (
@@ -618,33 +634,37 @@ function App() {
                 color: 'var(--text-color)',
               }}
             >
-              Error: No se pueden cargar las oraciones del ejercicio.
+              {' '}
+              Error: No se pueden cargar las oraciones del ejercicio.{' '}
             </div>
-          )}
-        </div>
+          )}{' '}
+        </div>{' '}
       </div>
     )
   } else {
-    // VISTA DE LECTURA NORMAL o EJERCICIO COMPLETADO (mostrando texto)
     mainContentToRender = (
       <div className={`reading-view-layout`}>
+        {' '}
         <img
           src={currentScene.image}
           alt={`Scene ${sceneIndex + 1} from Chapter ${
             currentChapter.title || 'Introduction'
           }`}
           className={`scene-image`}
-        />
+        />{' '}
         <div className={`text-container`}>
+          {' '}
           <div style={{ marginBottom: '1rem' }}>
             {chapterIndex === 0 ? (
               <h1 className="main-book-title">{allChapters[0].title}</h1>
             ) : (
               <h2 className="chapter-title-main">{currentChapter.title}</h2>
             )}
-          </div>
+          </div>{' '}
           <div className="content-area-wrapper">
+            {' '}
             <div className={`scrollable-text`}>
+              {' '}
               {(() => {
                 const sentences = []
                 let currentSentenceWords = []
@@ -681,15 +701,20 @@ function App() {
                   }
                   return (
                     <span key={sIndex} className="sentence-wrapper">
+                      {' '}
                       <button
                         onClick={playSentence}
                         className="play-button"
                         disabled={pageEffectsActive}
                       >
                         🔊
-                      </button>
+                      </button>{' '}
                       {sentenceData.map(
-                        ({ word: textWord, translation, globalArrIndex }) => {
+                        ({
+                          word: textWord,
+                          translation,
+                          globalArrIndex: GAI,
+                        }) => {
                           const isPunctuation = [
                             '.',
                             ',',
@@ -698,7 +723,8 @@ function App() {
                             '...',
                           ].includes(textWord)
                           return (
-                            <span key={`${globalArrIndex}-${textWord}`}>
+                            <span key={`${GAI}-${textWord}`}>
+                              {' '}
                               {isPunctuation ? (
                                 textWord
                               ) : (
@@ -710,41 +736,46 @@ function App() {
                                   onSpeak={speakWord}
                                   fontSize={currentFontSize}
                                 />
-                              )}
+                              )}{' '}
                             </span>
                           )
                         }
-                      )}
+                      )}{' '}
                     </span>
                   )
                 })
-              })()}
-            </div>
+              })()}{' '}
+            </div>{' '}
             {hasActivity &&
               showActivity &&
-              activityIsCompletedForCurrentScene && (
+              activityIsCompletedForCurrentScene &&
+              !isShowingTextDuringActivity && (
                 <div
                   className="activity-status-section"
                   style={{ marginTop: '1rem' }}
                 >
+                  {' '}
                   <p
                     style={{
                       color: 'var(--blank-correct-color)',
                       fontWeight: 'bold',
                     }}
                   >
-                    ¡Ejercicio completado!
-                  </p>
+                    {' '}
+                    ¡Ejercicio completado!{' '}
+                  </p>{' '}
                 </div>
-              )}
-          </div>
-        </div>
+              )}{' '}
+          </div>{' '}
+        </div>{' '}
       </div>
     )
   }
 
   return (
     <DndProvider backend={HTML5Backend}>
+      {' '}
+      {/* DndProvider AÑADIDO */}
       {showStudentNameModal && (
         <StudentNameModal
           onSubmit={handleStudentNameSubmit}
@@ -763,16 +794,15 @@ function App() {
           isLastChapterInBook={chapterIndex === allChapters.length - 1}
         />
       )}
-      {showConfetti && (
-        <Confetti
-          width={windowSize.width}
-          height={windowSize.height}
-          recycle={false}
-          numberOfPieces={600}
-          gravity={0.15}
-          initialVelocityY={20}
-        />
+      {showStarEffect && (
+        <>
+          <StarEffect />
+          <div className="completion-text-overlay">
+            <h2 className="completion-text-word">COMPLETED</h2>
+          </div>
+        </>
       )}
+      {/* ----------------------------- */}
       <div
         className={`app-container ${blurPage ? 'app-container-blur' : ''}`}
         onClick={() => {
@@ -806,7 +836,8 @@ function App() {
                 fontSizeIndex === FONT_SIZES.length - 1 || mainControlsDisabled
               }
             >
-              A+
+              {' '}
+              A+{' '}
             </button>{' '}
             <ChapterSelector
               chapters={allChapters}
@@ -858,6 +889,7 @@ function App() {
             {chapterIndex > 0 && currentChapter && (
               <div className="chapter-progress-container">
                 <span className="chapter-progress-text">
+                  {' '}
                   Capítulo {chapterIndex}: {completedScenesInCurrentChapter}/
                   {currentChapter.scenes.length}
                 </span>
@@ -871,6 +903,7 @@ function App() {
             )}{' '}
             {getGlobalSceneNumber() && (
               <div className="page-number-top-right">
+                {' '}
                 Página {getGlobalSceneNumber()}
               </div>
             )}{' '}
@@ -907,8 +940,6 @@ function App() {
             Actividad Completada
           </div>
         )}
-
-        {/* Temporizador de vistazo global (si está activo y estamos en modo vistazo de pantalla completa) */}
         {isGlanceTimerActive &&
           isShowingTextDuringActivity &&
           activityModeIsActive && (
@@ -932,24 +963,6 @@ function App() {
               </p>
             </div>
           )}
-        {/* Mensaje de "Ejercicio completado" si no estamos en modo vistazo y la actividad está completa */}
-        {/* {showActivity &&
-          hasActivity &&
-          activityIsCompletedForCurrentScene &&
-          !isShowingTextDuringActivity && (
-            <div className="activity-status-section">
-              <div>
-                <p
-                  style={{
-                    color: 'var(--blank-correct-color)',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  ¡Ejercicio completado!
-                </p>
-              </div>
-            </div>
-          )} */}
       </div>
     </DndProvider>
   )
