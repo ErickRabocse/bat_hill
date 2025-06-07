@@ -62,7 +62,6 @@ function App() {
     setShowStudentNameModal(true)
     setShowCongratulatoryModal(false)
     setCongratulatoryModalDetails(null)
-    // Aquí es donde va la nueva línea, junto a los otros resets
     setShowStarEffect(false)
     setBlurPage(false)
     setIsGlanceTimerActive(false)
@@ -70,10 +69,10 @@ function App() {
     if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
     setChaptersStartTime({})
     setPlacedWords(new Set())
-    setPlayingSentenceId(null) // <-- AÑADE ESTA LÍNEA
-    setIsScenePlaying(false) // <-- AÑADE ESTA LÍNEA
+    setPlayingSentenceId(null)
+    setIsScenePlaying(false)
   }, [])
-
+  const [isPaused, setIsPaused] = useState(false)
   const [chapterIndex, setChapterIndex] = useState(0)
   const [sceneIndex, setSceneIndex] = useState(0)
   const [darkMode, setDarkMode] = useState(false)
@@ -233,7 +232,11 @@ function App() {
   const currentFontSize = FONT_SIZES[fontSizeIndex]
   const [activeWord, setActiveWord] = useState(null)
   const speakWord = (wordToSpeak) => {
-    // Si el navegador está hablando, lo detenemos para empezar de nuevo.
+    if (isScenePlaying) {
+      setIsScenePlaying(false)
+      setIsPaused(false)
+    } // Si el navegador está hablando, lo detenemos para empezar de nuevo.
+    setReadSentenceIndices(new Set())
     if (speechSynthesis.speaking) {
       speechSynthesis.cancel()
     }
@@ -264,6 +267,8 @@ function App() {
   const resetViewAndTimer = () => {
     setReadSentenceIndices(new Set())
     speechSynthesis.cancel()
+    setIsPaused(false)
+    setIsScenePlaying(false)
     setShowActivity(false)
     setIsShowingTextDuringActivity(false)
     setIsGlanceTimerActive(false)
@@ -274,6 +279,11 @@ function App() {
     dragDropSentenceRef.current?.resetActivityState()
   }
   const speakSentence = (sentenceId, sentenceText) => {
+    if (isScenePlaying) {
+      setIsScenePlaying(false)
+      setIsPaused(false)
+    }
+    setReadSentenceIndices(new Set())
     // Si ya se está reproduciendo algo, evitamos empezar una nueva reproducción.
     if (speechSynthesis.speaking) {
       speechSynthesis.cancel()
@@ -299,9 +309,9 @@ function App() {
       speechSynthesis.speak(utterance)
     }, 150)
   }
-
   const playFullScene = () => {
     if (isScenePlaying || !currentScene || !currentScene.text) return
+    setIsPaused(false)
     if (speechSynthesis.speaking) speechSynthesis.cancel()
 
     // 1. Obtenemos un array con el texto de cada oración.
@@ -325,11 +335,11 @@ function App() {
     setReadSentenceIndices(new Set()) // Limpiamos resaltados anteriores
 
     // 2. Creamos una función que sabe cómo reproducir la "siguiente" oración en la cola.
-    // VERSIÓN CORREGIDA DE playNextSentence
     const playNextSentence = (sentenceIndex) => {
       // Si ya no hay más oraciones, terminamos.
       if (sentenceIndex >= sentencesText.length) {
         setIsScenePlaying(false)
+        setIsPaused(false)
         setTimeout(() => {
           setReadSentenceIndices(new Set())
         }, 1000)
@@ -360,6 +370,26 @@ function App() {
     // 4. Empezamos la cadena llamando a la primera oración (índice 0).
     playNextSentence(0)
   }
+  // Nueva función para controlar Play/Pausa/Continuar
+  const handlePlaybackToggle = () => {
+    // Caso 1: Si no se está reproduciendo nada, inicia la escena desde el principio.
+    if (!isScenePlaying) {
+      playFullScene()
+      return
+    }
+
+    // Caso 2: Si está en pausa, reanúdalo.
+    if (isPaused) {
+      speechSynthesis.resume()
+      setIsPaused(false)
+    }
+    // Caso 3: Si está sonando, páusalo.
+    else {
+      speechSynthesis.pause()
+      setIsPaused(true)
+    }
+  }
+
   const handleChapterChange = (newIndex) => {
     setChapterIndex(newIndex)
     setSceneIndex(0)
@@ -513,7 +543,6 @@ function App() {
     (isShowingTextDuringActivity &&
       isGlanceTimerActive &&
       glanceTimeRemaining === 0)
-  const showExerciseButtonDisabled = pageEffectsActive
   const checkButtonDisabledInSidebar =
     pageEffectsActive ||
     (isShowingTextDuringActivity && isGlanceTimerActive) ||
@@ -919,10 +948,14 @@ function App() {
               isDisabled={chapterSelectorDisabled}
             />{' '}
             <button
-              onClick={playFullScene}
-              disabled={mainControlsDisabled || isScenePlaying}
+              onClick={handlePlaybackToggle} // <-- 1. CAMBIA EL ONCLICK
+              disabled={mainControlsDisabled} // Opcional: puedes simplificar el disabled
             >
-              {isScenePlaying ? 'Reproduciendo...' : 'Play Scene'}
+              {isPaused
+                ? 'Continuar'
+                : isScenePlaying
+                ? 'Pausar'
+                : 'Play Scene'}
             </button>
           </div>
           <div className="right-indicators">
@@ -1000,13 +1033,20 @@ function App() {
         {hasActivity &&
           !showActivity &&
           !activityIsCompletedForCurrentScene && (
+            //...
             <button
               onClick={() => {
+                // 1. Detenemos cualquier voz que esté sonando.
+                speechSynthesis.cancel()
+                // 2. Reseteamos todos los estados relacionados con la reproducción de la escena.
+                setIsScenePlaying(false)
+                setIsPaused(false)
+                setReadSentenceIndices(new Set()) // Limpia el texto resaltado.
+                // 3. Continuamos con la lógica original de mostrar el ejercicio.
                 setShowActivity(true)
                 setIsShowingTextDuringActivity(false)
               }}
               className="show-activity-button"
-              disabled={showExerciseButtonDisabled}
             >
               Show Exercise
             </button>
