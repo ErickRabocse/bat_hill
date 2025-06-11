@@ -51,7 +51,7 @@ function Word({
         cursor: 'pointer',
         fontSize: fontSize || '1.2rem',
         lineHeight: '2.5',
-        ...(isActive ? { color: 'var(--word-active-color)' } : {}),
+        ...(isActive ? { color: 'var(--word-hover-color)' } : {}),
       }}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter} // <-- AÑADE ESTA LÍNEA

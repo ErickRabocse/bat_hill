@@ -18,7 +18,7 @@ const FONT_SIZES = ['1.2rem', '1.4rem', '1.6rem']
 const DEFAULT_FONT_SIZE_INDEX = 1
 const EFFECT_DURATION = 6000
 const NEXT_BUTTON_ANIM_DURATION = 3000
-const GLANCE_TIMER_SECONDS = 15
+const GLANCE_TIMER_SECONDS = 10
 
 function DraggableWord({ word, isUsed }) {
   // useDrag ya se importa globalmente para App, no necesita reimportarse aquí si DraggableWord está en App.jsx
@@ -69,7 +69,6 @@ function App() {
     if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
     setChaptersStartTime({})
     setPlacedWords(new Set())
-    setPlayingSentenceId(null)
     setIsScenePlaying(false)
   }, [])
   const [isPaused, setIsPaused] = useState(false)
@@ -106,8 +105,7 @@ function App() {
   const currentActivityId = `${chapterIndex}-${sceneIndex}`
   const activityIsCompletedForCurrentScene =
     !!isActivityCompleted[currentActivityId]
-  // En App.jsx
-  const [playingSentenceId, setPlayingSentenceId] = useState(null)
+
   // En App.jsx
   const [isScenePlaying, setIsScenePlaying] = useState(false)
   const [readSentenceIndices, setReadSentenceIndices] = useState(new Set()) // <-- AÑADE ESTA LÍNEA
@@ -278,37 +276,7 @@ function App() {
     setShowCongratulatoryModal(false)
     dragDropSentenceRef.current?.resetActivityState()
   }
-  const speakSentence = (sentenceId, sentenceText) => {
-    if (isScenePlaying) {
-      setIsScenePlaying(false)
-      setIsPaused(false)
-    }
-    setReadSentenceIndices(new Set())
-    // Si ya se está reproduciendo algo, evitamos empezar una nueva reproducción.
-    if (speechSynthesis.speaking) {
-      speechSynthesis.cancel()
-    }
 
-    // Creamos el enunciado con el texto completo de la oración.
-    const utterance = new SpeechSynthesisUtterance(sentenceText)
-    utterance.lang = 'en-US' // Aseguramos la pronunciación en inglés.
-    utterance.rate = 0.6 // <-- AÑADE ESTA LÍNEA
-
-    // Cuando empiece, actualizamos el estado para saber qué oración se está reproduciendo.
-    utterance.onstart = () => {
-      setPlayingSentenceId(sentenceId)
-    }
-
-    // Al terminar, reseteamos el estado para poder reproducir otra.
-    utterance.onend = () => {
-      setPlayingSentenceId(null)
-    }
-
-    // Le damos la orden al navegador para que hable.
-    setTimeout(() => {
-      speechSynthesis.speak(utterance)
-    }, 150)
-  }
   const playFullScene = () => {
     if (isScenePlaying || !currentScene || !currentScene.text) return
     setIsPaused(false)
@@ -600,10 +568,6 @@ function App() {
                   sentences.push(currentSentenceWords)
                 }
                 return sentences.map((sentenceData, sIndex) => {
-                  const sentenceText = sentenceData
-                    .map((item) => item.word)
-                    .join(' ')
-                    .replace(/\s+([.,!?])/g, '$1')
                   // Busca esta función dentro de tu JSX y reemplázala
 
                   return (
@@ -614,16 +578,6 @@ function App() {
                       }`}
                     >
                       {' '}
-                      <button
-                        onClick={() => speakSentence(sIndex, sentenceText)}
-                        className="play-button"
-                        disabled={
-                          pageEffectsActive || playingSentenceId !== null
-                        }
-                      >
-                        {' '}
-                        🔊{' '}
-                      </button>{' '}
                       {sentenceData.map(
                         ({
                           word: textWord,
@@ -791,10 +745,6 @@ function App() {
                   sentences.push(currentSentenceWords)
                 }
                 return sentences.map((sentenceData, sIndex) => {
-                  const sentenceText = sentenceData
-                    .map((item) => item.word)
-                    .join(' ')
-                    .replace(/\s+([.,!?])/g, '$1')
                   // Busca esta función dentro de tu JSX y reemplázala
                   return (
                     <span
@@ -804,13 +754,6 @@ function App() {
                       }`}
                     >
                       {' '}
-                      <button
-                        onClick={() => speakSentence(sIndex, sentenceText)}
-                        className="play-button"
-                        disabled={pageEffectsActive}
-                      >
-                        🔊
-                      </button>{' '}
                       {sentenceData.map(
                         ({
                           word: textWord,
@@ -951,11 +894,7 @@ function App() {
               onClick={handlePlaybackToggle} // <-- 1. CAMBIA EL ONCLICK
               disabled={mainControlsDisabled} // Opcional: puedes simplificar el disabled
             >
-              {isPaused
-                ? 'Continuar'
-                : isScenePlaying
-                ? 'Pausar'
-                : 'Play Scene'}
+              {isPaused ? 'Continuar' : isScenePlaying ? 'Pause' : 'Play Scene'}
             </button>
           </div>
           <div className="right-indicators">

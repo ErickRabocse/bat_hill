@@ -7,7 +7,6 @@ import React, {
   forwardRef,
 } from 'react'
 import { useDrop } from 'react-dnd'
-import FeedbackModal from './FeedbackModal'
 import './DragDropSentence.css'
 
 const ItemTypes = { WORD: 'word' }
@@ -58,10 +57,8 @@ const DragDropSentence = forwardRef(
     },
     ref
   ) => {
+    const [errors, setErrors] = useState({})
     const [currentSentences, setCurrentSentences] = useState([])
-    const [showFeedbackModal, setShowFeedbackModal] = useState(false)
-    const [feedbackMessage, setFeedbackMessage] = useState('')
-    const [feedbackHint, setFeedbackHint] = useState('')
     const [isInternallyCompleted, setIsInternallyCompleted] = useState(
       !!isInternallyCompletedProp
     )
@@ -200,43 +197,48 @@ const DragDropSentence = forwardRef(
       notifyBlanksChange(currentSentences, 'useEffect[currentSentences]')
     }, [currentSentences, notifyBlanksChange]) // Se ejecuta cada vez que currentSentences cambia
 
+    // Reemplaza tu función actual con esta nueva versión
     const checkAnswersInternal = () => {
       if (isInternallyCompleted) return
-      let allCorrect = true
-      let firstIncorrectMessage = ''
-      let firstIncorrectHint = ''
+
+      const newErrors = {} // Un objeto para guardar los nuevos errores que encontremos
+
       if (!currentSentences || currentSentences.length === 0) {
-        allCorrect = false
-        firstIncorrectMessage = 'No hay oraciones para comprobar.'
+        // En un futuro podríamos manejar este caso si fuera necesario
       } else {
         for (const sentence of currentSentences) {
           if (!sentence.parts || !Array.isArray(sentence.parts)) continue
+
           for (const part of sentence.parts) {
             if (part.type === 'blank') {
+              // Si un espacio está vacío
               if (part.currentWord === null) {
-                allCorrect = false
-                firstIncorrectMessage = `Hay espacios vacíos. Asegúrate de completar todas las oraciones.`
-                firstIncorrectHint = `Busca los espacios que dicen '______'.`
-                break
+                newErrors[sentence.id] = {
+                  hint: `Asegúrate de completar todos los espacios.`,
+                }
+                break // Pasamos a la siguiente oración si esta ya tiene un error
               }
+              // Si la palabra es incorrecta
               if (part.currentWord !== part.correctWord) {
-                allCorrect = false
-                firstIncorrectMessage = `La palabra "${part.currentWord}" no es correcta para "${part.translation}".`
-                firstIncorrectHint = part.hint || `Intenta con otra palabra.`
-                break
+                newErrors[sentence.id] = {
+                  hint:
+                    part.hint ||
+                    `La palabra "${part.currentWord}" no es correcta aquí.`,
+                }
+                break // Pasamos a la siguiente oración
               }
             }
           }
-          if (!allCorrect) break
         }
       }
-      if (allCorrect) {
+
+      // Actualizamos el estado con todos los errores encontrados
+      setErrors(newErrors)
+
+      // Si el objeto de errores está vacío, significa que todo está correcto
+      if (Object.keys(newErrors).length === 0) {
         setIsInternallyCompleted(true)
         if (onActivityComplete) onActivityComplete(true)
-      } else {
-        setFeedbackMessage(firstIncorrectMessage)
-        setFeedbackHint(firstIncorrectHint)
-        setShowFeedbackModal(true)
       }
     }
     const getBlankDisplayClass = (part) => {
@@ -302,38 +304,42 @@ const DragDropSentence = forwardRef(
     return (
       <div className="drag-drop-activity-content">
         {currentSentences.map((sentence) => (
-          <p key={sentence.id} className="sentence-line">
-            {' '}
-            {sentence.parts.map((part, pIndex) => {
-              if (part.type === 'text' || part.type === '.') {
-                return (
-                  <span key={`${sentence.id}-text-${pIndex}`}>
-                    {part.value || part.word}
-                  </span>
-                )
-              } else if (part.type === 'blank') {
-                return (
-                  <Blank
-                    key={`${sentence.id}-blank-${pIndex}`}
-                    currentWord={part.currentWord}
-                    onDropBlank={handleDropOnBlank}
-                    correctWord={part.correctWord}
-                    onClickBlank={handleClickOnBlank}
-                    computedClassName={getBlankDisplayClass(part)}
-                  />
-                )
-              }
-              return null
-            })}{' '}
-          </p>
+          // 1. Envolvemos cada oración en el nuevo contenedor
+          <div key={sentence.id} className="sentence-line-container">
+            {/* 2. El párrafo de la oración. Le quitamos el margen inferior
+              porque ahora lo controla el contenedor de arriba */}
+            <p className="sentence-line" style={{ marginBottom: 0 }}>
+              {' '}
+              {sentence.parts.map((part, pIndex) => {
+                // Esta es la lógica original que tenías, que se mantiene intacta:
+                if (part.type === 'text' || part.type === '.') {
+                  return (
+                    <span key={`${sentence.id}-text-${pIndex}`}>
+                      {part.value || part.word}
+                    </span>
+                  )
+                } else if (part.type === 'blank') {
+                  return (
+                    <Blank
+                      key={`${sentence.id}-blank-${pIndex}`}
+                      currentWord={part.currentWord}
+                      onDropBlank={handleDropOnBlank}
+                      correctWord={part.correctWord}
+                      onClickBlank={handleClickOnBlank}
+                      computedClassName={getBlankDisplayClass(part)}
+                    />
+                  )
+                }
+                return null
+              })}{' '}
+            </p>
+
+            {/* 3. Y aquí renderizamos la burbuja si hay un error para esta oración */}
+            {errors[sentence.id] && (
+              <div className="error-bubble">{errors[sentence.id].hint}</div>
+            )}
+          </div>
         ))}
-        {showFeedbackModal && (
-          <FeedbackModal
-            message={feedbackMessage}
-            hint={feedbackHint}
-            onClose={() => setShowFeedbackModal(false)}
-          />
-        )}
       </div>
     )
   }

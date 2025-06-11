@@ -1,4 +1,4 @@
-/* app.css - Versión Completa y Actualizada */
+/* app.css - Versión Corregida y Mejorada */
 
 /* --- Reset básico y box-sizing --- */
 *,
@@ -30,18 +30,14 @@ html {
   --button-primary-bg: #007bff;
   --button-primary-text: white;
   --button-primary-hover-bg: #0056b3;
-
   --play-button-bg: #f8f8f8;
   --play-button-border: #ccc;
   --play-button-hover-bg: #e9e9e9;
-
   --show-activity-button-bg: #28a745;
   --show-activity-button-hover-bg: #218838;
-
   --toggle-activity-view-button-bg: #6c757d;
   --toggle-activity-view-button-text: white;
   --toggle-activity-view-button-hover-bg: #5a6268;
-
   --error-message-color: #a94442;
   --error-background: #fcebeb;
   --error-border: #e0b4b4;
@@ -63,15 +59,13 @@ html {
   --draggable-word-hover-bg: #d0e0ff;
   --progress-bar-outer-bg: #e0e0e0;
   --progress-bar-inner-bg: #4caf50;
-  --select-arrow-color: #000;
-
   --top-bar-height: 60px;
-  /* Dentro de html { ... } */
-  --word-active-color: rgb(184, 20, 20); /* Para el modo claro */
+  --word-active-color: rgb(184, 20, 20);
+  --word-hover-color: #007bff;
 }
 
 html.dark-mode {
-  --background-color: #1e1e1e;
+  --background-color: #222;
   --text-color: #f0f0f0;
   --button-default-border: #555;
   --button-default-hover-bg: #2a2a2a;
@@ -105,9 +99,8 @@ html.dark-mode {
   --draggable-word-hover-bg: #555;
   --progress-bar-outer-bg: #333;
   --progress-bar-inner-bg: #66bb6a;
-  --select-arrow-color: #f0f0f0;
-  /* Dentro de html.dark-mode { ... } */
-  --word-active-color: #ff5e57; /* Un rojo más brillante y legible para el modo oscuro */
+  --word-active-color: #ff5e57;
+  --word-hover-color: #58a6ff;
 }
 
 /* --- Clases de utilidad --- */
@@ -125,7 +118,7 @@ html.dark-mode {
   overflow: hidden;
 }
 .app-container-blur {
-  filter: blur(25px);
+  filter: blur(8px); /* Reducido el blur para mejor estética */
   transition: filter 0.5s ease-in-out;
 }
 .top-button-bar {
@@ -152,7 +145,7 @@ html.dark-mode {
 }
 .left-controls select {
   appearance: none;
-  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="292.4" height="292.4"><path fill="var(--select-arrow-color)" d="M287 69.9H5.4c-7.3 0-11 8.9-6 14.2l140.7 140.8c2.8 2.8 7.7 2.8 10.5 0l140.7-140.8c5-5.3 1.3-14.2-6-14.2z"/></svg>');
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="292.4" height="292.4"><path fill="%23000000" d="M287 69.9H5.4c-7.3 0-11 8.9-6 14.2l140.7 140.8c2.8 2.8 7.7 2.8 10.5 0l140.7-140.8c5-5.3 1.3-14.2-6-14.2z"/></svg>');
   background-repeat: no-repeat;
   background-position: right 0.7em top 50%, 0 0;
   background-size: 0.65em auto, 100%;
@@ -161,6 +154,12 @@ html.dark-mode {
   background-color: var(--button-default-bg);
   color: var(--button-default-text);
   margin-left: 0.5rem;
+}
+html.dark-mode .left-controls select {
+  background-color: #222;
+  color: #f0f0f0;
+  border-color: #555;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="292.4" height="292.4"><path fill="%23f0f0f0" d="M287 69.9H5.4c-7.3 0-11 8.9-6 14.2l140.7 140.8c2.8 2.8 7.7 2.8 10.5 0l140.7-140.8c5-5.3 1.3-14.2-6-14.2z"/></svg>');
 }
 .right-indicators {
   display: flex;
@@ -173,15 +172,12 @@ html.dark-mode {
   gap: 0.5rem;
   align-items: center;
 }
-
 .scene-and-activity-container {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
-
-/* Layout de lectura normal (Imagen + Texto) Y PARA VISTAZO */
 .reading-view-layout {
   display: flex;
   flex-direction: row;
@@ -192,9 +188,8 @@ html.dark-mode {
   margin-top: 1rem;
 }
 .reading-view-layout.glance-mode {
-  margin-top: 0; /* El vistazo ocupa todo el espacio vertical del padre */
+  margin-top: 0;
 }
-
 .scene-image {
   flex-basis: 40%;
   max-width: 40%;
@@ -208,7 +203,6 @@ html.dark-mode {
 html.dark-mode .scene-image {
   background-color: rgba(255, 255, 255, 0.02);
 }
-
 .text-container {
   flex-basis: 60%;
   max-width: 60%;
@@ -247,18 +241,15 @@ html.dark-mode .scene-image {
   padding-right: 1rem;
   line-height: 1.7;
 }
-
-/* Layout cuando el ejercicio está en pantalla completa (dos columnas) */
 .exercise-fullscreen-layout {
   display: flex;
-  flex-direction: row; /* Sidebar IZQUIERDA, ejercicio DERECHA */
+  flex-direction: row;
   flex-grow: 1;
   height: 100%;
   width: 100%;
   margin-top: 0;
   overflow: hidden;
 }
-
 .exercise-sidebar-left {
   flex-basis: 25%;
   min-width: 280px;
@@ -280,7 +271,6 @@ html.dark-mode .scene-image {
   flex-shrink: 0;
   color: var(--text-color);
 }
-
 .sidebar-word-bank {
   flex-grow: 1;
   overflow-y: auto;
@@ -300,7 +290,6 @@ html.dark-mode .scene-image {
   gap: 8px;
   width: 100%;
 }
-
 .activity-action-buttons-sidebar {
   display: flex;
   justify-content: space-between;
@@ -341,7 +330,6 @@ html.dark-mode .scene-image {
   .toggle-activity-view-button:hover:not(:disabled) {
   background-color: var(--toggle-activity-view-button-hover-bg);
 }
-
 .exercise-main-area-right {
   flex-grow: 1;
   padding: 20px 40px;
@@ -351,12 +339,7 @@ html.dark-mode .scene-image {
   overflow: hidden;
   min-height: 0;
 }
-/* Para el texto de vistazo dentro de la columna derecha del ejercicio (se quita porque el vistazo ahora usa reading-view-layout) */
-/* .exercise-main-area-right .text-container.full-width-exercise { padding: 0; }  */
-/* .exercise-main-area-right .text-container .content-area-wrapper { height: auto; } */
-
 .activity-overlay-container {
-  /* Contenedor de DragDropSentence en App.jsx */
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -366,7 +349,6 @@ html.dark-mode .scene-image {
   min-height: 0;
 }
 .drag-drop-activity-content {
-  /* Div raíz dentro de DragDropSentence.jsx */
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -374,15 +356,33 @@ html.dark-mode .scene-image {
   padding: 10px;
   min-height: 0;
 }
-/* Ya no se ocultan aquí porque App.jsx controla su renderizado */
-/* .drag-drop-activity-content h3 { display: none; }  */
-/* .drag-drop-activity-content .exercise-action-buttons { display: none; }  */
 
-/* --- Estilos para Modales --- */
-.student-name-modal,
-.chapter-completion-modal {
-  max-width: 500px; /* ... (resto de estilos de modal como estaban) ... */
+/* --- AÑADIDO: Estilos estructurales para TODOS los modales --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1999;
 }
+
+.modal-box {
+  background-color: var(--modal-bg);
+  color: var(--modal-text);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  width: 90%;
+  z-index: 2000;
+}
+/* ---------------------------------------------------------------- */
+
 .student-name-modal h2,
 .chapter-completion-modal h2 {
   text-align: center;
@@ -408,7 +408,7 @@ html.dark-mode .scene-image {
   color: var(--text-color);
 }
 .student-name-modal input[type='text'] {
-  width: calc(100% - 20px);
+  width: 100%; /* Simplificado */
   padding: 10px;
   border: 1px solid var(--modal-border, #ccc);
   border-radius: 4px;
@@ -444,8 +444,6 @@ html.dark-mode .scene-image {
 .modal-close-button:hover {
   background-color: var(--button-primary-hover-bg);
 }
-
-/* --- Banco de Palabras (Draggable Words) --- */
 .draggable-word-fixed {
   display: inline-block;
   background-color: var(--draggable-word-bg);
@@ -480,8 +478,6 @@ html.dark-mode .draggable-word-fixed.used-in-bank {
   border-color: #1b5e20;
   color: #a5d6a7;
 }
-
-/* --- Estilos de Reproducción de Oraciones --- */
 .sentence-wrapper {
   display: inline-flex;
   align-items: center;
@@ -506,8 +502,6 @@ html.dark-mode .draggable-word-fixed.used-in-bank {
   background-color: var(--play-button-hover-bg);
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }
-
-/* --- Estilos de Botones Generales y Específicos --- */
 button {
   padding: 0.5rem 1rem;
   border: 1px solid var(--button-default-border);
@@ -532,7 +526,6 @@ button:disabled {
   cursor: not-allowed;
   box-shadow: none;
 }
-
 .show-activity-button {
   display: block;
   width: fit-content;
@@ -547,8 +540,6 @@ button:disabled {
 .show-activity-button:hover:not(:disabled) {
   background-color: var(--show-activity-button-hover-bg);
 }
-
-/* --- Estilos para la Sección de Estado de la Actividad (en App.jsx) --- */
 .activity-status-section {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -580,8 +571,6 @@ button:disabled {
   margin-right: 8px;
   font-size: 1.1rem;
 }
-
-/* --- Indicadores de Progreso y Página --- */
 .chapter-progress-container {
   display: flex;
   flex-direction: column;
@@ -622,8 +611,6 @@ html.dark-mode .page-number-top-right {
   background-color: rgba(0, 0, 0, 0.7);
   color: var(--text-color);
 }
-
-/* --- Animación Botón Next Scene --- */
 .next-scene-button-animate {
   animation: softGreenBlinkGlow 0.6s 5 alternate;
   border-radius: 5px;
@@ -641,8 +628,6 @@ html.dark-mode .page-number-top-right {
     transform: scale(1.03);
   }
 }
-
-/* Estilos para el texto de finalización sobre el efecto de partículas */
 .completion-text-overlay {
   position: fixed;
   top: 0;
@@ -652,20 +637,18 @@ html.dark-mode .page-number-top-right {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1041; /* Ligeramente por encima de las estrellas (1040), pero por debajo de futuros modales */
-  pointer-events: none; /* Para que la capa no bloquee clics */
+  z-index: 1041;
+  pointer-events: none;
 }
-
 .completion-text-word {
   font-family: 'Georgia', serif;
   font-size: 6rem;
   font-weight: bold;
-  color: rgba(255, 255, 220, 0.9); /* Un color blanco-amarillento */
-  text-shadow: 0 0 10px #fff, 0 0 20px #f7d76a, 0 0 35px #f48c06; /* Sombra de texto para el brillo */
-  opacity: 0; /* Comienza invisible */
+  color: rgba(255, 255, 220, 0.9);
+  text-shadow: 0 0 10px #fff, 0 0 20px #f7d76a, 0 0 35px #f48c06;
+  opacity: 0;
   animation: fadeInAndPulse 4s ease-in-out 1 forwards;
 }
-
 @keyframes fadeInAndPulse {
   0% {
     opacity: 0;
@@ -673,17 +656,53 @@ html.dark-mode .page-number-top-right {
   }
   50% {
     opacity: 1;
-    transform: scale(
-      1.05
-    ); /* Ligeramente más grande en la mitad de la animación */
+    transform: scale(1.05);
   }
   100% {
     opacity: 1;
-    transform: scale(1); /* Vuelve a su tamaño normal */
+    transform: scale(1);
   }
 }
-/* Estilo para las oraciones ya leídas */
 .read-sentence {
   color: var(--word-active-color);
   transition: color 0.3s ease-in-out;
+}
+
+/* --- Estilos para la Burbuja de Error Contextual --- */
+/* --- MODIFICADO: Hacemos que el contenedor se ajuste al texto --- */
+.sentence-line-container {
+  position: relative;
+  display: inline-flex; /* Cambiado a inline-flex */
+  align-items: center;
+  margin-bottom: 15px;
+  width: max-content; /* El contenedor solo será tan ancho como su contenido */
+  max-width: 100%; /* Pero no más ancho que su padre */
+}
+.error-bubble {
+  position: absolute;
+  left: 100%; /* Ahora se posiciona al final del texto */
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 15px; /* Espacio entre el texto y la burbuja */
+  padding: 8px 12px;
+  background-color: var(--error-background);
+  color: var(--error-message-color);
+  border: 1px solid var(--error-border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: Arial, sans-serif;
+  z-index: 10;
+  width: max-content;
+  max-width: 250px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.error-bubble::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent var(--error-border) transparent transparent;
 }
