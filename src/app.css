@@ -706,3 +706,19 @@ html.dark-mode .page-number-top-right {
   border-style: solid;
   border-color: transparent var(--error-border) transparent transparent;
 }
+/* --- AÑADIDO: Estilo para el botón "Play Scene" cuando está activo --- */
+button.play-scene-button-active {
+  background-color: var(
+    --show-activity-button-bg
+  ); /* El verde del botón de ejercicio */
+  border-color: var(
+    --show-activity-button-bg
+  ); /* Hacemos que el borde también sea verde */
+  color: white; /* Aseguramos que el texto sea blanco para buen contraste */
+}
+
+/* Opcional: Un estilo para el hover del botón activo */
+button.play-scene-button-active:hover:not(:disabled) {
+  background-color: var(--show-activity-button-hover-bg);
+  border-color: var(--show-activity-button-hover-bg);
+}

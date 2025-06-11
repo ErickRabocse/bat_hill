@@ -17,11 +17,12 @@ function Blank({
   correctWord,
   onClickBlank,
   computedClassName,
+  sentenceId,
 }) {
   const [{ isOver, canDrop }, drop] = useDrop(() => ({
     accept: ItemTypes.WORD,
     drop: (item) => {
-      onDropBlank(item.word, correctWord)
+      onDropBlank(item.word, correctWord, sentenceId)
       return { accepted: true, targetId: correctWord, droppedWord: item.word }
     },
     collect: (monitor) => ({
@@ -40,7 +41,7 @@ function Blank({
             : 'var(--blank-bg-color)',
         padding: '0 0.2em', // Añadir un poco de padding para que no se vea tan pegado el texto
       }}
-      onClick={() => onClickBlank(correctWord, currentWord)}
+      onClick={() => onClickBlank(correctWord, currentWord, sentenceId)}
     >
       {currentWord || '______'}
     </span>
@@ -115,7 +116,7 @@ const DragDropSentence = forwardRef(
     }, [activityData, resetInternalState])
 
     const handleDropOnBlank = useCallback(
-      (droppedWordParam, targetBlankCorrectWordParam) => {
+      (droppedWordParam, targetBlankCorrectWordParam, sentenceId) => {
         if (isInternallyCompleted) return
         let newSentencesState
         setCurrentSentences((prevSentences) => {
@@ -140,6 +141,11 @@ const DragDropSentence = forwardRef(
           }))
           return newSentencesState
         })
+        setErrors((prevErrors) => {
+          const newErrors = { ...prevErrors }
+          delete newErrors[sentenceId]
+          return newErrors
+        })
         if (newSentencesState) notifyBlanksChange(newSentencesState)
       },
       [isInternallyCompleted, notifyBlanksChange]
@@ -148,7 +154,7 @@ const DragDropSentence = forwardRef(
     // En DragDropSentence.jsx
 
     const handleClickOnBlank = useCallback(
-      (blankCorrectWordParam, wordCurrentlyInBlankParam) => {
+      (blankCorrectWordParam, wordCurrentlyInBlankParam, sentenceId) => {
         if (isInternallyCompleted || !wordCurrentlyInBlankParam) return
         let newSentencesState
         setCurrentSentences((prevSentences) => {
@@ -168,7 +174,11 @@ const DragDropSentence = forwardRef(
           return newSentencesState
         })
 
-        // Es crucial que notifyBlanksChange se llame con el estado actualizado.
+        setErrors((prevErrors) => {
+          const newErrors = { ...prevErrors }
+          delete newErrors[sentenceId]
+          return newErrors
+        }) // Es crucial que notifyBlanksChange se llame con el estado actualizado.
         // Si newSentencesState se actualiza correctamente y se pasa a notifyBlanksChange, App.jsx recibirá la información correcta.
         if (newSentencesState) {
           // Asegurarse de que newSentencesState tiene un valor (después de la actualización síncrona del closure)
@@ -327,6 +337,7 @@ const DragDropSentence = forwardRef(
                       correctWord={part.correctWord}
                       onClickBlank={handleClickOnBlank}
                       computedClassName={getBlankDisplayClass(part)}
+                      sentenceId={sentence.id}
                     />
                   )
                 }

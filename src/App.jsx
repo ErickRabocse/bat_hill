@@ -893,6 +893,7 @@ function App() {
             <button
               onClick={handlePlaybackToggle} // <-- 1. CAMBIA EL ONCLICK
               disabled={mainControlsDisabled} // Opcional: puedes simplificar el disabled
+              className={isScenePlaying ? 'play-scene-button-active' : ''}
             >
               {isPaused ? 'Continuar' : isScenePlaying ? 'Pause' : 'Play Scene'}
             </button>
