@@ -3,15 +3,23 @@ import React, { useCallback } from 'react'
 import Particles from 'react-tsparticles'
 import { loadStarsPreset } from 'tsparticles-preset-stars'
 
-const StarEffect = () => {
+const StarEffect = ({ onParticlesLoaded }) => {
   const particlesInit = useCallback(async (engine) => {
     console.log('[StarEffect] Inicializando partículas...')
     await loadStarsPreset(engine)
   }, [])
 
-  const particlesLoaded = useCallback(async (container) => {
-    console.log('[StarEffect] Partículas cargadas:', container)
-  }, [])
+  const particlesLoaded = useCallback(
+    async (container) => {
+      // <-- 2. La usamos
+      console.log('[StarEffect] Partículas cargadas:', container)
+      // Si nos pasaron la función, la llamamos.
+      if (onParticlesLoaded) {
+        onParticlesLoaded()
+      }
+    },
+    [onParticlesLoaded]
+  ) // <-- 3. La añadimos como dependencia
 
   // Dentro de StarEffect.jsx, reemplaza el objeto 'options'
 
@@ -30,7 +38,7 @@ const StarEffect = () => {
         value: 100, // Una buena cantidad de estrellas
       },
       color: {
-        value: '#ffffff', // Estrellas de color blanco clásico
+        value: '#FFC800', // Estrellas de color blanco clásico
       },
       opacity: {
         value: { min: 0.3, max: 1 }, // Opacidad aleatoria para que parpadeen
@@ -41,7 +49,7 @@ const StarEffect = () => {
         },
       },
       size: {
-        value: { min: 1, max: 3 }, // <-- TAMAÑOS DIFERENTES
+        value: { min: 1, max: 4 }, // <-- TAMAÑOS DIFERENTES
         animation: {
           // Animación para que el tamaño también pulse sutilmente
           enable: true,
@@ -53,7 +61,7 @@ const StarEffect = () => {
       shadow: {
         // <-- AQUÍ ESTÁ EL GLOW INTERESANTE
         enable: true,
-        color: '#6495ED', // Un tono azulado (CornflowerBlue) para el brillo
+        color: '#f7d76a', // <-- Un brillo amarillo cálido
         blur: 10,
       },
       move: {

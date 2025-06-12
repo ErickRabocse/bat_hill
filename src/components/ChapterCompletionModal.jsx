@@ -2,7 +2,7 @@
 import React from 'react'
 
 // Eliminada la prop 'onClose' de los parámetros
-function ChapterCompletionModal({ details, onProceed, isLastChapterInBook }) {
+function ChapterCompletionModal({ details, onProceed }) {
   if (!details) return null
 
   const {
@@ -69,7 +69,7 @@ function ChapterCompletionModal({ details, onProceed, isLastChapterInBook }) {
         )}
         <p>Excellent work, keep it up!</p>
         <button onClick={handleProceed} className="modal-submit-button">
-          {isLastChapterInBook ? 'Finish Book' : 'Continue to Next Chapter'}
+          Start Practice Exercise
         </button>
       </div>
     </div>

@@ -10,7 +10,8 @@ import { AnimatePresence } from 'framer-motion'
 // --- IMPORTACIONES CORREGIDAS ---
 import { DndProvider, useDrag } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-
+import { chapter1Practice } from './data/practice/chapter1Practice' // Importa los datos del ejercicio
+import { PracticeExercise } from './components/PracticeExercise' // Importa el componente del ejercicio
 import StarEffect from './components/StarEffect'
 import './app.css'
 
@@ -91,6 +92,7 @@ function App() {
     useState(null)
   const [blurPage, setBlurPage] = useState(false)
   const [showStarEffect, setShowStarEffect] = useState(false)
+  const [showPractice, setShowPractice] = useState(false)
   // 'windowSize' y 'setWindowSize' se usan si Confetti se usa con width/height dinámicos
 
   const [glanceTimeRemaining, setGlanceTimeRemaining] = useState(0)
@@ -421,10 +423,6 @@ function App() {
           completionTimestamp: new Date().toISOString(),
           durationMinutes: durationMinutes,
         })
-        setTimeout(() => {
-          setShowStarEffect(false)
-          setShowCongratulatoryModal(true)
-        }, EFFECT_DURATION)
       } else if (
         currentChapter &&
         sceneIndex < currentChapter.scenes.length - 1
@@ -437,12 +435,10 @@ function App() {
       }
     }
   }
-  const handleCloseCongratulatoryModal = () => {
-    setShowCongratulatoryModal(false)
-    setBlurPage(false)
-  }
+
   const handleProceedToNextChapter = () => {
     setShowCongratulatoryModal(false)
+    setShowStarEffect(false)
     setBlurPage(false)
     if (chapterIndex < allChapters.length - 1) {
       setChapterIndex((prev) => prev + 1)
@@ -450,7 +446,15 @@ function App() {
       resetViewAndTimer()
     }
   }
-
+  // AÑADE ESTA NUEVA FUNCIÓN
+  const handleStartPractice = () => {
+    // Ocultamos el modal y los efectos de celebración
+    setShowCongratulatoryModal(false)
+    setShowStarEffect(false)
+    setBlurPage(false)
+    // Y activamos la vista de práctica
+    setShowPractice(true)
+  }
   useEffect(() => {
     if (isGlanceTimerActive && glanceTimeRemaining > 0) {
       glanceTimerRef.current = setInterval(() => {
@@ -459,6 +463,7 @@ function App() {
     } else if (glanceTimeRemaining === 0 && isGlanceTimerActive) {
       setIsShowingTextDuringActivity(false)
       setIsGlanceTimerActive(false)
+      speechSynthesis.cancel()
       if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
     }
     return () => {
@@ -816,7 +821,19 @@ function App() {
       </div>
     )
   }
-
+  if (showPractice) {
+    return (
+      <PracticeExercise
+        practiceData={chapter1Practice}
+        onPracticeComplete={(finalLives) => {
+          console.log('Ejercicio completado con vidas:', finalLives)
+          // Por ahora, solo ocultamos la vista de práctica.
+          // Más adelante aquí mostraremos el modal final con el puntaje.
+          setShowPractice(false)
+        }}
+      />
+    )
+  }
   return (
     <DndProvider backend={HTML5Backend}>
       {' '}
@@ -831,21 +848,13 @@ function App() {
       {showCongratulatoryModal && congratulatoryModalDetails && (
         <ChapterCompletionModal
           details={congratulatoryModalDetails}
-          onProceed={
-            isLastSceneInChapter && chapterIndex === allChapters.length - 1
-              ? handleCloseCongratulatoryModal
-              : handleProceedToNextChapter
-          }
-          isLastChapterInBook={chapterIndex === allChapters.length - 1}
+          onProceed={handleStartPractice} // <-- CAMBIO IMPORTANTE
         />
       )}
       {showStarEffect && (
-        <>
-          <StarEffect />
-          <div className="completion-text-overlay">
-            <h2 className="completion-text-word">COMPLETED</h2>
-          </div>
-        </>
+        <StarEffect
+          onParticlesLoaded={() => setShowCongratulatoryModal(true)}
+        />
       )}
       {/* ----------------------------- */}
       <div

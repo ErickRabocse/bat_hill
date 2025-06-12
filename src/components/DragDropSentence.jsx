@@ -301,7 +301,6 @@ const DragDropSentence = forwardRef(
           className="drag-drop-activity-content"
           style={{
             padding: '20px',
-            border: '1px solid red',
             color: 'var(--text-color)',
             minHeight: '100px',
           }}
