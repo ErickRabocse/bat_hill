@@ -73,6 +73,74 @@ export const chapter8Data = {
         { word: 'Luna jumps with joy', translation: 'Luna salta de alegría' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch8_sc1',
+            parts: [
+              { type: 'text', value: 'Luna is ' },
+              {
+                type: 'blank',
+                correctWord: 'happy',
+                hint: '¿Cómo se siente Luna?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch8_sc1',
+            parts: [
+              { type: 'text', value: 'Her posters are ' },
+              {
+                type: 'blank',
+                correctWord: 'everywhere',
+                hint: '¿Dónde están los carteles?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch8_sc1',
+            parts: [
+              { type: 'text', value: 'They visit the ' },
+              {
+                type: 'blank',
+                correctWord: 'shelter',
+                hint: '¿Qué lugar visitan?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch8_sc1',
+            parts: [
+              { type: 'text', value: 'Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'sniffs',
+                hint: '¿Qué hace con su nariz en el suelo?',
+              },
+              { type: 'text', value: ' the floor.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch8_sc1',
+            parts: [
+              { type: 'text', value: '"Luna, it’s your ' },
+              {
+                type: 'blank',
+                correctWord: 'sister',
+                hint: '¿A quién encontró en la jaula?',
+              },
+              { type: 'text', value: '!"' },
+            ],
+          },
+        ],
+        allWords: ['happy', 'everywhere', 'shelter', 'sniffs', 'sister'],
+      },
     },
     {
       id: 2,
@@ -147,6 +215,74 @@ export const chapter8Data = {
         { word: 'is just beginning', translation: 'está comenzando' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch8_sc2',
+            parts: [
+              { type: 'text', value: '"We\'ll take her ' },
+              {
+                type: 'blank',
+                correctWord: 'home',
+                hint: '¿A dónde llevarán a Sol?',
+              },
+              { type: 'text', value: '," Sofia says.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch8_sc2',
+            parts: [
+              { type: 'text', value: 'Now Sofia, Luna and Sol are a ' },
+              {
+                type: 'blank',
+                correctWord: 'team',
+                hint: '¿En qué se convierten las tres juntas?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch8_sc2',
+            parts: [
+              { type: 'text', value: 'They visit ' },
+              {
+                type: 'blank',
+                correctWord: 'schools',
+                hint: '¿Qué lugares visitan para contar su historia?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch8_sc2',
+            parts: [
+              { type: 'text', value: 'They tell their ' },
+              {
+                type: 'blank',
+                correctWord: 'story',
+                hint: '¿Qué comparten con la gente?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch8_sc2',
+            parts: [
+              { type: 'text', value: 'A new ' },
+              {
+                type: 'blank',
+                correctWord: 'adventure',
+                hint: '¿Qué está comenzando para ellas?',
+              },
+              { type: 'text', value: ' is just beginning.' },
+            ],
+          },
+        ],
+        allWords: ['home', 'team', 'schools', 'story', 'adventure'],
+      },
     },
   ],
 }

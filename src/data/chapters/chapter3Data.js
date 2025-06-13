@@ -34,6 +34,74 @@ export const chapter3Data = {
         { word: 'Luna', translation: 'a Luna' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch3_sc1',
+            parts: [
+              { type: 'text', value: 'Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'wakes up',
+                hint: '¿Qué hace Luna al inicio de la mañana?',
+              },
+              { type: 'text', value: ' under the bench.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch3_sc1',
+            parts: [
+              { type: 'text', value: 'Her belly is ' },
+              {
+                type: 'blank',
+                correctWord: 'empty',
+                hint: '¿Cómo está su barriga si tiene hambre?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch3_sc1',
+            parts: [
+              { type: 'text', value: 'She walks ' },
+              {
+                type: 'blank',
+                correctWord: 'slowly',
+                hint: '¿De qué forma camina?',
+              },
+              { type: 'text', value: ' down the street.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch3_sc1',
+            parts: [
+              { type: 'text', value: 'People are walking ' },
+              {
+                type: 'blank',
+                correctWord: 'fast',
+                hint: 'Describe la velocidad de la gente.',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch3_sc1',
+            parts: [
+              { type: 'text', value: 'They are ' },
+              {
+                type: 'blank',
+                correctWord: 'busy',
+                hint: '¿Cómo están las personas en la calle?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['wakes up', 'empty', 'slowly', 'fast', 'busy'],
+      },
     },
     {
       id: 2,
@@ -61,6 +129,74 @@ export const chapter3Data = {
         { word: 'soft smile', translation: 'sonrisa suave' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch3_sc2',
+            parts: [
+              { type: 'text', value: 'Luna smells something ' },
+              {
+                type: 'blank',
+                correctWord: 'delicious',
+                hint: '¿Cómo era lo que olía?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch3_sc2',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'lifts',
+                hint: '¿Qué hace con su nariz para oler mejor?',
+              },
+              { type: 'text', value: ' her nose.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch3_sc2',
+            parts: [
+              { type: 'text', value: 'and ' },
+              {
+                type: 'blank',
+                correctWord: 'follows',
+                hint: '¿Qué hace después de olerlo?',
+              },
+              { type: 'text', value: ' the smell.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch3_sc2',
+            parts: [
+              { type: 'text', value: 'The smell comes from a ' },
+              {
+                type: 'blank',
+                correctWord: 'backpack',
+                hint: '¿De dónde viene el olor?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch3_sc2',
+            parts: [
+              { type: 'text', value: 'She has a soft ' },
+              {
+                type: 'blank',
+                correctWord: 'smile',
+                hint: '¿Qué tiene la niña en su cara?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['delicious', 'lifts', 'follows', 'backpack', 'smile'],
+      },
     },
     {
       id: 3,
@@ -109,6 +245,74 @@ export const chapter3Data = {
         { word: 'in her mouth', translation: 'en su boca' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch3_sc3',
+            parts: [
+              { type: 'text', value: 'Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'runs',
+                hint: '¿Qué hace Luna para seguir a la niña?',
+              },
+              { type: 'text', value: ' after her.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch3_sc3',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'barks',
+                hint: '¿Qué sonido hace para llamar la atención?',
+              },
+              { type: 'text', value: ', "Woof! Woof!"' },
+            ],
+          },
+          {
+            id: 'sentence3_ch3_sc3',
+            parts: [
+              { type: 'text', value: 'Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'chews',
+                hint: '¿Qué le hace a la agujeta?',
+              },
+              { type: 'text', value: " the girl's shoelace." },
+            ],
+          },
+          {
+            id: 'sentence4_ch3_sc3',
+            parts: [
+              { type: 'text', value: 'A bike is coming ' },
+              {
+                type: 'blank',
+                correctWord: 'fast',
+                hint: '¿A qué velocidad viene la bicicleta?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch3_sc3',
+            parts: [
+              { type: 'text', value: 'She feels a ' },
+              {
+                type: 'blank',
+                correctWord: 'tug',
+                hint: '¿Qué siente la niña en su zapato?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['runs', 'barks', 'chews', 'fast', 'tug'],
+      },
     },
     {
       id: 4,
@@ -139,6 +343,74 @@ export const chapter3Data = {
         { word: 'she adds', translation: 'ella añade' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch3_sc4',
+            parts: [
+              { type: 'text', value: 'The spot looks like a ' },
+              {
+                type: 'blank',
+                correctWord: 'moon',
+                hint: '¿A qué se parece su mancha?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch3_sc4',
+            parts: [
+              { type: 'text', value: 'The girl ' },
+              {
+                type: 'blank',
+                correctWord: 'kneels',
+                hint: '¿Qué hace para estar a la altura de Luna?',
+              },
+              { type: 'text', value: ' down.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch3_sc4',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'laughs',
+                hint: '¿Cuál es su reacción al ver a Luna?',
+              },
+              { type: 'text', value: ' a little.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch3_sc4',
+            parts: [
+              { type: 'text', value: 'You ' },
+              {
+                type: 'blank',
+                correctWord: 'saved',
+                hint: '¿Qué hizo Luna por Sofia?',
+              },
+              { type: 'text', value: ' me!"' },
+            ],
+          },
+          {
+            id: 'sentence5_ch3_sc4',
+            parts: [
+              { type: 'text', value: '"You are a tiny ' },
+              {
+                type: 'blank',
+                correctWord: 'hero',
+                hint: '¿Cómo llama a Luna?',
+              },
+              { type: 'text', value: '."' },
+            ],
+          },
+        ],
+        allWords: ['moon', 'kneels', 'laughs', 'saved', 'hero'],
+      },
     },
     {
       id: 5,
@@ -184,6 +456,74 @@ export const chapter3Data = {
         { word: 'she is not alone', translation: 'ella no está sola' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch3_sc5',
+            parts: [
+              { type: 'text', value: 'She gives Luna a piece of her ' },
+              {
+                type: 'blank',
+                correctWord: 'sandwich',
+                hint: '¿Qué comida le da a Luna?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch3_sc5',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'wags',
+                hint: '¿Qué hace con la cola?',
+              },
+              { type: 'text', value: ' her tail.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch3_sc5',
+            parts: [
+              { type: 'text', value: 'She gently ' },
+              {
+                type: 'blank',
+                correctWord: 'places',
+                hint: '¿Qué hace para meter a Luna en la mochila?',
+              },
+              { type: 'text', value: ' Luna in her backpack.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch3_sc5',
+            parts: [
+              { type: 'text', value: 'Luna feels ' },
+              {
+                type: 'blank',
+                correctWord: 'safe',
+                hint: '¿Cómo se siente ahora?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch3_sc5',
+            parts: [
+              { type: 'text', value: 'she is not ' },
+              {
+                type: 'blank',
+                correctWord: 'alone',
+                hint: '¿Cómo no está por primera vez?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['sandwich', 'wags', 'places', 'safe', 'alone'],
+      },
     },
   ],
 }

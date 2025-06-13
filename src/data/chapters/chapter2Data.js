@@ -31,6 +31,70 @@ export const chapter2Data = {
         { word: 'something is wrong', translation: 'algo está mal' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch2_sc1',
+            parts: [
+              { type: 'text', value: 'Luna is in the ' },
+              { type: 'blank', correctWord: 'box', hint: '¿Dónde está Luna?' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch2_sc1',
+            parts: [
+              { type: 'text', value: 'They are ' },
+              {
+                type: 'blank',
+                correctWord: 'warm',
+                hint: '¿Cómo están las cachorritas?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch2_sc1',
+            parts: [
+              { type: 'text', value: 'They are ' },
+              {
+                type: 'blank',
+                correctWord: 'sleeping',
+                hint: '¿Qué están haciendo?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch2_sc1',
+            parts: [
+              { type: 'text', value: 'Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'hears',
+                hint: '¿Qué hace Luna con el aullido?',
+              },
+              { type: 'text', value: ' a long sad howl.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch2_sc1',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'feels',
+                hint: '¿Qué siente ella?',
+              },
+              { type: 'text', value: ' something is wrong.' },
+            ],
+          },
+        ],
+        allWords: ['box', 'warm', 'sleeping', 'hears', 'feels'],
+      },
     },
     {
       id: 2,
@@ -61,6 +125,54 @@ export const chapter2Data = {
         { word: 'to help', translation: 'ayudar' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch2_sc2',
+            parts: [
+              { type: 'text', value: 'Her little legs ' },
+              { type: 'blank', correctWord: 'shake' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch2_sc2',
+            parts: [
+              { type: 'text', value: 'She walks toward the ' },
+              { type: 'blank', correctWord: 'street' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch2_sc2',
+            parts: [
+              { type: 'text', value: 'She ' },
+              { type: 'blank', correctWord: 'sees' },
+              { type: 'text', value: ' Mama on the road.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch2_sc2',
+            parts: [
+              { type: 'text', value: 'Luna is ' },
+              { type: 'blank', correctWord: 'scared' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch2_sc2',
+            parts: [
+              { type: 'text', value: 'She wants to ' },
+              { type: 'blank', correctWord: 'help' },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['shake', 'street', 'sees', 'scared', 'help'],
+      },
     },
     {
       id: 3,
@@ -93,16 +205,58 @@ export const chapter2Data = {
         { word: 'The box', translation: 'La caja' },
         { word: 'is gone', translation: 'ya no está' },
         { word: '.', translation: '' },
-        {
-          word: 'Her sisters',
-          translation: 'Sus hermanas',
-        },
-        {
-          word: 'are gone',
-          translation: 'han desaparecido',
-        },
+        { word: 'Her sisters', translation: 'Sus hermanas' },
+        { word: 'are gone', translation: 'han desaparecido' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch2_sc3',
+            parts: [
+              { type: 'text', value: 'A man ' },
+              { type: 'blank', correctWord: 'smiles' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch2_sc3',
+            parts: [
+              { type: 'text', value: 'but no one ' },
+              { type: 'blank', correctWord: 'stops' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch2_sc3',
+            parts: [
+              { type: 'text', value: 'Someone ' },
+              { type: 'blank', correctWord: 'moves' },
+              { type: 'text', value: ' Luna away.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch2_sc3',
+            parts: [
+              { type: 'text', value: 'She is ' },
+              { type: 'blank', correctWord: 'pushed' },
+              { type: 'text', value: ' far from the alley.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch2_sc3',
+            parts: [
+              { type: 'text', value: 'Now she is ' },
+              { type: 'blank', correctWord: 'lost' },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['smiles', 'stops', 'moves', 'pushed', 'lost'],
+      },
     },
     {
       id: 4,
@@ -155,6 +309,54 @@ export const chapter2Data = {
         { word: 'a little', translation: 'un poco' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch2_sc4',
+            parts: [
+              { type: 'text', value: 'Buildings ' },
+              { type: 'blank', correctWord: 'shine' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch2_sc4',
+            parts: [
+              { type: 'text', value: 'Everything is ' },
+              { type: 'blank', correctWord: 'loud' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch2_sc4',
+            parts: [
+              { type: 'text', value: 'Luna feels ' },
+              { type: 'blank', correctWord: 'small' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch2_sc4',
+            parts: [
+              { type: 'text', value: 'She is ' },
+              { type: 'blank', correctWord: 'hungry' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch2_sc4',
+            parts: [
+              { type: 'text', value: 'She ' },
+              { type: 'blank', correctWord: 'pulls' },
+              { type: 'text', value: ' out a piece of bread.' },
+            ],
+          },
+        ],
+        allWords: ['shine', 'loud', 'small', 'hungry', 'pulls'],
+      },
     },
     {
       id: 5,
@@ -174,14 +376,8 @@ export const chapter2Data = {
         { word: 'Luna finds', translation: 'Luna encuentra' },
         { word: 'a bench', translation: 'una banca' },
         { word: '.', translation: '' },
-        {
-          word: 'She crawls',
-          translation: 'Ella se arrastra',
-        },
-        {
-          word: 'under it',
-          translation: 'debajo de ella',
-        },
+        { word: 'She crawls', translation: 'Ella se arrastra' },
+        { word: 'under it', translation: 'debajo de ella' },
         { word: '.', translation: '' },
         { word: 'It is quiet there', translation: 'Está tranquilo allí' },
         { word: '.', translation: '' },
@@ -199,20 +395,62 @@ export const chapter2Data = {
         { word: ',', translation: '' },
         { word: 'Luna feels strong', translation: 'Luna se siente fuerte' },
         { word: '.', translation: '' },
-        {
-          word: 'She whispers',
-          translation: 'Ella susurra',
-        },
-        {
-          word: 'to herself',
-          translation: 'para sí misma',
-        },
+        { word: 'She whispers', translation: 'Ella susurra' },
+        { word: 'to herself', translation: 'para sí misma' },
         { word: ',', translation: '' },
         { word: '"I can do this."', translation: '"Yo puedo hacer esto."' },
         { word: 'She falls asleep', translation: 'Ella se duerme' },
         { word: 'in the big city', translation: 'en la gran ciudad' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch2_sc5',
+            parts: [
+              { type: 'text', value: 'Her paws are ' },
+              { type: 'blank', correctWord: 'tired' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch2_sc5',
+            parts: [
+              { type: 'text', value: 'Luna ' },
+              { type: 'blank', correctWord: 'finds' },
+              { type: 'text', value: ' a bench.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch2_sc5',
+            parts: [
+              { type: 'text', value: 'She ' },
+              { type: 'blank', correctWord: 'crawls' },
+              { type: 'text', value: ' under it.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch2_sc5',
+            parts: [
+              { type: 'text', value: 'She ' },
+              { type: 'blank', correctWord: 'misses' },
+              { type: 'text', value: ' Mama.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch2_sc5',
+            parts: [
+              { type: 'text', value: 'Luna feels ' },
+              { type: 'blank', correctWord: 'strong' },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['tired', 'finds', 'crawls', 'misses', 'strong'],
+      },
     },
   ],
 }

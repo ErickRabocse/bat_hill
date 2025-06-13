@@ -29,6 +29,70 @@ export const chapter4Data = {
         { word: '"Shhh, Luna.', translation: '"Shhh, Luna.' },
         { word: 'Stay calm."', translation: 'Mantente tranquila."' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch4_sc1',
+            parts: [
+              { type: 'text', value: 'Sofia and Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'arrive',
+                hint: '¿Qué hacen al llegar a la escuela?',
+              },
+              { type: 'text', value: ' at school.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch4_sc1',
+            parts: [
+              { type: 'text', value: 'Luna stays ' },
+              {
+                type: 'blank',
+                correctWord: 'quiet',
+                hint: '¿Cómo se mantiene en la mochila?',
+              },
+              { type: 'text', value: ' inside the backpack.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch4_sc1',
+            parts: [
+              { type: 'text', value: 'She lets out a tiny ' },
+              { type: 'blank', correctWord: 'bark', hint: '¿Qué sonido hace?' },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch4_sc1',
+            parts: [
+              { type: 'text', value: 'The teacher looks ' },
+              {
+                type: 'blank',
+                correctWord: 'around',
+                hint: '¿Hacia dónde mira la maestra?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch4_sc1',
+            parts: [
+              { type: 'text', value: 'Sofia ' },
+              {
+                type: 'blank',
+                correctWord: 'whispers',
+                hint: '¿Cómo habla para no ser descubierta?',
+              },
+              { type: 'text', value: ', "Shhh, Luna."' },
+            ],
+          },
+        ],
+        allWords: ['arrive', 'quiet', 'bark', 'around', 'whispers'],
+      },
     },
     {
       id: 2,
@@ -103,6 +167,74 @@ export const chapter4Data = {
         { word: 'Her eyes are soft', translation: 'Tiene una mirada dulce' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch4_sc2',
+            parts: [
+              { type: 'text', value: 'Her house is small and ' },
+              {
+                type: 'blank',
+                correctWord: 'yellow',
+                hint: '¿De qué color es la casa?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch4_sc2',
+            parts: [
+              { type: 'text', value: 'There are ' },
+              {
+                type: 'blank',
+                correctWord: 'flowers',
+                hint: '¿Qué plantas hay en el jardín?',
+              },
+              { type: 'text', value: ' in the garden.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch4_sc2',
+            parts: [
+              { type: 'text', value: 'Her mom is ' },
+              {
+                type: 'blank',
+                correctWord: 'cooking',
+                hint: '¿Qué hace la mamá en la cocina?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch4_sc2',
+            parts: [
+              { type: 'text', value: 'The smell is ' },
+              {
+                type: 'blank',
+                correctWord: 'nice',
+                hint: '¿A qué huele la comida?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch4_sc2',
+            parts: [
+              { type: 'text', value: 'Luna sits down ' },
+              {
+                type: 'blank',
+                correctWord: 'quietly',
+                hint: '¿Cómo se sienta Luna?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['yellow', 'flowers', 'cooking', 'nice', 'quietly'],
+      },
     },
     {
       id: 3,
@@ -168,6 +300,74 @@ export const chapter4Data = {
         },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch4_sc3',
+            parts: [
+              { type: 'text', value: 'She must stay ' },
+              {
+                type: 'blank',
+                correctWord: 'outside',
+                hint: '¿Cuál es la condición para que Luna se quede?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch4_sc3',
+            parts: [
+              { type: 'text', value: 'There is a small wooden ' },
+              {
+                type: 'blank',
+                correctWord: 'shelter',
+                hint: '¿Dónde puede dormir Luna?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch4_sc3',
+            parts: [
+              { type: 'text', value: 'Sofia brings a ' },
+              {
+                type: 'blank',
+                correctWord: 'blanket',
+                hint: '¿Qué le trae Sofia para que no tenga frío?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch4_sc3',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'chews',
+                hint: '¿Qué travesura hace con los palos y los zapatos?',
+              },
+              { type: 'text', value: ' sticks.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch4_sc3',
+            parts: [
+              { type: 'text', value: 'The shoes are ' },
+              {
+                type: 'blank',
+                correctWord: 'ruined',
+                hint: '¿En qué estado quedaron los zapatos?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['outside', 'shelter', 'blanket', 'chews', 'ruined'],
+      },
     },
     {
       id: 4,
@@ -210,6 +410,74 @@ export const chapter4Data = {
         { word: 'courage', translation: 'valor' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch4_sc4',
+            parts: [
+              { type: 'text', value: "Sofia's parents are " },
+              {
+                type: 'blank',
+                correctWord: 'upset',
+                hint: '¿Cómo están los papás por los zapatos arruinados?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch4_sc4',
+            parts: [
+              { type: 'text', value: '"This dog is ' },
+              {
+                type: 'blank',
+                correctWord: 'trouble',
+                hint: '¿Qué es esta perrita, según ellos?',
+              },
+              { type: 'text', value: '!"' },
+            ],
+          },
+          {
+            id: 'sentence3_ch4_sc4',
+            parts: [
+              { type: 'text', value: 'Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'hides',
+                hint: '¿Qué hace Luna por miedo?',
+              },
+              { type: 'text', value: ' in her little house.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch4_sc4',
+            parts: [
+              { type: 'text', value: 'Sofia ' },
+              {
+                type: 'blank',
+                correctWord: 'hugs',
+                hint: '¿Qué hace Sofia para tranquilizarla?',
+              },
+              { type: 'text', value: ' her.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch4_sc4',
+            parts: [
+              { type: 'text', value: 'That gives her ' },
+              {
+                type: 'blank',
+                correctWord: 'courage',
+                hint: '¿Qué sentimiento le da el amor de Sofia?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['upset', 'trouble', 'hides', 'hugs', 'courage'],
+      },
     },
   ],
 }

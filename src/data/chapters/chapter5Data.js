@@ -85,6 +85,74 @@ export const chapter5Data = {
         { word: 'he says', translation: 'él dice' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch5_sc1',
+            parts: [
+              { type: 'text', value: 'Every day, Sofia ' },
+              {
+                type: 'blank',
+                correctWord: 'plays',
+                hint: '¿Qué hacen juntas todos los días?',
+              },
+              { type: 'text', value: ' with Luna.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch5_sc1',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'trains',
+                hint: '¿Qué hace Sofia para enseñarle a Luna?',
+              },
+              { type: 'text', value: ' her with care.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch5_sc1',
+            parts: [
+              { type: 'text', value: 'Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'waits',
+                hint: '¿Qué hace Luna cuando Sofia dice "Stay"?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch5_sc1',
+            parts: [
+              { type: 'text', value: 'Sofia never ' },
+              {
+                type: 'blank',
+                correctWord: 'shouts',
+                hint: '¿Qué es lo que Sofia nunca hace?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch5_sc1',
+            parts: [
+              { type: 'text', value: 'Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'brings',
+                hint: '¿Qué hace Luna con el periódico?',
+              },
+              { type: 'text', value: ' the newspaper.' },
+            ],
+          },
+        ],
+        allWords: ['plays', 'trains', 'waits', 'shouts', 'brings'],
+      },
     },
     {
       id: 2,
@@ -155,6 +223,74 @@ export const chapter5Data = {
         { word: 'of the family', translation: 'de la familia' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch5_sc2',
+            parts: [
+              { type: 'text', value: 'Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'stops',
+                hint: '¿Qué hace Luna cuando Sofia le da una orden?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch5_sc2',
+            parts: [
+              { type: 'text', value: "Sofia's mom " },
+              {
+                type: 'blank',
+                correctWord: 'watches',
+                hint: '¿Qué hace la mamá al verlas?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch5_sc2',
+            parts: [
+              { type: 'text', value: 'Luna feels ' },
+              {
+                type: 'blank',
+                correctWord: 'proud',
+                hint: '¿Cómo se siente Luna al obedecer?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch5_sc2',
+            parts: [
+              { type: 'text', value: 'Her tail moves like a little ' },
+              {
+                type: 'blank',
+                correctWord: 'flag',
+                hint: '¿A qué se parece su cola al moverse?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch5_sc2',
+            parts: [
+              { type: 'text', value: 'The stars ' },
+              {
+                type: 'blank',
+                correctWord: 'shine',
+                hint: '¿Qué hacen las estrellas en la noche?',
+              },
+              { type: 'text', value: ' above.' },
+            ],
+          },
+        ],
+        allWords: ['stops', 'watches', 'proud', 'flag', 'shine'],
+      },
     },
   ],
 }

@@ -37,6 +37,74 @@ export const chapter7Data = {
         { word: 'Sofia says', translation: 'dice Sofia' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch7_sc1',
+            parts: [
+              { type: 'text', value: 'Luna is ' },
+              {
+                type: 'blank',
+                correctWord: 'sleeping',
+                hint: '¿Qué hace Luna en la cama?',
+              },
+              { type: 'text', value: ' on her bed.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch7_sc1',
+            parts: [
+              { type: 'text', value: '"Now you are ' },
+              {
+                type: 'blank',
+                correctWord: 'safe',
+                hint: '¿Cómo está Luna ahora que tiene un hogar?',
+              },
+              { type: 'text', value: '," she whispers.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch7_sc1',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'thinks',
+                hint: '¿Qué hace Sofia sobre los otros perros?',
+              },
+              { type: 'text', value: ' of other dogs.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch7_sc1',
+            parts: [
+              { type: 'text', value: 'Many still have no ' },
+              {
+                type: 'blank',
+                correctWord: 'home',
+                hint: '¿Qué es lo que no tienen muchos perros?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch7_sc1',
+            parts: [
+              { type: 'text', value: '"We have to ' },
+              {
+                type: 'blank',
+                correctWord: 'help',
+                hint: '¿Qué quiere hacer Sofia por los otros perros?',
+              },
+              { type: 'text', value: ' them."' },
+            ],
+          },
+        ],
+        allWords: ['sleeping', 'safe', 'thinks', 'home', 'help'],
+      },
     },
     {
       id: 2,
@@ -95,6 +163,74 @@ export const chapter7Data = {
         { word: 'color', translation: 'colorear' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch7_sc2',
+            parts: [
+              { type: 'text', value: 'She takes ' },
+              {
+                type: 'blank',
+                correctWord: 'paper',
+                hint: '¿Qué material usa para sus carteles?',
+              },
+              { type: 'text', value: ' and markers.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch7_sc2',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'draws',
+                hint: '¿Qué hace con los marcadores?',
+              },
+              { type: 'text', value: ' happy dogs and hearts.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch7_sc2',
+            parts: [
+              { type: 'text', value: 'She shows the ' },
+              {
+                type: 'blank',
+                correctWord: 'posters',
+                hint: '¿Qué le enseña a sus padres?',
+              },
+              { type: 'text', value: ' to her parents.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch7_sc2',
+            parts: [
+              { type: 'text', value: 'Her mom ' },
+              {
+                type: 'blank',
+                correctWord: 'smiles',
+                hint: '¿Cuál es la reacción de su mamá?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch7_sc2',
+            parts: [
+              { type: 'text', value: '"Let\'s ' },
+              {
+                type: 'blank',
+                correctWord: 'invite',
+                hint: '¿Qué sugiere la maestra para el día de adopción?',
+              },
+              { type: 'text', value: ' a shelter."' },
+            ],
+          },
+        ],
+        allWords: ['paper', 'draws', 'posters', 'smiles', 'invite'],
+      },
     },
     {
       id: 3,
@@ -143,6 +279,74 @@ export const chapter7Data = {
         { word: 'making a change', translation: 'haciendo un cambio' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch7_sc3',
+            parts: [
+              { type: 'text', value: 'Sofia ' },
+              {
+                type: 'blank',
+                correctWord: 'shares',
+                hint: '¿Qué hace con su idea?',
+              },
+              { type: 'text', value: ' her idea with her friends.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch7_sc3',
+            parts: [
+              { type: 'text', value: 'They help her ' },
+              {
+                type: 'blank',
+                correctWord: 'hang',
+                hint: '¿Cómo la ayudan sus amigos con los carteles?',
+              },
+              { type: 'text', value: ' the posters.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch7_sc3',
+            parts: [
+              { type: 'text', value: 'More people see the ' },
+              {
+                type: 'blank',
+                correctWord: 'message',
+                hint: '¿Qué ven las personas gracias a los carteles?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch7_sc3',
+            parts: [
+              { type: 'text', value: '"Sofia, you are a ' },
+              {
+                type: 'blank',
+                correctWord: 'leader',
+                hint: '¿Cómo llama la maestra a Sofia?',
+              },
+              { type: 'text', value: '."' },
+            ],
+          },
+          {
+            id: 'sentence5_ch7_sc3',
+            parts: [
+              { type: 'text', value: 'Sofia feels ' },
+              {
+                type: 'blank',
+                correctWord: 'proud',
+                hint: '¿Cómo se siente Sofia por su trabajo?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['shares', 'hang', 'message', 'leader', 'proud'],
+      },
     },
   ],
 }

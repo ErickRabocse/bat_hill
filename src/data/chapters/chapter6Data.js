@@ -40,6 +40,70 @@ export const chapter6Data = {
         { word: 'confused', translation: 'confundida' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch6_sc1',
+            parts: [
+              { type: 'text', value: 'Sofia is ' },
+              {
+                type: 'blank',
+                correctWord: 'happy',
+                hint: '¿Cómo se siente Sofia hoy?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch6_sc1',
+            parts: [
+              { type: 'text', value: 'Today, Luna ' },
+              { type: 'blank', correctWord: 'goes', hint: '¿A dónde va Luna?' },
+              { type: 'text', value: ' to the vet.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch6_sc1',
+            parts: [
+              { type: 'text', value: 'She ' },
+              {
+                type: 'blank',
+                correctWord: 'brushes',
+                hint: '¿Qué le hace al pelo de Luna?',
+              },
+              { type: 'text', value: " Luna's fur." },
+            ],
+          },
+          {
+            id: 'sentence4_ch6_sc1',
+            parts: [
+              { type: 'text', value: 'Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'wags',
+                hint: '¿Qué hace con su cola?',
+              },
+              { type: 'text', value: ' her tail.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch6_sc1',
+            parts: [
+              { type: 'text', value: 'Luna looks around, ' },
+              {
+                type: 'blank',
+                correctWord: 'confused',
+                hint: '¿Cómo se siente al no ir al parque?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['happy', 'goes', 'brushes', 'wags', 'confused'],
+      },
     },
     {
       id: 2,
@@ -78,6 +142,74 @@ export const chapter6Data = {
         },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch6_sc2',
+            parts: [
+              { type: 'text', value: 'They stop at a small ' },
+              {
+                type: 'blank',
+                correctWord: 'clinic',
+                hint: '¿Cuál es el lugar al que llegan?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch6_sc2',
+            parts: [
+              { type: 'text', value: 'There is a big ' },
+              {
+                type: 'blank',
+                correctWord: 'sign',
+                hint: '¿Qué ven en la entrada?',
+              },
+              { type: 'text', value: ': "Pet\'s Doctor."' },
+            ],
+          },
+          {
+            id: 'sentence3_ch6_sc2',
+            parts: [
+              { type: 'text', value: '"The doctor will ' },
+              {
+                type: 'blank',
+                correctWord: 'help',
+                hint: '¿Qué hará el doctor por Luna?',
+              },
+              { type: 'text', value: ' you."' },
+            ],
+          },
+          {
+            id: 'sentence4_ch6_sc2',
+            parts: [
+              { type: 'text', value: 'Inside, Luna ' },
+              {
+                type: 'blank',
+                correctWord: 'hides',
+                hint: '¿Qué hace Luna al entrar?',
+              },
+              { type: 'text', value: " behind Sofia's legs." },
+            ],
+          },
+          {
+            id: 'sentence5_ch6_sc2',
+            parts: [
+              { type: 'text', value: 'He ' },
+              {
+                type: 'blank',
+                correctWord: 'checks',
+                hint: '¿Qué le hace el veterinario a Luna?',
+              },
+              { type: 'text', value: ' her eyes, ears, and heart.' },
+            ],
+          },
+        ],
+        allWords: ['clinic', 'sign', 'help', 'hides', 'checks'],
+      },
     },
     {
       id: 3,
@@ -130,6 +262,74 @@ export const chapter6Data = {
         { word: 'she says', translation: ' dice ella' },
         { word: '.', translation: '' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch6_sc3',
+            parts: [
+              { type: 'text', value: '"She is ' },
+              {
+                type: 'blank',
+                correctWord: 'healthy',
+                hint: '¿Cómo está la salud de Luna?',
+              },
+              { type: 'text', value: '," he says.' },
+            ],
+          },
+          {
+            id: 'sentence2_ch6_sc3',
+            parts: [
+              { type: 'text', value: '"But she needs a ' },
+              {
+                type: 'blank',
+                correctWord: 'vaccine',
+                hint: '¿Qué le tienen que poner?',
+              },
+              { type: 'text', value: '."' },
+            ],
+          },
+          {
+            id: 'sentence3_ch6_sc3',
+            parts: [
+              { type: 'text', value: 'The vet gives Luna the ' },
+              {
+                type: 'blank',
+                correctWord: 'shot',
+                hint: '¿Cómo le da la vacuna?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch6_sc3',
+            parts: [
+              { type: 'text', value: 'Luna makes a tiny ' },
+              {
+                type: 'blank',
+                correctWord: 'cry',
+                hint: '¿Qué sonido hace por el piquete?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence5_ch6_sc3',
+            parts: [
+              { type: 'text', value: 'Then the vet gives her a ' },
+              {
+                type: 'blank',
+                correctWord: 'treat',
+                hint: '¿Qué le da de premio por ser valiente?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['healthy', 'vaccine', 'shot', 'cry', 'treat'],
+      },
     },
     {
       id: 4,
@@ -170,6 +370,74 @@ export const chapter6Data = {
         { word: 'as if to say', translation: 'como si dijera' },
         { word: '"Yes."', translation: '"Sí."' },
       ],
+      activity: {
+        type: 'DragDropSentence',
+        instructions:
+          'Arrastra las palabras a los espacios en blanco para completar las oraciones.',
+        sentences: [
+          {
+            id: 'sentence1_ch6_sc4',
+            parts: [
+              { type: 'text', value: '"You are a good ' },
+              {
+                type: 'blank',
+                correctWord: 'friend',
+                hint: '¿Qué es Sofia para Luna?',
+              },
+              { type: 'text', value: ' to her."' },
+            ],
+          },
+          {
+            id: 'sentence2_ch6_sc4',
+            parts: [
+              { type: 'text', value: 'They ' },
+              {
+                type: 'blank',
+                correctWord: 'leave',
+                hint: '¿Qué hacen al terminar en la clínica?',
+              },
+              { type: 'text', value: ' the clinic.' },
+            ],
+          },
+          {
+            id: 'sentence3_ch6_sc4',
+            parts: [
+              { type: 'text', value: 'Luna walks ' },
+              {
+                type: 'blank',
+                correctWord: 'proudly',
+                hint: '¿Cómo camina Luna ahora?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+          {
+            id: 'sentence4_ch6_sc4',
+            parts: [
+              { type: 'text', value: '"You were so ' },
+              {
+                type: 'blank',
+                correctWord: 'brave',
+                hint: '¿Cómo se portó Luna en el veterinario?',
+              },
+              { type: 'text', value: '!"' },
+            ],
+          },
+          {
+            id: 'sentence5_ch6_sc4',
+            parts: [
+              { type: 'text', value: 'They walk home ' },
+              {
+                type: 'blank',
+                correctWord: 'together',
+                hint: '¿Cómo caminan a casa?',
+              },
+              { type: 'text', value: '.' },
+            ],
+          },
+        ],
+        allWords: ['friend', 'leave', 'proudly', 'brave', 'together'],
+      },
     },
   ],
 }
