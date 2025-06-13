@@ -5,7 +5,7 @@ import { allChapters } from './data/chapters'
 import ChapterSelector from './components/ChapterSelector'
 import DragDropSentence from './components/DragDropSentence'
 import StudentNameModal from './components/StudentNameModal'
-import ChapterCompletionModal from './components/ChapterCompletionModal'
+import { ChapterCompletionModal } from './components/ChapterCompletionModal'
 import { AnimatePresence } from 'framer-motion'
 // --- IMPORTACIONES CORREGIDAS ---
 import { DndProvider, useDrag } from 'react-dnd'
@@ -93,7 +93,8 @@ function App() {
   const [blurPage, setBlurPage] = useState(false)
   const [showStarEffect, setShowStarEffect] = useState(false)
   const [showPractice, setShowPractice] = useState(false)
-  // 'windowSize' y 'setWindowSize' se usan si Confetti se usa con width/height dinámicos
+  const [showPostPracticeModal, setShowPostPracticeModal] = useState(false) // <-- AÑADIR
+  const [finalScore, setFinalScore] = useState(0) // <-- AÑADIR
 
   const [glanceTimeRemaining, setGlanceTimeRemaining] = useState(0)
   const [isGlanceTimerActive, setIsGlanceTimerActive] = useState(false)
@@ -112,6 +113,11 @@ function App() {
   const [isScenePlaying, setIsScenePlaying] = useState(false)
   const [readSentenceIndices, setReadSentenceIndices] = useState(new Set()) // <-- AÑADE ESTA LÍNEA
   //...
+  const handlePracticeComplete = (finalLives) => {
+    setFinalScore(finalLives) // 1. Guarda la puntuación de corazones
+    setShowPractice(false) // 2. Oculta la vista del ejercicio
+    setShowPostPracticeModal(true) // 3. Muestra el nuevo modal de puntuación
+  }
 
   const handleStudentNameSubmit = (nameFromModal, groupFromModal) => {
     setStudentName(nameFromModal)
@@ -825,12 +831,7 @@ function App() {
     return (
       <PracticeExercise
         practiceData={chapter1Practice}
-        onPracticeComplete={(finalLives) => {
-          console.log('Ejercicio completado con vidas:', finalLives)
-          // Por ahora, solo ocultamos la vista de práctica.
-          // Más adelante aquí mostraremos el modal final con el puntaje.
-          setShowPractice(false)
-        }}
+        onPracticeComplete={handlePracticeComplete}
       />
     )
   }
@@ -849,6 +850,22 @@ function App() {
         <ChapterCompletionModal
           details={congratulatoryModalDetails}
           onProceed={handleStartPractice} // <-- CAMBIO IMPORTANTE
+        />
+      )}
+      {showPostPracticeModal && (
+        <ChapterCompletionModal
+          details={{
+            // Le pasamos un título y mensaje personalizados
+            customTitle: `¡Ejercicio Completado!`,
+            customMessage: `Terminaste la práctica con ${finalScore} ❤️ restantes.`,
+            studentName: studentName, // <-- AÑADE ESTA LÍNEA
+          }}
+          // Al darle clic, cerramos este modal y avanzamos de capítulo
+          onProceed={() => {
+            setShowPostPracticeModal(false)
+            handleProceedToNextChapter()
+          }}
+          buttonText="Next Chapter"
         />
       )}
       {showStarEffect && (

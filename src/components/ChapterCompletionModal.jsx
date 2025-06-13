@@ -1,47 +1,42 @@
 // src/components/ChapterCompletionModal.jsx
 import React from 'react'
 
-// Eliminada la prop 'onClose' de los parámetros
-function ChapterCompletionModal({ details, onProceed }) {
+// Versión final y flexible del modal
+export function ChapterCompletionModal({ details, onProceed, buttonText }) {
   if (!details) return null
 
-  const {
-    chapterNumber,
-    chapterTitle,
-    studentName,
-    studentGroup,
-    completionTimestamp,
-    durationMinutes,
-  } = details
-
-  const formattedDate = completionTimestamp
-    ? new Date(completionTimestamp).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : ''
-  const formattedTime = completionTimestamp
-    ? new Date(completionTimestamp).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      })
-    : ''
-
-  // La función onProceed (que es handleProceedToNextChapter o handleCloseCongratulatoryModal en App.jsx)
-  // ya se encarga de cerrar el modal.
+  // La función que se ejecuta al hacer clic en el botón
   const handleProceed = () => {
     if (onProceed) {
       onProceed()
     }
   }
 
+  // Damos formato a la fecha y hora solo si existen los datos para ello
+  const formattedDate = details.completionTimestamp
+    ? new Date(details.completionTimestamp).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : ''
+  const formattedTime = details.completionTimestamp
+    ? new Date(details.completionTimestamp).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      })
+    : ''
+
   return (
-    <div className="modal-overlay" style={{ zIndex: 1050 }}>
+    <div className="modal-overlay">
       <div className="modal-box chapter-completion-modal">
-        <h2>Congratulations, {studentName}!</h2>
-        {studentGroup && (
+        {/* Si pasamos un título personalizado, lo usamos. Si no, el de por defecto. */}
+        <h2>
+          {details.customTitle || `Congratulations, ${details.studentName}!`}
+        </h2>
+
+        {details.studentGroup && !details.customMessage && (
           <p
             style={{
               fontSize: '0.9em',
@@ -49,31 +44,37 @@ function ChapterCompletionModal({ details, onProceed }) {
               marginBottom: '15px',
             }}
           >
-            <em>(Group: {studentGroup})</em>
+            <em>(Group: {details.studentGroup})</em>
           </p>
         )}
-        <p>
-          You have successfully completed{' '}
-          <strong>
-            Chapter {chapterNumber}: {chapterTitle}
-          </strong>
-          <br />
-          on <strong>{formattedDate}</strong> at{' '}
-          <strong>{formattedTime}</strong>.
-        </p>
-        {durationMinutes !== undefined && (
+
+        {/* Si pasamos un mensaje personalizado, lo usamos. Si no, el de por defecto. */}
+        {details.customMessage ? (
+          <p>{details.customMessage}</p>
+        ) : (
+          <p>
+            You have successfully completed{' '}
+            <strong>
+              Chapter {details.chapterNumber}: {details.chapterTitle}
+            </strong>
+            <br />
+            on <strong>{formattedDate}</strong> at{' '}
+            <strong>{formattedTime}</strong>.
+          </p>
+        )}
+
+        {details.durationMinutes !== undefined && (
           <p>
             Time taken for this chapter:{' '}
-            <strong>{durationMinutes} minutes</strong>.
+            <strong>{details.durationMinutes} minutes</strong>.
           </p>
         )}
-        <p>Excellent work, keep it up!</p>
+
+        <p>Excellent work, {details.studentName}! Keep it up!</p>
         <button onClick={handleProceed} className="modal-submit-button">
-          Start Practice Exercise
+          {buttonText || 'Practice Section'}
         </button>
       </div>
     </div>
   )
 }
-
-export default ChapterCompletionModal

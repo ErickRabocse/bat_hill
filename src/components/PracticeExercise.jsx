@@ -1,88 +1,88 @@
 // src/components/PracticeExercise.jsx
-import React, { useState, useEffect } from 'react' // 1. AÑADIDO: useEffect a la importación
+import React, { useState, useEffect } from 'react'
 
 export function PracticeExercise({ practiceData, onPracticeComplete }) {
   // --- ESTADOS DEL JUEGO ---
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [lives, setLives] = useState(3)
-  const [streak, setStreak] = useState(0)
   const [gameState, setGameState] = useState('identifying_error')
-  const [selectedWord, setSelectedWord] = useState(null)
-  const [feedback, setFeedback] = useState('')
+  const [feedback, setFeedback] = useState({ msg: '', type: 'info' })
   const [userAnswer, setUserAnswer] = useState('')
   const [isGameOver, setIsGameOver] = useState(false)
 
+  // --- LÓGICA DEL JUEGO ---
+
+  // Efecto que vigila las vidas para terminar el juego
   useEffect(() => {
     if (lives <= 0) {
-      setFeedback('¡Oh no! Te has quedado sin vidas.')
+      setFeedback({ msg: '¡Oh no! Te has quedado sin vidas.', type: 'error' })
       setIsGameOver(true)
     }
   }, [lives])
 
+  // Maneja el clic en una de las palabras de la oración
+  const handleOptionClick = (clickedOption) => {
+    if (gameState !== 'identifying_error' || isGameOver) return
+
+    if (clickedOption.isError) {
+      setFeedback({ msg: '', type: 'info' })
+      setGameState('correcting_error') // Pasa a la etapa de corrección
+    } else {
+      setLives((prevLives) => prevLives - 1)
+      setFeedback({
+        msg: `'${clickedOption.word}' es una palabra correcta. Intenta de nuevo.`,
+        type: 'error',
+      })
+    }
+  }
+
+  // Maneja el envío de la respuesta escrita
   const handleCheckAnswer = (event) => {
     event.preventDefault()
     if (isGameOver) return
+
     const correctAnswer = currentQuestion.correction.toLowerCase()
     const userAnswerClean = userAnswer.trim().toLowerCase()
 
     if (userAnswerClean === correctAnswer) {
-      const newStreak = streak + 1
-      setStreak(newStreak)
-      if (newStreak > 0 && newStreak % 3 === 0) {
-        setLives((prevLives) => prevLives + 1)
-        setFeedback('¡Correcto! ¡Ganaste una vida extra por tu racha!')
-      } else {
-        setFeedback('¡Muy bien! Respuesta correcta.')
-      }
+      setFeedback({ msg: '¡Muy bien! Respuesta correcta.', type: 'success' })
       const isLastQuestion =
         currentQuestionIndex === practiceData.questions.length - 1
+
       setTimeout(() => {
         if (isLastQuestion) {
-          onPracticeComplete(lives)
+          onPracticeComplete(lives) // Llama al padre para indicar la victoria
         } else {
-          setFeedback('')
+          // Prepara la siguiente pregunta
+          setFeedback({ msg: '', type: 'info' })
           setUserAnswer('')
-          setGameState('identifying_error') // Volvemos a la etapa de identificar
+          setGameState('identifying_error')
           setCurrentQuestionIndex((prevIndex) => prevIndex + 1)
         }
       }, 1500)
     } else {
-      setFeedback('Respuesta incorrecta. ¡Inténtalo de nuevo!')
+      setFeedback({
+        msg: 'Respuesta incorrecta. ¡Inténtalo de nuevo!',
+        type: 'error',
+      })
       setLives((prevLives) => prevLives - 1)
-      setStreak(0)
     }
   }
 
+  // Reinicia el juego desde la pantalla de Game Over
   const handleRestart = () => {
     setCurrentQuestionIndex(0)
     setLives(3)
-    setStreak(0)
-    setFeedback('')
+    setFeedback({ msg: '', type: 'info' })
     setUserAnswer('')
     setGameState('identifying_error')
     setIsGameOver(false)
   }
 
-  const handleOptionClick = (clickedOption) => {
-    if (gameState !== 'identifying_error') return
-    if (clickedOption.isError) {
-      setFeedback('')
-      setSelectedWord(clickedOption.word)
-      setGameState('correcting_error')
-    } else {
-      setLives((prevLives) => prevLives - 1)
-      setStreak(0)
-      setFeedback(
-        `'${clickedOption.word}' es una palabra correcta. Intenta de nuevo.`
-      )
-    }
-  }
-
   const currentQuestion = practiceData.questions[currentQuestionIndex]
 
-  // Si no hay más preguntas (porque ganaste), onPracticeComplete ya fue llamado.
-  // Mostramos un mensaje intermedio antes de que App.jsx cambie la vista.
-  if (!currentQuestion) {
+  // Mensaje de victoria antes de que App.jsx cambie de vista
+  if (!currentQuestion && !isGameOver) {
     return (
       <div className="practice-exercise-container">
         <h2>¡Felicidades!</h2>
@@ -91,42 +91,48 @@ export function PracticeExercise({ practiceData, onPracticeComplete }) {
     )
   }
 
-  // --- RENDERIZADO ---
-  // REEMPLAZA TU RETURN COMPLETO CON ESTE
+  // --- RENDERIZADO DEL COMPONENTE ---
+  // Por favor, reemplaza todo tu return con este bloque final
   return (
     <div className="practice-exercise-container">
       {isGameOver && (
         <div className="game-over-overlay">
           <div className="game-over-box">
             <h2>Game Over</h2>
-            <p>{feedback}</p>
+            <p>{feedback.msg}</p>
             <button onClick={handleRestart}>Intentar de Nuevo</button>
           </div>
         </div>
       )}
 
-      {/* --- Encabezado y Vidas --- */}
       <div className="practice-header">
-        <h1>{practiceData.topic}</h1>
+        <h1 className="practice-topic-title">{practiceData.topic}</h1>
         <div className="lives-container">
           <span>Vidas:</span> {'❤️'.repeat(lives)}
         </div>
       </div>
-      <h2>
-        Pregunta {currentQuestionIndex + 1} de {practiceData.questions.length}
-      </h2>
 
-      {/* --- INSTRUCCIONES DINÁMICAS (AJUSTE 1) --- */}
       <p className="instructions">
         {gameState === 'identifying_error'
-          ? `El error está en ${currentQuestion.focus}. ¡Haz clic en la palabra incorrecta!`
-          : `¡Correcto! Ahora, escribe la palabra correcta y presiona "Comprobar".`}
+          ? `¡Haz clic en la palabra incorrecta! El error está en ${currentQuestion.focus}.`
+          : `Ahora, escribe la corrección y presiona "Comprobar".`}
       </p>
-      <hr />
 
-      {/* --- FORMULARIO QUE ENVUELVE LA ORACIÓN Y EL BOTÓN --- */}
+      <div className="progress-bar-container">
+        <div className="progress-bar-outer">
+          <div
+            className="progress-bar-inner"
+            style={{
+              width: `${
+                (currentQuestionIndex / practiceData.questions.length) * 100
+              }%`,
+            }}
+          ></div>
+        </div>
+      </div>
+      
+
       <form onSubmit={handleCheckAnswer}>
-        {/* Banco de Palabras (solo en etapa de corrección) */}
         {gameState === 'correcting_error' && (
           <div className="answer-bank">
             <h3>Opciones de Respuesta:</h3>
@@ -140,17 +146,18 @@ export function PracticeExercise({ practiceData, onPracticeComplete }) {
           </div>
         )}
 
-        {/* Oración con INPUT INTEGRADO (AJUSTE 2) */}
-        {/* Oración con INPUT INTEGRADO */}
+        {/* --- ESTA ES LA LÓGICA DE RENDERIZADO CORREGIDA Y FINAL --- */}
         <div className="sentence-display">
           {currentQuestion.sentence.map((word, index) => {
-            // --- ESTA ES LA LÓGICA CORREGIDA ---
-            // Si estamos en la etapa de corrección Y la palabra actual es la palabra del error...
-            if (gameState === 'correcting_error' && word === selectedWord) {
+            // Si estamos en la etapa de corrección y esta es la palabra del error...
+            if (
+              gameState === 'correcting_error' &&
+              word.trim() === currentQuestion.error.trim()
+            ) {
               // ...la reemplazamos por el campo de texto.
               return (
                 <input
-                  key={index}
+                  key={`${currentQuestion.id}-input`}
                   type="text"
                   className="correction-input"
                   value={userAnswer}
@@ -158,20 +165,20 @@ export function PracticeExercise({ practiceData, onPracticeComplete }) {
                   autoFocus
                   style={{
                     minWidth: '100px',
-                    width: `${currentQuestion.correction.length * 1.2}ch`,
+                    width: `${currentQuestion.correction.length * 1.5}ch`,
                   }}
                 />
               )
             }
 
-            // Si estamos en la etapa de identificar, vemos si la palabra es una opción clickeable.
+            // Si estamos en la etapa de identificar, vemos si es una opción clickeable.
             const optionData = currentQuestion.options.find(
               (opt) => opt.word === word
             )
             if (optionData && gameState === 'identifying_error') {
               return (
                 <span
-                  key={index}
+                  key={`${currentQuestion.id}-option-${index}`}
                   className="error-option"
                   onClick={() => handleOptionClick(optionData)}
                 >
@@ -181,22 +188,28 @@ export function PracticeExercise({ practiceData, onPracticeComplete }) {
             }
 
             // En cualquier otro caso, es solo texto normal.
-            return <span key={index}> {word} </span>
+            return (
+              <span key={`${currentQuestion.id}-word-${index}`}> {word} </span>
+            )
           })}
         </div>
 
-        {/* Botón de Comprobar CENTRADO (AJUSTE 3) */}
         {gameState === 'correcting_error' && (
           <div className="check-answer-area">
-            <button type="submit" className="check-answer-button">
+            <button
+              type="submit"
+              className="check-answer-button"
+              disabled={feedback.type === 'success'}
+            >
               Comprobar
             </button>
           </div>
         )}
       </form>
 
-      {/* Feedback para el usuario (ahora solo para errores) */}
-      <div className="feedback-display">{feedback}</div>
+      <div className={`feedback-display feedback--${feedback.type}`}>
+        {feedback.msg}
+      </div>
     </div>
   )
 }
