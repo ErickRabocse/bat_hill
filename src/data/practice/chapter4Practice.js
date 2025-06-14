@@ -69,7 +69,7 @@ export const chapter4Practice = {
     {
       id: 'c4q6',
       focus: "POSESIVO 'S",
-      sentence: ['The', 'Sofia', 'parents', 'are', 'upset', '.'],
+      sentence: ['Sofia', 'parents', 'are', 'upset', '.'],
       options: [
         { word: 'Sofia', isError: true },
         { word: 'parents', isError: false },
@@ -100,7 +100,8 @@ export const chapter4Practice = {
         'are',
         'in',
         'her',
-        'backpack,"',
+        'backpack',
+        ',"',
         'Sofia',
         'says',
         '.',

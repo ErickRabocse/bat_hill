@@ -130,7 +130,6 @@ export function PracticeExercise({ practiceData, onPracticeComplete }) {
           ></div>
         </div>
       </div>
-      
 
       <form onSubmit={handleCheckAnswer}>
         {gameState === 'correcting_error' && (

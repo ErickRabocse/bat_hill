@@ -3,7 +3,7 @@ export const chapter6Practice = {
   questions: [
     {
       id: 'c6q1',
-      focus: 'PRESENTE SIMPLE',
+      focus: 'VERBO EN PRESENTE SIMPLE',
       sentence: ['Sofia', 'feel', 'happy', 'today', '.'],
       options: [
         { word: 'Sofia', isError: false },
@@ -16,7 +16,7 @@ export const chapter6Practice = {
     },
     {
       id: 'c6q2',
-      focus: 'PRESENTE SIMPLE',
+      focus: 'VERBO EN PRESENTE SIMPLE',
       sentence: ['She', 'brush', "Luna's", 'fur', '.'],
       options: [
         { word: 'She', isError: false },
@@ -29,7 +29,7 @@ export const chapter6Practice = {
     },
     {
       id: 'c6q3',
-      focus: 'PRESENTE SIMPLE',
+      focus: 'VERBO EN PRESENTE SIMPLE',
       sentence: ['Luna', 'wag', 'her', 'tail', '.'],
       options: [
         { word: 'Luna', isError: false },
@@ -42,7 +42,7 @@ export const chapter6Practice = {
     },
     {
       id: 'c6q4',
-      focus: 'PRESENTE SIMPLE',
+      focus: 'VERBO EN PRESENTE SIMPLE',
       sentence: ['They', 'stops', 'at', 'a', 'small', 'clinic', '.'],
       options: [
         { word: 'They', isError: false },
@@ -56,19 +56,19 @@ export const chapter6Practice = {
     {
       id: 'c6q5',
       focus: 'ADVERBIO DE FRECUENCIA',
-      sentence: ['The', 'vet', 'is', 'always', 'friendly', '.'],
+      sentence: ['The', 'vet', 'is', 'never', 'friendly', '.'],
       options: [
         { word: 'vet', isError: false },
-        { word: 'is', isError: true }, // Error de orden: 'always is' es incorrecto
+        { word: 'is', isError: true }, 
         { word: 'friendly', isError: false },
       ],
-      error: 'is',
-      correction: 'is always',
-      answerBank: ['is always', 'always is', 'is sometimes'],
+      error: 'never',
+      correction: 'always',
+      answerBank: ['rarely', 'always', 'never'],
     },
     {
       id: 'c6q6',
-      focus: 'PRESENTE SIMPLE',
+      focus: 'VERBO EN PRESENTE SIMPLE',
       sentence: ['The', 'vet', 'give', 'Luna', 'a', 'shot', '.'],
       options: [
         { word: 'vet', isError: false },
@@ -81,7 +81,7 @@ export const chapter6Practice = {
     },
     {
       id: 'c6q7',
-      focus: 'PRESENTE SIMPLE',
+      focus: 'VERBO EN PRESENTE SIMPLE',
       sentence: ['Luna', 'make', 'a', 'tiny', 'cry', '.'],
       options: [
         { word: 'Luna', isError: false },
@@ -94,7 +94,7 @@ export const chapter6Practice = {
     },
     {
       id: 'c6q8',
-      focus: 'PRESENTE SIMPLE',
+      focus: 'VERBO EN PRESENTE SIMPLE',
       sentence: ['He', 'put', 'the', 'pill', 'in', 'the', 'bag', '.'],
       options: [
         { word: 'He', isError: false },
@@ -120,7 +120,7 @@ export const chapter6Practice = {
     },
     {
       id: 'c6q10',
-      focus: 'PRESENTE SIMPLE',
+      focus: 'VERBO EN PRESENTE SIMPLE',
       sentence: ['Luna', 'bark', 'softly', '.'],
       options: [
         { word: 'Luna', isError: false },

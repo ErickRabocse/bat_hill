@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import Word from './Word'
 import { allChapters } from './data/chapters'
+import { allPracticeData } from './data/practice'
 import ChapterSelector from './components/ChapterSelector'
 import DragDropSentence from './components/DragDropSentence'
 import StudentNameModal from './components/StudentNameModal'
@@ -10,7 +11,6 @@ import { AnimatePresence } from 'framer-motion'
 // --- IMPORTACIONES CORREGIDAS ---
 import { DndProvider, useDrag } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import { chapter1Practice } from './data/practice/chapter1Practice' // Importa los datos del ejercicio
 import { PracticeExercise } from './components/PracticeExercise' // Importa el componente del ejercicio
 import StarEffect from './components/StarEffect'
 import './app.css'
@@ -68,7 +68,7 @@ function App() {
     setIsGlanceTimerActive(false)
     setGlanceTimeRemaining(0)
     if (glanceTimerRef.current) clearInterval(glanceTimerRef.current)
-    setChaptersStartTime({})
+
     setPlacedWords(new Set())
     setIsScenePlaying(false)
   }, [])
@@ -100,8 +100,7 @@ function App() {
   const [isGlanceTimerActive, setIsGlanceTimerActive] = useState(false)
   const glanceTimerRef = useRef(null)
   const dragDropSentenceRef = useRef(null)
-  const [chaptersStartTime, setChaptersStartTime] = useState({})
-
+  const [sessionStartTime, setSessionStartTime] = useState(null)
   const currentChapter = allChapters[chapterIndex]
   const currentScene = currentChapter?.scenes[sceneIndex]
   const hasActivity = currentScene && currentScene.activity !== undefined
@@ -125,22 +124,9 @@ function App() {
     localStorage.setItem('studentName', nameFromModal)
     localStorage.setItem('studentGroup', groupFromModal)
     setShowStudentNameModal(false)
-    if (chapterIndex > 0 && !chaptersStartTime[chapterIndex]) {
-      setChaptersStartTime((prev) => ({ ...prev, [chapterIndex]: Date.now() }))
-    }
+    setSessionStartTime(Date.now()) // ¡Aquí iniciamos el contador!
   }
-  useEffect(() => {
-    if (
-      chapterIndex > 0 &&
-      !showStudentNameModal &&
-      !chaptersStartTime[chapterIndex]
-    ) {
-      setChaptersStartTime((prev) => ({ ...prev, [chapterIndex]: Date.now() }))
-    }
-  }, [chapterIndex, showStudentNameModal, chaptersStartTime])
-  useEffect(() => {
-    localStorage.setItem('chaptersStartTime', JSON.stringify(chaptersStartTime))
-  }, [chaptersStartTime])
+
   const completedScenesInCurrentChapter = useMemo(() => {
     if (!currentChapter) return 0
     return currentChapter.scenes.filter((scene, idx) => {
@@ -415,8 +401,8 @@ function App() {
         currentChapter && sceneIndex === currentChapter.scenes.length - 1
       if (hasActivity && isLastSceneOfChapter && chapterIndex >= 0) {
         let durationMinutes = 0
-        if (chaptersStartTime[chapterIndex]) {
-          const durationMs = Date.now() - chaptersStartTime[chapterIndex]
+        if (sessionStartTime) {
+          const durationMs = Date.now() - sessionStartTime
           durationMinutes = Math.round(durationMs / (1000 * 60))
         }
         setBlurPage(true)
@@ -446,8 +432,11 @@ function App() {
     setShowCongratulatoryModal(false)
     setShowStarEffect(false)
     setBlurPage(false)
+
     if (chapterIndex < allChapters.length - 1) {
-      setChapterIndex((prev) => prev + 1)
+      const nextChapterIndex = chapterIndex + 1
+
+      setChapterIndex(nextChapterIndex)
       setSceneIndex(0)
       resetViewAndTimer()
     }
@@ -830,7 +819,7 @@ function App() {
   if (showPractice) {
     return (
       <PracticeExercise
-        practiceData={chapter1Practice}
+        practiceData={allPracticeData[chapterIndex]}
         onPracticeComplete={handlePracticeComplete}
       />
     )
