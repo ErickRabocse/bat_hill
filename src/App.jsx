@@ -839,6 +839,7 @@ function App() {
         <ChapterCompletionModal
           details={congratulatoryModalDetails}
           onProceed={handleStartPractice} // <-- CAMBIO IMPORTANTE
+          buttonText={`Let's practice: ${allPracticeData[chapterIndex]?.topic}`}
         />
       )}
       {showPostPracticeModal && (

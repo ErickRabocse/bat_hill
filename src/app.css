@@ -810,7 +810,6 @@ button.play-scene-button-active:hover:not(:disabled) {
 }
 
 .instructions {
-  text-align: center;
   font-style: italic;
   color: var(--text-color-muted);
   font-size: 1.3rem;
@@ -902,6 +901,7 @@ button.play-scene-button-active:hover:not(:disabled) {
   font-size: 1.1rem;
   font-weight: 700;
   min-height: 24px;
+  color: rgba(144, 238, 144, 0.9);
 }
 /* --- Estilos para la Pantalla de Game Over --- */
 .game-over-overlay {

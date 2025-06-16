@@ -113,9 +113,20 @@ export function PracticeExercise({ practiceData, onPracticeComplete }) {
       </div>
 
       <p className="instructions">
-        {gameState === 'identifying_error'
-          ? `¡Haz clic en la palabra incorrecta! El error está en ${currentQuestion.focus}.`
-          : `Ahora, escribe la corrección y presiona "Comprobar".`}
+        {gameState === 'identifying_error' ? (
+          <>
+            Haz clic en la palabra "incorrecta".
+            <ul>
+              <li> El error está en {currentQuestion.focus}</li>
+              <li>
+                Probablemente es una palabra que no encaja con lo que ocurre en
+                la historia
+              </li>
+            </ul>
+          </>
+        ) : (
+          <>¡Muy bien! Ahora escribe la corrección y presiona “Comprobar”.</>
+        )}
       </p>
 
       <div className="progress-bar-container">
@@ -134,7 +145,7 @@ export function PracticeExercise({ practiceData, onPracticeComplete }) {
       <form onSubmit={handleCheckAnswer}>
         {gameState === 'correcting_error' && (
           <div className="answer-bank">
-            <h3>Opciones de Respuesta:</h3>
+            <h2>Opciones de Respuesta:</h2>
             <div className="bank-words">
               {currentQuestion.answerBank.map((word) => (
                 <span key={word} className="bank-word">

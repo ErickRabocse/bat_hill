@@ -59,7 +59,7 @@ export const chapter6Practice = {
       sentence: ['The', 'vet', 'is', 'never', 'friendly', '.'],
       options: [
         { word: 'vet', isError: false },
-        { word: 'is', isError: true }, 
+        { word: 'never', isError: true }, 
         { word: 'friendly', isError: false },
       ],
       error: 'never',
@@ -108,13 +108,13 @@ export const chapter6Practice = {
     {
       id: 'c6q9',
       focus: 'ADVERBIO DE FRECUENCIA',
-      sentence: ['They', 'walk', 'often', 'to', 'the', 'vet', '.'],
+      sentence: ['They', 'walk often', 'to', 'the', 'vet', '.'],
       options: [
         { word: 'walk', isError: false },
         { word: 'often', isError: true }, // Error de posición del adverbio
         { word: 'vet', isError: false },
       ],
-      error: 'often',
+      error: 'walk often',
       correction: 'often walk',
       answerBank: ['often walk', 'walk often', 'never walk'],
     },

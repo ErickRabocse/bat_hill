@@ -1,5 +1,7 @@
 export const chapter2Practice = {
   topic: 'Articles & Plural Nouns',
+  reviewUrl: 'https://english.lingolia.com/es/gramatica/articulos', // <-- AÑADE ESTA LÍNEA
+
   questions: [
     {
       id: 'c2q1',

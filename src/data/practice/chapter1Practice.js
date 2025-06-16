@@ -2,6 +2,7 @@
 
 export const chapter1Practice = {
   topic: 'Verb to be & Subject Pronouns',
+  reviewUrl: 'https://www.britishcouncil.org.mx/blog/verbo-to-be', // <-- AÑADE ESTA LÍNEA
   questions: [
     // --- PREGUNTAS EXISTENTES ---
     {
