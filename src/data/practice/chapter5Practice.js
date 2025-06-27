@@ -1,5 +1,16 @@
 export const chapter5Practice = {
   topic: "Imperatives & Can/Can't",
+  reviewLinks: [
+    // <-- NUEVA PROPIEDAD (una lista de objetos)
+    {
+      label: 'Repasar "Imperativos"',
+      url: 'https://www.abaenglish.com/es/aba-english-masterclass/aprende-a-utilizar-los-imperativos-en-ingles/',
+    },
+    {
+      label: 'Repasar "Verbo can y can\'t"',
+      url: 'https://www.abaenglish.com/es/verbos-modales-ingles/can/',
+    },
+  ],
   questions: [
     {
       id: 'c5q1',

@@ -1,5 +1,20 @@
 export const chapter4Practice = {
   topic: 'Possessives & Demonstratives',
+  reviewLinks: [
+    // <-- NUEVA PROPIEDAD (una lista de objetos)
+    {
+      label: 'Repasar "Adjetivos posesivos"',
+      url: 'https://whatsup.es/blog/my-your-his-her-adjetivos-posesivos',
+    },
+    {
+      label: 'Repasar "Posesión"',
+      url: 'https://www.ef.com/wwes/recursos-aprender-ingles/gramatica-inglesa/indicar-posesion/',
+    },
+    {
+      label: 'Repasar "Adjetivos demostrativos"',
+      url: 'https://www.abaenglish.com/es/gramatica-ingles/adjetivos-pronombres-demostrativos/',
+    },
+  ],
   questions: [
     {
       id: 'c4q1',

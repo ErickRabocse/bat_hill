@@ -100,6 +100,22 @@ export function PracticeExercise({ practiceData, onPracticeComplete }) {
           <div className="game-over-box">
             <h2>Game Over</h2>
             <p>{feedback.msg}</p>
+            {/* --- NUEVA LÓGICA PARA MÚLTIPLES BOTONES DE REPASO --- */}
+            <div className="review-links-container">
+              <p>Recomendación:</p>
+              {practiceData.reviewLinks?.map((link) => (
+                <a
+                  key={link.url}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="review-button"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+
             <button onClick={handleRestart}>Intentar de Nuevo</button>
           </div>
         </div>

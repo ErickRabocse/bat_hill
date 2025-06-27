@@ -1,7 +1,16 @@
 export const chapter2Practice = {
   topic: 'Articles & Plural Nouns',
-  reviewUrl: 'https://english.lingolia.com/es/gramatica/articulos', // <-- AÑADE ESTA LÍNEA
-
+  reviewLinks: [
+    // <-- NUEVA PROPIEDAD (una lista de objetos)
+    {
+      label: 'Repasar "Artículos A, An y The"',
+      url: 'https://idiomas.gcfglobal.org/es/curso/ingles/gramatica/articulos-a-an-y-the/',
+    },
+    {
+      label: 'Repasar "Sustantivos plurales (-s, -es, irregulares)"',
+      url: 'https://www.ingles.com/guia/los-sustantivos-plurales-en-ingles',
+    },
+  ],
   questions: [
     {
       id: 'c2q1',

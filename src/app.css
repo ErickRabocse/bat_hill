@@ -971,3 +971,31 @@ button.play-scene-button-active:hover:not(:disabled) {
   margin-bottom: 1.5rem;
   margin-top: 1rem;
 }
+.review-links-container {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--sidebar-border);
+  padding-top: 1.5rem;
+  display: flex;
+  flex-direction: column; /* Apila los botones verticalmente */
+  gap: 0.75rem; /* Espacio entre los botones */
+  padding-bottom: 12px;
+}
+
+.review-links-container p {
+  margin: 0 0 0.5rem 0;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+.review-links-container a {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  text-decoration: none;
+  border-radius: 5px;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+.review-links-container a:hover {
+  background-color: var(--button-primary-hover-bg);
+}

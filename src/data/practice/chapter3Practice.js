@@ -1,5 +1,16 @@
 export const chapter3Practice = {
   topic: 'There is/are & Prepositions',
+  reviewLinks: [
+    // <-- NUEVA PROPIEDAD (una lista de objetos)
+    {
+      label: 'Repasar "There is / There are"',
+      url: 'https://www.britishcouncil.es/blog/diferencias-entre-there-is-y-there-are',
+    },
+    {
+      label: 'Repasar "Preposiciones de lugar (in, on, under, next to)"',
+      url: 'https://www.aprenderinglesrapidoyfacil.com/2012/08/29/las-preposiciones-de-lugar-en-ingles-in-on-under-in-front-of-behind-between-next-to-across-from/#google_vignette',
+    },
+  ],
   questions: [
     {
       id: 'c3q1',

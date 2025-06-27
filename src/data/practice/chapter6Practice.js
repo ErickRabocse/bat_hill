@@ -1,5 +1,16 @@
 export const chapter6Practice = {
   topic: 'Simple Present & Adverbs of Frequency',
+  reviewLinks: [
+    // <-- NUEVA PROPIEDAD (una lista de objetos)
+    {
+      label: 'Repasar "Present simple"',
+      url: 'https://www.britishcouncil.co/blog/aprende-ingles/present-simple',
+    },
+    {
+      label: 'Repasar "Adverbios de frecuencia"',
+      url: 'https://whatsup.es/blog/guia-rapida-de-los-adverbios-de-frecuencia-en-ingles',
+    },
+  ],
   questions: [
     {
       id: 'c6q1',
@@ -59,7 +70,7 @@ export const chapter6Practice = {
       sentence: ['The', 'vet', 'is', 'never', 'friendly', '.'],
       options: [
         { word: 'vet', isError: false },
-        { word: 'never', isError: true }, 
+        { word: 'never', isError: true },
         { word: 'friendly', isError: false },
       ],
       error: 'never',

@@ -2,7 +2,17 @@
 
 export const chapter1Practice = {
   topic: 'Verb to be & Subject Pronouns',
-  reviewUrl: 'https://www.britishcouncil.org.mx/blog/verbo-to-be', // <-- AÑADE ESTA LÍNEA
+  reviewLinks: [
+    // <-- NUEVA PROPIEDAD (una lista de objetos)
+    {
+      label: 'Repasar "Verb to be"',
+      url: 'https://www.britishcouncil.org.mx/blog/verbo-to-be',
+    },
+    {
+      label: 'Repasar "Pronombres"',
+      url: 'https://www.abaenglish.com/es/gramatica-ingles/pronombres/personales/',
+    },
+  ],
   questions: [
     // --- PREGUNTAS EXISTENTES ---
     {

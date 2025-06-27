@@ -1,5 +1,12 @@
 export const chapter8Practice = {
   topic: 'like/love/hate + verb-ing',
+  reviewLinks: [
+    // <-- NUEVA PROPIEDAD (una lista de objetos)
+    {
+      label: 'Repasar "Like", "Love" y "Hate" + verbo-ing',
+      url: 'https://www.ef.com.mx/recursos-aprender-ingles/gramatica-inglesa/uso-hate-love-prefer/',
+    },
+  ],
   questions: [
     {
       id: 'c8q1',

@@ -1,5 +1,12 @@
 export const chapter7Practice = {
   topic: 'Question Words',
+  reviewLinks: [
+    // <-- NUEVA PROPIEDAD (una lista de objetos)
+    {
+      label: 'Repasar "Question Words"',
+      url: 'https://funnylearning.es/que-son-las-questions-words/',
+    },
+  ],
   questions: [
     {
       id: 'c7q1',
